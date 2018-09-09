@@ -63,6 +63,7 @@
     }
   }
 
+  // import_categories start
   if (isset($_POST['import_categories'])) {
 
     try {
@@ -82,11 +83,13 @@
       $csv = functions::csv_decode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset']);
 
       $line = 0;
-      foreach ($csv as $row) {
+      foreach ($csv as $row) {//遍历csv文件
         $line++;
-
-      // Find category
+      // Find category， 这一段逻辑是根据上传的csv来创建category对象，为存在的分类将会添加到库，find 完成后会进行update
         if (!empty($row['id'])) {
+            // 如果当前行id不为空，查询lc_categories表里对应的id数据是否存在，这里做了limit 1处理。
+            // 如果能找到改id，则new ctrl_category对象，如果id在数据库不存在，会根据insert_categories参数来决定是否创建新的分类。
+            // 当这个参数没有时，将不会创建一个新的分类，并且跳过当前这行数据。【注意：这里不会跳出整个csv，只是跳出当前行数据】
           if ($category = database::fetch(database::query("select id from ". DB_TABLE_CATEGORIES ." where id = ". (int)$row['id'] ." limit 1;"))) {
             $category = new ctrl_category($category['id']);
             echo "Updating existing category ". (!empty($row['name']) ? $row['name'] : "on line $line") ."\r\n";
@@ -99,8 +102,9 @@
             $category = new ctrl_category($row['id']);
             echo 'Creating new category: '. $row['name'] . PHP_EOL;
           }
-
         } elseif (!empty($row['code'])) {
+            // 如果包含了code数据，到insert_categories去查找该code对应的id。
+            //同样的如果code在表里找不到，还是会根据insert_categories来决定是跳过当前数据还是穿件一个新的分类
           if ($category = database::fetch(database::query("select id from ". DB_TABLE_CATEGORIES ." where code = '". database::input($row['code']) ."' limit 1;"))) {
             $category = new ctrl_category($category['id']);
             echo "Updating existing category ". (!empty($row['name']) ? $row['name'] : "on line $line") ."\r\n";
@@ -109,11 +113,12 @@
               echo "[Skipped] New category on line $line was not inserted to database.\r\n";
               continue;
             }
-            $category = new ctrl_category();
+            $category = new ctrl_category();//创建新的分类
             echo 'Creating new category: '. $row['name'] . PHP_EOL;
           }
-
         } elseif (!empty($row['name']) && !empty($row['language_code'])) {
+            // 如果包含了name和language_code，到lc_categories_info里去查找对应的category_id，
+            //如果找不到根据insert_categories决定是跳过当前行数据还是创建新数据
           if ($category = database::fetch(database::query("select category_id as id from ". DB_TABLE_CATEGORIES_INFO ." where name = '". database::input($row['name']) ."' and language_code = '". $row['language_code'] ."' limit 1;"))) {
             $category = new ctrl_category($category['id']);
             echo "Updating existing category ". (!empty($row['name']) ? $row['name'] : "on line $line") ."\r\n";
@@ -124,11 +129,13 @@
             }
             $category = new ctrl_category();
           }
-
         } else {
           echo "[Skipped] Could not identify category on line $line.\r\n";
           continue;
-        }
+        } // Find category  end
+      // -------------------------------------------------------------------------------------
+      //              导入数据时基本数据的判断到此结束，一下是设置$category 对象相关数据的代码。
+      //---------------------------------------------------------------------------------------
 
         if (isset($row['dock'])) $row['dock'] = explode(',', $row['dock']);
 
@@ -153,6 +160,7 @@
 
         $category->save();
 
+        //更新数据
         if (!empty($row['date_created'])) {
           database::query(
             "update ". DB_TABLE_CATEGORIES ."
@@ -168,8 +176,9 @@
     } catch (Exception $e) {
       notices::add('errors', $e->getMessage());
     }
-  }
+  }// import_categories end.
 
+//export_products start
   if (isset($_POST['export_products'])) {
 
     try {
@@ -251,7 +260,7 @@
     } catch (Exception $e) {
       notices::add('errors', $e->getMessage());
     }
-  }
+  }//export_products end.
 
   if (isset($_POST['import_products'])) {
 
