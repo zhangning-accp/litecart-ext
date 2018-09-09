@@ -1,5 +1,7 @@
 <?php
- require_once('../includes/app_header.inc.php');
+// admin index page
+
+ require_once('../includes/app_header.inc.php');//引入页头
 
   user::require_login();
 
@@ -92,7 +94,9 @@
 
       echo $box_widgets->stitch('views/box_widgets');
 
-  // App content
+  //=============================================================================================================
+  //                                        App content
+  //==============================================================================================================
     } else { // in app page
 
       if (empty(user::$data['permissions'])
@@ -123,12 +127,13 @@
                   . '</span>';
 
         ob_start();
-        if (!empty($_GET['doc'])) {
+        if (!empty($_GET['doc'])) {// 获取到doc参数的值
             $app_url = ""; // 目标页面的url地址， zn2018-9-8 添加
-          if (empty($app_config['docs'][$_GET['doc']])
+          if (empty($app_config['docs'][$_GET['doc']])//根据doc参数的相关拿到对应的url地址
               || !file_exists(FS_DIR_HTTP_ROOT . WS_DIR_ADMIN . $_GET['app'].'.app/' . $app_config['docs'][$_GET['doc']])) trigger_error($_GET['app'] .'.app/'. htmlspecialchars($_GET['doc']) . ' is not a valid admin document', E_USER_ERROR);
             $app_url = vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_ADMIN . $_GET['app'].'.app/' . $app_config['docs'][$_GET['doc']]);
-          //include $app_url;
+            echo $app_url;
+            //include $app_url;
         } else {
             $app_url = vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_ADMIN . $_GET['app'].'.app/' . $app_config['docs'][$app_config['default']]);
           //include $app_url;
@@ -147,4 +152,4 @@
       }
     }
     $app_url = vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_INCLUDES . 'app_footer.inc.php');
-    require_once $app_url;
+    require_once $app_url;//引入页脚

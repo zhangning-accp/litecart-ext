@@ -1,5 +1,10 @@
 <?php
+    // catalog->CSV Import/Export page and process import/export Categories or Products
 
+
+  //--------------------------------------------------------------------------------------------------------------------
+  //                      export categories
+  //--------------------------------------------------------------------------------------------------------------------
   if (isset($_POST['export_categories'])) {
 
     try {
@@ -172,12 +177,12 @@
       if (empty($_POST['language_code'])) throw new Exception(language::translate('error_must_select_a_language', 'You must select a language'));
 
       $csv = array();
-
-      $products_query = database::query(
-        "select p.id from ". DB_TABLE_PRODUCTS ." p
-        left join ". DB_TABLE_PRODUCTS_INFO ." pi on (pi.product_id = p.id and pi.language_code = '". database::input($_POST['language_code']) ."')
-        order by pi.name;"
-      );
+      // select p.id from `litecart`.`lc_products` p left join `litecart`.`lc_products_info` pi on (pi.product_id = p.id and pi.language_code = 'en') order by pi.name;
+      $query_sql = "select p.id from ". DB_TABLE_PRODUCTS ." p left join "
+          . DB_TABLE_PRODUCTS_INFO
+          ." pi on (pi.product_id = p.id and pi.language_code = '"
+          . database::input($_POST['language_code']) ."') order by pi.name;";
+      $products_query = database::query($query_sql);
 
       while ($product = database::fetch($products_query)) {
         $product = new ref_product($product['id'], $_POST['language_code'], $_POST['currency_code']);
@@ -481,7 +486,7 @@
 
 ?>
 <h1><?php echo $app_icon; ?> <?php echo language::translate('title_csv_import_export', 'CSV Import/Export'); ?></h1>
-
+<!-- import or export csv html content 2018 17:07 zn add annotation in here -->
 <div class="row">
   <div class="col-md-6">
 

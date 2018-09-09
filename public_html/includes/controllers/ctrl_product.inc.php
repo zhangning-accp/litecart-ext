@@ -1,5 +1,5 @@
 <?php
-
+    //导入时对procuct对象的相关操作
   class ctrl_product {
     public $data;
 
