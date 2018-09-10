@@ -1,5 +1,11 @@
 <?php
-    //导入时对procuct对象的相关操作
+
+/**
+ * Class ctrl_product
+ * 修改版导入时对procuct对象的相关操作
+ * @author:zn
+ * @data:2018-09-10
+ */
   class ctrl_product
   {
     public $data;
@@ -168,10 +174,13 @@
       }
     }
 
+    /**
+     * save data to database;
+     */
     public function save()
     {
 
-      if (empty($this->data['id'])) {
+      if (empty($this->data['id'])) {//如果id为空，则添加新数据，并获取id
         database::query(
           "insert into " . DB_TABLE_PRODUCTS . "
           (date_created)
@@ -249,7 +258,7 @@
       // 5 Update options
       $this->update_options();
       // 6 Update stock_options
-      $this->update_stock_options();
+      $this->update_options_stock();
       // 7 Update image table;
       $this->update_image_table();
       // 更新相关表结束
@@ -314,12 +323,18 @@
       $this->data['id'] = null;
     }
 
+    /**
+     * 添加图片文件，改方法会添加数据到images表。该方法的逻辑还没看明白。
+     * @param $file  图片文件路径
+     * @param string $filename 图片文件名，默认为 ‘’；
+     * @return bool|void
+     */
     public function add_image($file, $filename = '')
     {
 
-      if (empty($file)) return;
+      if (empty($file)) return;// $file 为空时直接返回。
 
-      $checksum = md5_file($file);
+      $checksum = md5_file($file);//对文件路径进行md5校验
       if (in_array($checksum, array_column($this->data['images'], 'checksum'))) return false;
 
       if (!empty($filename)) $filename = 'products/' . $filename;
@@ -366,7 +381,7 @@
 
     /**-----------------------------------------------------------------------------------------------------------------
      * Private method area
-     */
+     *************************************/
 
     // Update table images
     private function update_images_table()
@@ -420,7 +435,8 @@
       }
     }
 
-    private function update_stock_options ()
+    // 更新库存信息
+    private function update_options_stock ()
     {
       // Delete stock options
       database::query(
