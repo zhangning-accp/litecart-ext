@@ -1,4 +1,4 @@
-## [2018-09-08 14:43:46] Request ##############################
+## [2018-09-09 18:31:46] Request ##############################
 
 GET /feeds/discussions.rss HTTP/1.1
 Host: www.litecart.net
@@ -7,26 +7,26 @@ Connection: Close
 
 
 
-## [2018-09-08 14:43:47] Response — 9394 bytes transferred in 1.119 s ##############################
+## [2018-09-09 18:31:47] Response — 9465 bytes transferred in 1.248 s ##############################
 
 HTTP/1.1 200 OK
-Date: Sat, 08 Sep 2018 06:43:48 GMT
+Date: Sun, 09 Sep 2018 10:31:47 GMT
 Content-Type: application/rss+xml; charset=utf-8
 Transfer-Encoding: chunked
 Connection: close
-Set-Cookie: __cfduid=d76e6302377849979289683a94e86ffc71536389028; expires=Sun, 08-Sep-19 06:43:48 GMT; path=/; domain=.litecart.net; HttpOnly
+Set-Cookie: __cfduid=dc37dcfbea1c4560a6fbd146afbb29e561536489106; expires=Mon, 09-Sep-19 10:31:46 GMT; path=/; domain=.litecart.net; HttpOnly
 X-Powered-By: LiteCart HQ
 Expires: Thu, 19 Nov 1981 08:52:00 GMT
 Cache-Control: no-store, no-cache, must-revalidate
 Pragma: no-cache
 Content-Language: en
-Set-Cookie: LCSESSID=0bcaa4def1cf10040cfcf3b241ef4ac8; path=/
-Set-Cookie: language_code=en; expires=Mon, 08-Oct-2018 06:43:48 GMT; Max-Age=2592000; path=/
-Set-Cookie: cart[uid]=5b936fa48b8ba; expires=Sun, 08-Sep-2019 06:43:48 GMT; Max-Age=31536000; path=/
-Set-Cookie: currency_code=USD; expires=Mon, 08-Oct-2018 06:43:48 GMT; Max-Age=2592000; path=/
+Set-Cookie: LCSESSID=9d4f00d5ac7a1e5d1a03b1333ec0a10c; path=/
+Set-Cookie: language_code=en; expires=Tue, 09-Oct-2018 10:31:47 GMT; Max-Age=2592000; path=/
+Set-Cookie: cart[uid]=5b94f6930a13b; expires=Mon, 09-Sep-2019 10:31:47 GMT; Max-Age=31536000; path=/
+Set-Cookie: currency_code=USD; expires=Tue, 09-Oct-2018 10:31:47 GMT; Max-Age=2592000; path=/
 Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
 Server: cloudflare
-CF-RAY: 456f7163d9c4bbde-LHR
+CF-RAY: 4578fcb63dd83452-LHR
 
 <?xml version="1.0" encoding="utf-8" ?>
 <rss version="2.0">
@@ -36,12 +36,36 @@ CF-RAY: 456f7163d9c4bbde-LHR
     <description>The most recent forum activity.</description>
     <language>en</language>
     <item>
+      <category><![CDATA[Add-ons]]></category>
+      <title><![CDATA[Customer Discount for version 2.1.3]]></title>
+      <link>https://www.litecart.net/forums/7/add-ons/8277/customer-discount-for-version-2-1-3</link>
+      <description><![CDATA[]]></description>
+      <author><![CDATA[vilaiporn]]></author>
+      <pubDate>Sun, 09 Sep 2018 09:14:45 +0000</pubDate>
+    </item>
+    <item>
+      <category><![CDATA[Installation and Configuration]]></category>
+      <title><![CDATA[404 the requested url /en was not found]]></title>
+      <link>https://www.litecart.net/forums/3/installation-and-configuration/7951/404-the-requested-url-en-was-not-found</link>
+      <description><![CDATA[]]></description>
+      <author><![CDATA[bob512]]></author>
+      <pubDate>Sat, 08 Sep 2018 19:13:04 +0000</pubDate>
+    </item>
+    <item>
       <category><![CDATA[General Discussions]]></category>
       <title><![CDATA[5 Columns of products on main page]]></title>
       <link>https://www.litecart.net/forums/2/general-discussions/7814/5-columns-of-products-on-main-page</link>
       <description><![CDATA[]]></description>
       <author><![CDATA[akifmansoor]]></author>
-      <pubDate>Sat, 08 Sep 2018 02:07:33 +0000</pubDate>
+      <pubDate>Sat, 08 Sep 2018 14:48:38 +0000</pubDate>
+    </item>
+    <item>
+      <category><![CDATA[Installation and Configuration]]></category>
+      <title><![CDATA[Code field in products / manufacturers]]></title>
+      <link>https://www.litecart.net/forums/3/installation-and-configuration/8381/code-field-in-products-manufacturers</link>
+      <description><![CDATA[]]></description>
+      <author><![CDATA[bobdrinktech]]></author>
+      <pubDate>Sat, 08 Sep 2018 12:07:20 +0000</pubDate>
     </item>
     <item>
       <category><![CDATA[Add-ons]]></category>
@@ -170,30 +194,6 @@ CF-RAY: 456f7163d9c4bbde-LHR
       <description><![CDATA[]]></description>
       <author><![CDATA[bobdrinktech]]></author>
       <pubDate>Wed, 22 Aug 2018 06:31:47 +0000</pubDate>
-    </item>
-    <item>
-      <category><![CDATA[Errors and Troubleshooting]]></category>
-      <title><![CDATA[Marking a read/unread topic in this forum]]></title>
-      <link>https://www.litecart.net/forums/15/errors-and-troubleshooting/8304/marking-a-read-unread-topic-in-this-forum</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[litecart_cs]]></author>
-      <pubDate>Wed, 22 Aug 2018 00:09:21 +0000</pubDate>
-    </item>
-    <item>
-      <category><![CDATA[General Discussions]]></category>
-      <title><![CDATA[How to Install a vQmod]]></title>
-      <link>https://www.litecart.net/forums/2/general-discussions/8078/how-to-install-a-vqmod</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[freshlix]]></author>
-      <pubDate>Tue, 21 Aug 2018 18:36:35 +0000</pubDate>
-    </item>
-    <item>
-      <category><![CDATA[Feature Requests]]></category>
-      <title><![CDATA[Aliexpress addon]]></title>
-      <link>https://www.litecart.net/forums/5/feature-requests/8325/aliexpress-addon</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[dreamplanet]]></author>
-      <pubDate>Sun, 19 Aug 2018 21:06:20 +0000</pubDate>
     </item>
   </channel>
 </rss>
