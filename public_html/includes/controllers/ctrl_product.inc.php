@@ -50,7 +50,7 @@
 
       $this->reset();
 
-    // Product
+    // Product. 根据id查询第一条记录
       $products_query = database::query(
         "select * from ". DB_TABLE_PRODUCTS ."
         where id = '". (int)$product_id ."'
@@ -199,7 +199,7 @@
       if (empty($this->data['default_category_id']) || !in_array($this->data['default_category_id'], $this->data['categories'])) {
         $this->data['default_category_id'] = reset($this->data['categories']);
       }
-
+      // Update products
       database::query(
         "update ". DB_TABLE_PRODUCTS ." set
         status = ". (int)$this->data['status'] .",
@@ -233,6 +233,7 @@
         limit 1;"
       );
 
+      // Update product_to_categories. delete->insert
       database::query(
         "delete from ". DB_TABLE_PRODUCTS_TO_CATEGORIES ."
          where product_id = '". (int)$this->data['id'] ."';"
@@ -245,6 +246,7 @@
         );
       }
 
+      // Update product_info. find->insert->update
       foreach (array_keys(language::$languages) as $language_code) {
         $products_info_query = database::query(
           "select * from ". DB_TABLE_PRODUCTS_INFO ."
@@ -276,6 +278,7 @@
         );
       }
 
+      // Prices select->insert->update
       foreach (array_keys(currency::$currencies) as $currency_code) {
 
         $products_prices_query = database::query(

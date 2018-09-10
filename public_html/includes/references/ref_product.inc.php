@@ -1,11 +1,5 @@
 <?php
 
-/**
- * Class ref_product
- *
- * 导出时获取product相关的信息
- *
- */
   class ref_product {
 
     private $_id;
