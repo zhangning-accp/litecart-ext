@@ -31,6 +31,9 @@
       case (substr($class, 0, 4) == 'url_'):
         require_once vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_ROUTES . $class . '.inc.php');
         break;
+        case (substr($class, 0, 2) == 'u_'):
+            require_once vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_INCLUDES . 'utils/' . $class . '.inc.php');
+            break;
       default:
         require_once vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_CLASSES . $class . '.inc.php');
         break;

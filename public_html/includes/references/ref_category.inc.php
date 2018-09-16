@@ -1,5 +1,9 @@
 <?php
 
+    /**
+     * Class ref_category
+     * 应该是导出时用的对象，不知道作者为什么把导入导出分为两个对象来处理，而不是一个实体对象
+     */
   class ref_category {
 
     private $_id;

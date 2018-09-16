@@ -1,332 +1,286 @@
 <?php
     // catalog->CSV Import/Export page and process import/export Categories or Products
+    /**-----------------------------------------------------------
+     * 导入功能的使用场景描述:
+     * 1. 新增商品
+     * 2. 下架商品  sku
+     * 3. 修改库存  sku
+     * 4. 更新商品(更新商品时有小机率会更新分类) sku
+     */
 
+    /**----------------------------------------------------------
+     * 导入的数据项
+     *
+
+     *
+     *
+     *
+     *
+     */
     /**
      * 导入分类
      * @param $csv csv文件
      * @param $isInsertNew 当数据不存在时是否插入新数据。如果true，当数据库找不到导入的数据时，则将新增数据到数据库.
+     * 该方法测试通过。 2018-9-16 11:30
      */
-    function importCategories($csv, $isInsertNew)
+    function importCategories($csv)
     {
-        // import_categories start
-        if (isset($_POST['import_categories'])) {
-            if (isset($csv['category_status'])) {
-                $csv['category_status'] = 1;
-            }
-            $line = 0;
-            foreach ($csv as $row) {//遍历csv文件
-                $line++;
-                // Find category， 这一段逻辑是根据上传的csv来创建category对象，为存在的分类将会添加到库，find 完成后会进行update
-                if (!empty($row['category_id'])) {
-                    // 如果当前行id不为空，查询lc_categories表里对应的id数据是否存在，这里做了limit 1处理。
-                    // 如果能找到改id，则new ctrl_category对象，如果id在数据库不存在，会根据insert_categories参数来决定是否创建新的分类。
-                    // 当这个参数没有时，将不会创建一个新的分类，并且跳过当前这行数据。【注意：这里不会跳出整个csv，只是跳出当前行数据】
-                    if ($category = database::fetch(database::query("select id from " . DB_TABLE_CATEGORIES . " where id = " . (int)$row['category_id'] . " limit 1;"))) {
-                        $category = new ctrl_category($category['id']);
-                        echo "Updating existing category " . (!empty($row['category_name']) ? $row['category_name'] : "on line $line") . "\r\n";
-                    } else {
-                        if ($isInsertNew == false) {
-                            echo "[Skipped] New category on line $line was not inserted to database.\r\n";
-                            continue;
-                        }
-                        database::query("insert into " . DB_TABLE_CATEGORIES . " (id, date_created) values (" . (int)$row['id'] . ", '" . date('Y-m-d H:i:s') . "');");
-                        $category = new ctrl_category($row['category_id']);
-                        echo 'Creating new category: ' . $row['category_name'] . PHP_EOL;
-                    }
-                } elseif (!empty($row['category_code'])) {
-                    // 如果包含了code数据，到insert_categories去查找该code对应的id。
-                    //同样的如果code在表里找不到，还是会根据insert_categories来决定是跳过当前数据还是穿件一个新的分类
-                    if ($category = database::fetch(database::query("select id from " . DB_TABLE_CATEGORIES . " where code = '" . database::input($row['category_code']) . "' limit 1;"))) {
-                        $category = new ctrl_category($category['category_id']);
-                        echo "Updating existing category " . (!empty($row['category_name']) ? $row['category_name'] : "on line $line") . "\r\n";
-                    } else {
-                        if ($isInsertNew == false) {
-                            echo "[Skipped] New category on line $line was not inserted to database.\r\n";
-                            continue;
-                        }
-                        $category = new ctrl_category();//创建新的分类
-                        echo 'Creating new category: ' . $row['category_name'] . PHP_EOL;
-                    }
-                } elseif (!empty($row['category_name']) && !empty($row['category_language_code'])) {
-                    // 如果包含了name和language_code，到lc_categories_info里去查找对应的category_id，
-                    //如果找不到根据insert_categories决定是跳过当前行数据还是创建新数据
-                    if ($category = database::fetch(database::query("select category_id as id from " . DB_TABLE_CATEGORIES_INFO . " where name = '" . database::input($row['category_name']) . "' and language_code = '" . $row['category_language_code'] . "' limit 1;"))) {
-                        $category = new ctrl_category($category['category_id']);
-                        echo "Updating existing category " . (!empty($row['category_name']) ? $row['category_name'] : "on line $line") . "\r\n";
-                    } else {
-                        if ($isInsertNew == false) {
-                            echo "[Skipped] New category on line $line was not inserted to database.\r\n";
-                            continue;
-                        }
-                        $category = new ctrl_category();
-                    }
-                } else {
-                    echo "[Skipped] Could not identify category on line $line.\r\n";
-                    continue;
-                } // Find category  end
-                // -------------------------------------------------------------------------------------
-                //              导入数据时基本数据的判断以及创建$category到此结束，一下是设置$category 对象相关数据的代码。
-                //---------------------------------------------------------------------------------------
+        $line = 0;
+        foreach ($csv as $row) {//遍历csv文件
+            $line++;
+            $categorie_names = $row['categorie_names'];//"Rubber Ducks|Subcategory|shot,d,d,d";
+            $category_descriptions = $row['category_descriptions'];// [|]ddddd[|]|[|]dssdfdf[|], 注：如果某些分类没有title，则用一个空格 | | | , ,
+            $category_short_descriptions = $row['category_short_descriptions'];
+            $category_meta_descriptions = $row['category_meta_descriptions'];
+            $category_head_titles = $row['category_head_titles'];
+            $category_h1_titles = $row['category_h1_titles'];
 
+            //示例： ["Collectibles","Barware","Shot Glasses,man,woman"]
+            $categorie_names = preg_split("/[|]/", $categorie_names);
+            //["Collectibles","Barware","Shot Glasses,man,woman"]
+            $categorie_names = array_filter($categorie_names);
+            //"Shot Glasses,man,woman"
+            $category_name_tmp = array_pop($categorie_names);
+            //["Shot Glasses","man","woman"]
+            $category_name_tmp = findFirstCategory($category_name_tmp,"/,/");
+            //将第一个分类放到原数组。["Collectibles","Barware","Shot Glasses"]
+            $categorie_names[] = array_shift($category_name_tmp);
 
-                if (isset($row['category_dock'])) $row['category_dock'] = explode(',', $row['category_dock']);
+            $category_descriptions = preg_split("/\[\|\]/", $category_descriptions);
+            $category_descriptions = array_filter($category_descriptions);
+            $category_descriptions_tmp = array_pop($category_descriptions);
+            $category_descriptions_tmp = findFirstCategory($category_descriptions_tmp,"/\[,\]/");
+            $category_descriptions[] = array_shift($category_descriptions_tmp);
 
-                // Set default category data
-                if (empty($category->data['id']) && empty($row['category_dock']) && empty($row['category_parent_id'])) {
-                    $category->data['dock'][] = 'tree';
+            $category_short_descriptions = preg_split("/\[\|\]/", $category_short_descriptions);
+            $category_short_descriptions = array_filter($category_short_descriptions);
+            $category_short_descriptions_tmp = array_pop($category_short_descriptions);
+            $category_short_descriptions_tmp = findFirstCategory($category_short_descriptions_tmp,"/\[,\]/");
+            $category_short_descriptions[] = array_shift($category_short_descriptions_tmp);
+
+            $category_meta_descriptions = preg_split("/\[\|\]/", $category_meta_descriptions);
+            $category_meta_descriptions = array_filter($category_meta_descriptions);
+            $category_meta_descriptions_tmp = array_pop($category_meta_descriptions);
+            $category_meta_descriptions_tmp = findFirstCategory($category_meta_descriptions_tmp,"/\[,\]/");
+            $category_meta_descriptions[] = array_shift($category_meta_descriptions_tmp);
+
+            $category_head_titles = preg_split("/\[\|\]/", $category_head_titles);
+            $category_head_titles = array_filter($category_head_titles);
+            $category_head_titles_tmp = array_pop($category_head_titles);// 拿到最后一个
+            $category_head_titles_tmp = findFirstCategory($category_head_titles_tmp,"/\[,\]/");
+            $category_head_titles[] = array_shift($category_head_titles_tmp);// 拿到第一个
+
+            $category_h1_titles = preg_split("/\[\|\]/", $category_h1_titles);
+            $category_h1_titles = array_filter($category_h1_titles);
+            $category_h1_titles_tmp = array_pop($category_h1_titles);
+            $category_h1_titles_tmp = findFirstCategory($category_h1_titles_tmp,"/\[,\]/");
+            $category_h1_titles[] = array_shift($category_h1_titles_tmp);
+            //检查各数组长度是否一致
+            if (count($categorie_names) !== count($category_descriptions)
+                && count($categorie_names) !== count($category_meta_descriptions)
+                && count($categorie_names) !== count($category_short_descriptions)
+                && count($categorie_names) !== count($category_head_titles)
+                && count($categorie_names) !== count($category_h1_titles)
+            ) {
+                echo "categorie_names, category_descriptions, category_short_descriptions, category_meta_descriptions, 
+                    category_head_titles, category_h1_titles column count doesn't match. Please check !";
+                exit;
+            } else {
+                $parent_id = 0;
+                //添加分类里摘出的一级分类
+                for($i = 0; $i < count($category_name_tmp);$i ++) {
+                    $parent_id = 0;
+                    $category_name = $category_name_tmp[$i];
+                    $category_description = $category_descriptions_tmp[$i];
+                    $category_short_description = $category_short_descriptions_tmp[$i];
+                    $category_meta_description = $category_meta_descriptions_tmp[$i];
+                    $category_head_title = $category_head_titles_tmp[$i];
+                    $category_h1_title = $category_h1_titles_tmp[$i];
+                    insertOrUpdateCategory($category_name,$parent_id,$category_description,$category_short_description,
+                        $category_meta_description,$category_head_title,$category_h1_title,false);
                 }
-
-                // Set new category data
-                foreach (array('category_parent_id', 'category_status', 'category_code', 'category_dock', 'category_keywords', 'category_image') as $field) {
-                    $sub_field = str_replace("category_", "", $field);
-                    if (isset($row[$field])) $category->data[$sub_field] = $row[$field];
-                }
-
-                // Set category info data
-                foreach (array('category_name', 'category_short_description', 'category_description', 'category_head_title', 'category_h1_title', 'category_meta_description') as $field) {
-                    $sub_field = str_replace("category_", "", $field);
-                    if (isset($row[$field])) $category->data[$sub_field][$row['category_language_code']] = $row[$field];
-                }
-
-                if (isset($row['category_new_image'])) {//这里怎么可能会有new_image的数据呢？
-                    $category->save_image($row['category_new_image']);
-                }
-
-                $category->save();
-
-                //更新数据
-                if (!empty($row['category_date_created'])) {
-                    database::query(
-                        "update " . DB_TABLE_CATEGORIES . "
-                set date_created = '" . date('Y-m-d H:i:s', strtotime($row['category_date_created'])) . "'
-                where id = " . (int)$category->data['id'] . "
-                limit 1;"
-                    );
+                //添加多级分类数据及关系
+                $parent_id = 0;
+                for ($i = 0; $i < count($categorie_names); $i++) {
+                    $category_name = $categorie_names[$i];
+                    $category_description = $category_descriptions[$i];
+                    $category_short_description = $category_short_descriptions[$i];
+                    $category_meta_description = $category_meta_descriptions[$i];
+                    $category_head_title = $category_head_titles[$i];
+                    $category_h1_title = $category_h1_titles[$i];
+                    insertOrUpdateCategory($category_name,$parent_id,$category_description,$category_short_description,
+                            $category_meta_description,$category_head_title,$category_h1_title);
                 }
             }
         }
     }// import_categories end.
 
+    function findFirstCategory($category_name_tmp,$pattern) {
+        $category_name_tmp = preg_split($pattern, $category_name_tmp);
+        $category_name_tmp = array_filter($category_name_tmp);
+        return $category_name_tmp;
+    }
+
     /**
-     * 导入产品
-     * @param $csv csv文件
-     * @param $isInsertNew 当数据不存在时是否插入新数据。如果true，当数据库找不到导入的数据时，则将新增数据到数据库.
+     * 添加分类，该方法会构建层级结构
+     * @param $category_name     分类名
+     * @param $parent_id        分类的父类
+     * @param $category_description     分类的详细描述
+     * @param $category_short_description   分类的简介
+     * @param $category_meta_description    分类meta描述
+     * @param $category_head_title  分类的<head>标签里的内容
+     * @param $category_h1_title    分类在页面上显示的标题
+     * @param $isTree   是否为添加层级结构。
      */
-    function importProducts($csv, $isInsertNew)
+    function insertOrUpdateCategory($category_name,&$parent_id,$category_description,$category_short_description,
+                                    $category_meta_description,$category_head_title,$category_h1_title,$isTree = true)
     {
-        $line = 0;
+        // 查找每个分类数据，如果找到，则跳过，如果没找到，则添加
+        $sql = "SELECT id,parent_id FROM %s WHERE id = (SELECT category_id FROM %s WHERE NAME = '%s' limit 1) and parent_id = %d limit 1";
+        $sql = u_utils::builderSQL($sql,array(DB_TABLE_CATEGORIES, DB_TABLE_CATEGORIES_INFO,$category_name,$parent_id));
+        $result = database::fetch(database::query($sql));
+        if (empty($result)) {//记录不存在
+            // 1. 插入新的分类到lc_categories，插入的数据有：langunge_code,date_created,插入完成后拿到id值。
 
-        foreach ($csv as $row) {//import products start.
-            $line++;
-            /*------------------------------------------------------------------------------------
-             * 逻辑梳理：导入导出产品涉及11张表
-             * 1. 根据id到lc_products里查询数据，如果没有数据则根据insert_products来决定是否添加或跳过当前行的插入。
-             * 2. 无论是找到或新增数据后，都要生成$product对象。
-             * -----------------------------------------------------------------------------------
-             */
-            // Find product
-            if (!empty($row['id'])) {
-                if ($product = database::fetch(database::query("select id from " . DB_TABLE_PRODUCTS . " where id = " . (int)$row['id'] . " limit 1;"))) {
-                    $product = new ctrl_product($product['id']);
-                    echo "Updating existing product " . (!empty($row['name']) ? $row['name'] : "on line $line") . "\r\n";
-                } else {
-                    if ($isInsertNew == false) {
-                        echo "[Skipped] New product on line $line was not inserted to database.\r\n";
-                        continue;
-                    }
-                    database::query("insert into " . DB_TABLE_PRODUCTS . " (id, date_created) values (" . (int)$row['id'] . ", '" . date('Y-m-d H:i:s') . "');");
-                    $product = new ctrl_product($row['id']);
-                    echo 'Creating new product: ' . $row['name'] . PHP_EOL;
-                }
-            } elseif (!empty($row['code'])) {
-                if ($product = database::fetch(database::query("select id from " . DB_TABLE_PRODUCTS . " where code = '" . database::input($row['code']) . "' limit 1;"))) {
-                    $product = new ctrl_product($product['id']);
-                    echo "Updating existing product " . (!empty($row['name']) ? $row['name'] : "on line $line") . "\r\n";
-                } else {
-                    if ($isInsertNew == false) {
-                        echo "[Skipped] New product on line $line was not inserted to database.\r\n";
-                        continue;
-                    }
-                    $product = new ctrl_product();
-                    echo 'Creating new product: ' . $row['name'] . PHP_EOL;
-                }
-            } elseif (!empty($row['sku'])) {
-                if ($product = database::fetch(database::query("select id from " . DB_TABLE_PRODUCTS . " where sku = '" . database::input($row['sku']) . "' limit 1;"))) {
-                    $product = new ctrl_product($product['id']);
-                    echo "Updating existing product " . (!empty($row['name']) ? $row['name'] : "on line $line") . "\r\n";
-                } else {
-                    if ($isInsertNew == false) {
-                        echo "[Skipped] New product on line $line was not inserted to database.\r\n";
-                        continue;
-                    }
-                    $product = new ctrl_product();
-                    echo 'Creating new product: ' . $row['name'] . PHP_EOL;
-                }
-
-            } elseif (!empty($row['mpn'])) {
-                if ($product = database::fetch(database::query("select id from " . DB_TABLE_PRODUCTS . " where mpn = '" . database::input($row['mpn']) . "' limit 1;"))) {
-                    $product = new ctrl_product($product['id']);
-                    echo "Updating existing product " . (!empty($row['name']) ? $row['name'] : "on line $line") . "\r\n";
-                } else {
-                    if ($isInsertNew == false) {
-                        echo "[Skipped] New product on line $line was not inserted to database.\r\n";
-                        continue;
-                    }
-                    $product = new ctrl_product();
-                    echo 'Creating new product: ' . $row['name'] . PHP_EOL;
-                }
-
-            } elseif (!empty($row['gtin'])) {
-                if ($product = database::fetch(database::query("select id from " . DB_TABLE_PRODUCTS . " where gtin = '" . database::input($row['gtin']) . "' limit 1;"))) {
-                    $product = new ctrl_product($product['id']);
-                    echo "Updating existing product " . (!empty($row['name']) ? $row['name'] : "on line $line") . "\r\n";
-                } else {
-                    if ($isInsertNew == false) {
-                        echo "[Skipped] New product on line $line was not inserted to database.\r\n";
-                        continue;
-                    }
-                    $product = new ctrl_product();
-                    echo 'Creating new product: ' . $row['name'] . PHP_EOL;
-                }
-
-            } elseif (!empty($row['name']) && !empty($row['language_code'])) {
-                // 查找lc_product_info表
-                if ($product = database::fetch(database::query("select product_id as id from " . DB_TABLE_PRODUCTS_INFO . " where name = '" . database::input($row['name']) . "' and language_code = '" . $row['language_code'] . "' limit 1;"))) {
-                    $product = new ctrl_product($product['id']);
-                    echo "Updating existing product " . (!empty($row['name']) ? $row['name'] : "on line $line") . "\r\n";
-                } else {
-                    if ($isInsertNew == false) {
-                        echo "[Skipped] New product on line $line was not inserted to database.\r\n";
-                        continue;
-                    }
-                    $product = new ctrl_product();
-                }
-
-            } else {
-                echo "[Skipped] Could not identify product on line $line.\r\n";
-                continue;
-            }// Find product end.
-
-            //
-            if (empty($row['manufacturer_id']) && !empty($row['manufacturer_name'])) {
-                // find table manufacturs
-                $manufacturers_query = database::query(
-                    "select * from " . DB_TABLE_MANUFACTURERS . "
-            where name = '" . database::input($row['manufacturer_name']) . "'
-            limit 1;"
-                );
-                if ($manufacturer = database::fetch($manufacturers_query)) {
-                    $row['manufacturer_id'] = $manufacturer['id'];
-                } else {
-                    $manufacturer = new ctrl_manufacturer();
-                    $manufacturer->data['name'] = $row['manufacturer_name'];
-                    $manufacturer->save();
-                    $row['manufacturer_id'] = $manufacturer->data['id'];
-                }
+            $sql = "insert into " . DB_TABLE_CATEGORIES
+                . " (parent_id, dock, status, list_style, date_created) values (%d,'%s',%d,'%s','%s')";
+            $sql = u_utils::builderSQL($sql, array($parent_id, 'tree', 1, 'rows', date('Y-m-d H:i:s')));
+            $result = database::query($sql);
+            $id = database::insert_id();//query("select max(id) from " . DB_TABLE_CATEGORIES);//2. 拿到刚才添加的id。
+            // 如果$id不为null且不是""，这设置parent_id
+            if (isset($id) && !empty($id)) {
+                $parent_id = $id;//改变父类id
             }
+            // 新增数据到lc_categories_info表。先测试通过，后期再看如何优化。
+            $sql = "insert into %s (category_id, language_code, name, description, short_description, meta_description, head_title, h1_title) 
+                  values(%d,'%s','%s','%s','%s','%s','%s','%s')";
+            $sql = u_utils::builderSQL($sql, array(DB_TABLE_CATEGORIES_INFO, $id, 'en',
+                $category_name, $category_description, $category_short_description,$category_meta_description,
+                $category_head_title, $category_h1_title));
+            database::query($sql);
+            echo 'Creating new category: ' . $category_name . PHP_EOL;
+        } else {// update..  lc_categories_info
 
-            if (empty($row['supplier_id']) && !empty($row['supplier_id'])) {
-                // find table suppliers
-                $suppliers_query = database::query(
-                    "select * from " . DB_TABLE_SUPPLIERS . "
-            where name = '" . database::input($row['supplier_name']) . "'
-            limit 1;"
-                );
-                if ($supplier = database::fetch($suppliers_query)) {
-                    $row['supplier_id'] = $supplier['id'];
-                } else {
-                    $supplier = new ctrl_supplier();
-                    $supplier->data['name'] = $row['supplier_name'];
-                    $supplier->save();
-                    $row['supplier_id'] = $supplier->data['id'];
-                }
+            if ($isTree == true) {//如果是添加有层级关系的分类，则父类id等于当前找到的id。
+                $parent_id = $result['id'];
+            } else {//如果是添加平级关系的分类，则父类id为当前的父类id
+                $parent_id = $result['parent_id'];
             }
-
-            $fields = array(
-                'status',
-                'manufacturer_id',
-                'supplier_id',
-                'code',
-                'sku',
-                'mpn',
-                'gtin',
-                'taric',
-                'tax_class_id',
-                'quantity',
-                'quantity_unit_id',
-                'weight',
-                'weight_class',
-                'purchase_price',
-                'purchase_price_currency_code',
-                'delivery_status_id',
-                'sold_out_status_id',
-                'date_valid_from',
-                'date_valid_to'
-            );
-
-            // Set new product data
-            foreach ($fields as $field) {
-                if (isset($row[$field])) $product->data[$field] = $row[$field];
-            }
-            // 这里就是对逗号以及逗号后一个空格进行拆分。这里很奇怪的是为什么不适用\s.
-            if (isset($row['keywords'])) $product->data['keywords'] = preg_split('#, ?#', $row['keywords']);
-            if (isset($row['categories'])) $product->data['categories'] = preg_split('#, ?#', $row['categories']);
-            if (isset($row['product_groups'])) $product->data['product_groups'] = preg_split('#, ?#', $row['product_groups']);
-
-            // Set price
-            if (!empty($row['currency_code'])) {
-                if (isset($row['price'])) $product->data['prices'][$row['currency_code']] = $row['price'];
-            }
-
-            // Set product info data
-            if (!empty($row['language_code'])) {
-                foreach (array('name', 'short_description', 'description', 'attributes', 'head_title', 'meta_description') as $field) {
-                    if (isset($row[$field])) {
-                        $product->data[$field][$row['language_code']] = $row[$field];
-                    }
-                }
-            }
-
-            // Set product images.
-            if (isset($row['images'])) {
-                $row['images'] = explode(';', $row['images']);
-
-                $product_images = array();
-                $current_images = array();
-                foreach ($product->data['images'] as $key => $image) {
-                    if (in_array($image['filename'], $row['images'])) {
-                        $product_images[$key] = $image;
-                        $current_images[] = $image['filename'];
-                    }
-                }
-
-                $i = 0;
-                foreach ($row['images'] as $image) {
-                    if (!in_array($image, $current_images)) {
-                        $product_images['new' . ++$i] = array('filename' => $image);
-                    }
-                }
-
-                $product->data['images'] = $product_images;
-            }
-
-            if (isset($row['new_images'])) {
-                foreach (explode(';', $row['new_images']) as $new_image) {
-                    $product->add_image($new_image);
-                }
-            }
-
-            $product->save();
-
-            if (!empty($row['date_created'])) {
-                database::query(
-                    "update " . DB_TABLE_PRODUCTS . "
-            set date_created = '" . date('Y-m-d H:i:s', strtotime($row['date_created'])) . "'
-            where id = " . (int)$product->data['id'] . "
-            limit 1;"
-                );
-            }
+            updateCategory($result['id'],$category_description,$category_short_description,
+                $category_meta_description,$category_head_title,$category_h1_title);
+            echo "Updated  category :" . $category_name . "\r\n";
         }
+    }
+
+    function updateCategory($category_id,$category_description,$category_short_description,$category_meta_description,$category_head_title,$category_h1_title) {
+        $sql = "update %s SET description = '%s', short_description = '%s',
+                meta_description = '%s', head_title = '%s',h1_title = '%s' WHERE category_id = %d";
+        $sql = u_utils::builderSQL($sql,array(DB_TABLE_CATEGORIES_INFO,$category_description,$category_short_description,
+            $category_meta_description,$category_head_title,$category_h1_title,$category_id));
+        $result = database::query($sql);
+    }
+
+    /**
+     * 导入产品相关数据
+     * @param $csv 产品csv数据
+     */
+    function importProducts($csv)
+    {
+    /*------------------------------------------------------------------
+    code	* (唯一号，可用来在sku外的场合用)
+	sku	*
+	name	*
+	short_description	*
+	description	*
+	attributes	*
+	head_title	*
+	meta_description	*
+	images	* (url,不支持本地图片)
+	purchase_price	*
+	price	*
+	quantity	*
+	option_groups	*  	- 新增  option_name:n1  理出关联表
+		`lc_option_groups`
+		`lc_option_groups_info`
+		`lc_option_values`
+		`lc_option_values_info`
+	product_goups  *	- 新增 grop_name:n1,n2,n3... 理出关联表
+		`lc_product_groups`
+		`lc_product_groups_info`
+		`lc_product_groups_values`
+		`lc_product_groups_values_info`
+
+    逻辑梳理：
+            1. 如果有id则是update，如果没有id则为insert
+            2. 首先处理option_groups和product_groups
+            3.
+            4.
+     */
+
+        $line = 0;
+        foreach ($csv as $row) {//遍历csv文件
+            $option_groups_str = $row['option_groups'];
+            //导入option-groups 初步测试通过。2018-09-16 22:25
+            importOptionGroups($option_groups_str);
+        }
+    }
+
+    function importOptionGroups($option_groups_str)
+    {
+        //option_groups 数据格式:   option_name(选项父类名):select_name(选项子类值)
+        $option_groups = preg_split("/:/",$option_groups_str);
+        importOptionGroup($option_groups[0],$option_groups[1]);
+    }
+    function importOptionGroup($option_name,$option_value)
+    {
+        // 查找是否存在该数据选项，如果不存在，则添加，存在则不做处理
+        //1. 需要查找lc_option_groups_info和lc_option_values_info。
+        //类型是textarea和input的选项数据是放在lc_option_values表里。暂时不考虑这两种类型
+        // 其它类型的选项数据是放在lc_option_values_info表里
+        $sql = "select id,group_id from %s where name = '%s'";
+        $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_GROUPS_INFO, $option_name));
+        $result = database::fetch(database::query($sql));
+        $group_id = $result['group_id'];
+        if (empty($result)) {
+            //添加如下数据到对应表：
+            //1. `lc_option_groups`
+            $sql = "insert into %s (function,required,sort,date_created) VALUES ('%s',1,'%s','%s')";
+            $sql = u_utils::builderSQL(DB_TABLE_OPTION_GROUPS,
+                array('select', 1, priority, u_utils::builderSQL()));
+            $result = database::query($sql);//拿到id值
+            $group_id = database::insert_id();
+            //`lc_option_groups_info`
+            $sql = "insert into %s (group_id,language_code,name,description) VALUES ('%d','en','%s','')";
+            $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_GROUPS_INFO, $option_groups_id, $option_name));
+            $result = database::query($sql);
+            // 添加$option_name 数据结束
+        }
+        //添加$option_value 开始`lc_option_values`
+        // 先查询$option_value在表lc_option_values_info是否存在，如果不存在，则添加，如果存在则忽略
+        $sql = "select id from %s where name = '%s'";
+        $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_VALUES_INFO, $option_value));
+        $result = database::fetch(database::query($sql));
+        //如果$option_value不存在。
+        if (empty($result)) {
+            $sql = "insert into %s (group_id,value,priority) VALUES (%d,'',1)";
+            $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_VALUES, $group_id));
+            $result = database::query($sql);
+            $value_id = database::insert_id();
+            //`lc_option_values_info`
+            $sql = "insert into %s (value_id,language_code,name) VALUES (%d,'en','%s')";
+            $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_VALUES_INFO, $value_id,$option_value));
+            $result = database::query($sql);
+        }
+    }
+    function importProductGroups()
+    {
+        while(true) {
+            importProductGroup();
+        }
+    }
+    function importProductGroup()
+    {
+
     }
 
     /**
@@ -347,11 +301,9 @@
                 . "----------\r\n";
 
             $csv = file_get_contents($_FILES['file']['tmp_name']);
-
             $csv = functions::csv_decode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset']);
-            $isInsertNew = !empty($_POST['insert_products']);
-            importCategories($csv,$isInsertNew);
-            //importProducts($csv, $isInsertNew);
+            //importCategories($csv);
+            importProducts($csv, $isInsertNew);
             exit;
         } catch (Exception $e) {
             notices::add('errors', $e->getMessage());
@@ -361,7 +313,7 @@
     /**
      * 导出分类
      */
-    function exportCategories($csv)
+    function exportCategories()
     {
         ///if (isset($_POST['export_categories'])) {
 
@@ -426,7 +378,7 @@
     /*
      * 导出产品
      */
-    function exportProducts($csv)
+    function exportProducts()
     {
         //export_products start
         //if (isset($_POST['export_products'])) {
@@ -517,10 +469,10 @@
     /**
      * 完整导出分类和产品
      */
-    function exportCategoriesAndProducts($csv_array)
+    function exportCategoriesAndProducts()
     {
-        exportProducts($csv_array);
-        exportCategories($csv_array);
+        exportProducts();
+        exportCategories();
     }
 
     function builderExportCSVArray()
@@ -574,14 +526,16 @@
             'date_valid_from' => '',
             'date_valid_to' => '',
         );
+
+        return $csv_array;
     }
 
     // import or export run.
     if (isset($_POST['import_products'])) {
         importCategoriesAndProducts();
     } elseif (isset($_POST['export_products'])) {
-        $csv_array = builderExportCSVArray();
-        exportCategoriesAndProducts($csv_array);
+        //$csv_array = builderExportCSVArray();
+        exportCategoriesAndProducts();
     }
 ?>
 <h1><?php echo $app_icon; ?><?php echo language::translate('title_csv_import_export', 'CSV Import/Export'); ?></h1>
