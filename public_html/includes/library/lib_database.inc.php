@@ -173,6 +173,24 @@
       return $array;
     }
 
+      /**
+       * 遍历结果集里的所有记录，并放入到array里
+       * @param $result
+       * @param string $column
+       * @return mixed array;
+       */
+      public static function fetch_full($result, $column='') {
+          $array = array();
+          while($row = $result->fetch_assoc()) {
+              if ($column != '') {
+                  $array[] = $row[$column];
+              } else {
+                  $array[] = $row;
+              }
+          }
+          return $array;
+      }
+
     public static function seek($result, $offset) {
       return $result->data_seek($offset);
     }
