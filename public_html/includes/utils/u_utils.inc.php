@@ -27,4 +27,18 @@
         public static function getYMDHISDate($format = 'Y-m-d H:i:s') {
             return date($format);
         }
+
+        /**
+         * 获得数组指定索引的值。
+         * @param $array 数字索引数组
+         * @param $index 需要取值的索引
+         * @return mixed 返回索引指定的值，如果索引越界，返回"";
+         */
+        public static function getArrayIndexValue($array,$index) {
+            if($index <= count($array) -1 ) {
+                return $array[$index];
+            } else {
+                return "";
+            }
+        }
     }

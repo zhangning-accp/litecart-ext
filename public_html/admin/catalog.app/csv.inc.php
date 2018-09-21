@@ -1,12 +1,37 @@
 <?php
     // catalog->CSV Import/Export page and process import/export Categories or Products
-    $product_map = array();// key:product_id,value:md5
     /**
      * 导入产品相关数据
      * @param $csv 产品csv数据
+     *
+     * csv关键数据的数据结构说明：
+     *
+     * [id]:导入时可以没有，但更新时必须有。
+     * status:0|1|2.  0:下架，1：上架，2：隐藏
+     * [code]:导入时程序生成 uuid
+     * [sku]:导入时程序生成   uuid
+     * name:* required.
+     * short_description: * required.
+     * description:* required.
+     * attributes:* required.
+     * head_title:* required.
+     * meta_description:* required.
+     * image:* required.
+     * price:* required.
+     * quantity:* required.
+     * option_groups: option_name:option_value. 键值对，值只有一个，不支持多个。
+     * product_groups: gn1:gv1,gv2,...|gn2:gv1,gv2,gv3  键值对，值允许多个，用逗号隔开。多个group格式为：
+     *
+     * categorie_names: c1|c2|c3|c4,c5,...
+     * category_descriptions: d1[|]d2[|]|d3[,]d4[,]...
+     * category_short_descriptions:同category_descriptions
+     * category_meta_descriptions:同category_descriptions
+     * category_h1_titles:同category_descriptions
+     * category_head_titles:同category_descriptions
      */
     function importProducts($csv)
     {
+        $product_map = array();
         $line = 0;
         foreach ($csv as $row) {//遍历csv文件
             $date = u_utils::getYMDHISDate();
@@ -58,50 +83,57 @@
                 "category_h1_titles" => "",
                 "category_head_titles" => "",
                 "option_groups" => "",
-                "md5" => ""
+                "md5" => "",
+                "price" => 0
             );
             foreach ($row as $key => $value) {
-                $product_info[$key] = $value;
+                $product_info[$key] = trim($value);
             }
-            //
             // -------------- 商品数据构建完毕 ---------------
-            importProduct($product_info);
+            $product_name = $product_info['name'];
+            if(!empty($product_name)) {
+                importProduct($product_info, $product_map);
+            }
         }
     }
 
-    function importProduct(&$product_info)
+    function importProduct(&$product_info, &$product_map)
     {
         //------------ 添加商品信息 -----------------
         $product_id = $product_info['id'];
         $md5_value = md5Product($product_info);
         if (empty($product_id)) {
-            if (!empty(findProductIdByMd5($md5_value))) {
-                $product_id = findProductIdByMd5($md5_value);
+            $product_id = $product_map["'" . $md5_value . "'"];
+            if (!empty($product_id)) {
                 $product_info['id'] = $product_id;
             }
         }
         //1. 拆分image字符串
         $product_info['image'] = array_filter(preg_split("/\|/", $product_info['image']));
+        $main_image = "";
+        if(!empty($product_info['image'])) {
+            $main_image = $product_info['image'][0];
+        }
         if (empty($product_id)) {//新增
             // 新增，新增后，将product_id赋值给id
-            $sql = "INSERT INTO %s (status,manufacturer_id,supplier_id,delivery_status_id,
+            $sql = "INSERT INTO " . DB_TABLE_PRODUCTS . " (status,manufacturer_id,supplier_id,delivery_status_id,
                       sold_out_status_id,default_category_id,product_groups,keywords,
                       code,sku,mpn,upc,gtin,taric,quantity,quantity_unit_id,weight,
                       weight_class,dim_x,dim_y,dim_z,dim_class,purchase_price,purchase_price_currency_code,
                       tax_class_id,image,views,purchases,date_valid_from,date_valid_to,date_updated,date_created)
                        values (%d,%d,%d,%d,
                               %d,%d,%d,'%s',
-                              uuid(),uuid(),'%s','%s','%s','%s',%d,%d,%d,
-                              '%s',%d,%d,%d,'%s',%.2f,'%s',
+                              uuid(),uuid(),'%s','%s','%s','%s',%.4f,%d,%d,
+                              '%s',%d,%d,%d,'%s',%.4f,'%s',
                               %d,'%s',%d,%d,'%s','%s','%s','%s')";
-            $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS,
+            $sql = u_utils::builderSQL($sql, array(
                 $product_info['status'], $product_info['manufacturer_id'], $product_info['supplier_id'], $product_info['delivery_status_id'],
                 $product_info['sold_out_status_id'], $product_info['default_category_id'], '', $product_info['keywords'],
                 $product_info['mpn'], $product_info['upc'], $product_info['gtin'], $product_info['taric'],
-                $product_info['quantity'], $product_info['quantity_unit_id'], $product_info['weight'],
+                0, $product_info['quantity_unit_id'], $product_info['weight'],
                 $product_info['weight_class'], $product_info['dim_x'], $product_info['dim_y'], $product_info['dim_z'],
-                $product_info['dim_class'], $product_info['purchase_price'], $product_info['purchase_price_currency_code'],
-                $product_info['tax_class_id'], $product_info['image'][0], $product_info['views'], $product_info['purchases'],
+                $product_info['dim_class'], $product_info['price'], $product_info['purchase_price_currency_code'],
+                $product_info['tax_class_id'], $main_image, $product_info['views'], $product_info['purchases'],
                 $product_info['date_valid_from'], $product_info['date_valid_to'], $product_info['date_updated'],
                 $product_info['date_created']));
             $result = database::query($sql);
@@ -118,48 +150,44 @@
             $result = database::query($sql);
 
         } else {
-            // TODO:避免多次更新,如果遇到id不同，但md5值相同怎么处理,这种情况忽略
-            if (empty(findProductIdByMd5($md5_value))) {// 如果MD5值对应的value为空，表示是第一次更新。
+            if (empty($product_map["'" . $md5_value . "'"])) {// 如果MD5值对应的value为空，表示是第一次更新。
                 // 1. 对于product表，进行更新，
                 $date = u_utils::getYMDHISDate();
-                $sql = "UPDATE %s SET status = %d,quantity = %d,purchase_price = %d,image = '%s',date_updated = '%s' WHERE id = %d";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS,
-                    $product_info['status'], $product_info['quantity'], $product_info['purchase_price'],
-                    $product_info['image'][0], $date, $product_id));
+                $sql = "UPDATE " . DB_TABLE_PRODUCTS . "SET status = %d,quantity = %d,purchase_price = %.4f,image = '%s',date_updated = '%s' WHERE id = %d";
+                $sql = u_utils::builderSQL($sql, array($product_info['status'], $product_info['quantity'],
+                    $product_info['price'], $product_info['image'][0], $date, $product_id));
                 database::query($sql);
                 // 更新product_info表
-                $sql = "UPDATE %s SET name = '%s', short_description = '%s', description = '%s', head_title = '%s', 
+                $sql = "UPDATE " . DB_TABLE_PRODUCTS_INFO . " SET name = '%s', short_description = '%s', description = '%s', head_title = '%s', 
                     meta_description = '%s', attributes = '%s' WHERE product_id = %d";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_INFO,
-                    $product_info['name'], $product_info['short_description'], $product_info['description'],
-                    $product_info['head_title'], $product_info['meta_description'], $product_info['attributes'], $product_id));
+                $sql = u_utils::builderSQL($sql, array($product_info['name'], $product_info['short_description'],
+                    $product_info['description'], $product_info['head_title'], $product_info['meta_description'],
+                    $product_info['attributes'], $product_id));
                 database::query($sql);
             }
-        }// TODO:以上代码测试通过 2018-09-18 14:50
-        $product_map[$md5_value] = $product_id;
+        }// 以上代码测试通过 2018-09-18 14:50
+        $product_map["'" . $md5_value . "'"] = $product_id;
         addImages($product_info); //处理图片数据
-        addOptionGroup($product_info,$md5_value);
+        addOptionGroup($product_info);
         //echo "addProductGroup before:".$product_info['product_groups'].PHP_EOL;
         addProductGroup($product_info);
         //echo "addProductGroup after:".$product_info['product_groups'].PHP_EOL;
         addCategories($product_info);
         updateProductOther($product_info);
-
-
     }
 
     /**
-     * 添加图片
+     * 添加图片，测试多次无异常，放心用
      * @param $product_info 商品信息对象
      */
-    function addImages(&$product_info)
+    function addImages($product_info)
     {
         //---------------------对于lc_products_images表，先删后增。---------------------
         $product_id = $product_info['id'];
-        $sql = "delete from %s where product_id = %d";
-        $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_IMAGES, $product_id));
-        $result = database::query($sql);
-        if (!empty($product_info['image']) && !empty($product_id)) {//删除表数据
+        if(!empty($product_info['image']) && !empty($product_id)) {
+            $sql = "delete from %s where product_id = %d";
+            $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_IMAGES, $product_id));
+            $result = database::query($sql);
             foreach ($product_info['image'] as $image) {//添加新数据
                 $sql = "insert into %s (product_id,filename,checksum,priority) values(%d,'%s','%s',1)";
                 $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_IMAGES, $product_id, $image, ""));
@@ -171,39 +199,36 @@
     /**
      * @param $product_info
      */
-    function addOptionGroup(&$product_info,$md5_value)
+    function addOptionGroup($product_info)
     {
-        //TODO: 需要重新梳理一下和option_group相关的表以及操作。
-        // 这个要重新处理，相同规格的商品只能是一条记录，但这处理成了多条记录。解决办法，对
-        //name short_description	description	attributes	head_title	meta_description
-        // 这几个值进行md5校验。
-
-        //option_groups  数据格式:   option_name(选项父类名):select_name(选项子类值)
+        //option_groups  数据格式:   group_name(选项组名):option_name(选项名)
         $product_id = $product_info['id'];
         $option_groups_str = $product_info['option_groups'];
-        if(!empty($option_groups_str)) {
+        $date = u_utils::getYMDHISDate();
+        $combination = "";
+        if (!empty($option_groups_str)) {
             $option_groups = preg_split("/:/", $option_groups_str);
-            $option_name = $option_groups[0];
-            $option_value = $option_groups[1];
+            $group_name = $option_groups[0];
+            $option_name = $option_groups[1];
             // 查找是否存在该数据选项，如果不存在，则添加，存在则不做处理
             //1. 需要查找lc_option_groups_info和lc_option_values_info。
             //类型是textarea和input的选项数据是放在lc_option_values表里。暂时不考虑这两种类型
             // 其它类型的选项数据是放在lc_option_values_info表里
-            $sql = "select id,group_id from %s where name = '%s'";
-            $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_GROUPS_INFO, $option_name));
+            $sql = "select id,group_id from " . DB_TABLE_OPTION_GROUPS_INFO . " where name = '%s'";
+            $sql = u_utils::builderSQL($sql, array($group_name));
             $result = database::fetch(database::query($sql));
             $group_id = $result['group_id'];
             if (empty($result)) {// 如果不存在选项则添加，存在则忽略
                 //添加如下数据到对应表：
                 //1. `lc_option_groups`
-                $sql = "insert into %s (function,required,sort,date_created) VALUES ('%s',1,'%s','%s')";
+                $sql = "insert into " . DB_TABLE_OPTION_GROUPS . " (function,required,sort,date_created) VALUES ('%s',1,'%s','%s')";
                 $sql = u_utils::builderSQL($sql,
-                    array(DB_TABLE_OPTION_GROUPS,'select','priority', $product_info['date_created']));
+                    array('select', 'priority', $product_info['date_created']));
                 $result = database::query($sql);//拿到id值
                 $group_id = database::insert_id();
                 //`lc_option_groups_info`
                 $sql = "insert into %s (group_id,language_code,name,description) VALUES (%d,'en','%s','')";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_GROUPS_INFO, $group_id, $option_name));
+                $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_GROUPS_INFO, $group_id, $group_name));
                 $result = database::query($sql);
                 // 添加$option_name 数据结束
             }
@@ -214,130 +239,155 @@
             $sql = u_utils::builderSQL($sql, array(
                 DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
                 DB_TABLE_OPTION_VALUES_INFO, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
-                $group_id, DB_TABLE_OPTION_VALUES_INFO,$option_value));
-            //$sql = "select id from %s where name = '%s'";
-            //$sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_VALUES_INFO, DB_TABLE_OPTION_VALUES,$group_id,$option_value));
+                $group_id, DB_TABLE_OPTION_VALUES_INFO, $option_name));
             $result = database::fetch(database::query($sql));
-            if (empty($result)) {//如果$option_value不存在。则添加，如果存在则更新。
+            if (empty($result)) {//如果$option_name不存在。则添加，如果存在则更新。
                 $sql = "insert into %s (group_id,value,priority) VALUES (%d,'',1)";
                 $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_VALUES, $group_id));
                 $result = database::query($sql);
                 $value_id = database::insert_id();
                 //`lc_option_values_info`
-                $sql = "insert into %s (value_id,language_code,name) VALUES (%d,'en','%s')";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_VALUES_INFO, $value_id, $option_value));
+                $sql = "insert into " . DB_TABLE_OPTION_VALUES_INFO . " (value_id,language_code,name) VALUES (%d,'en','%s')";
+                $sql = u_utils::builderSQL($sql, array($value_id, $option_name));
                 $result = database::query($sql);
-                //$value_id = database::insert_id();
                 // --------- value_info 添加结束 -------------------
 
                 //关联商品操作 lc_products_options 和 lc_products_options_stock
                 //1. 先关联lc_products_options，这样页面上购买商品是才有可选项。
-                $sql = "insert into %s (product_id,group_id,value_id,price_operator,USD,
+                $sql = "insert into" . DB_TABLE_PRODUCTS_OPTIONS . " (product_id,group_id,value_id,price_operator,USD,
                                     priority,date_updated,date_created) 
                     VALUES (%d,%d,%d,'+',0.000,1,'%s','%s')";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_OPTIONS,
-                    $product_id, $group_id, $value_id, $product_info['date_updated'], $product_info['date_created']));
+                $sql = u_utils::builderSQL($sql, array($product_id, $group_id, $value_id, $date, $date));
                 $result = database::query($sql);
-                // 以上操作测试无误。
-
-                //TODO: 关联lc_products_options_stock 操作。
-                // 2. 关联lc_products_options_stock 操作。
-//                $combination = $group_id . "-" . $value_id;
-//                $sql = "INSERT INTO %s (product_id,combination,sku,weight,
-//                                                weight_class,dim_x,dim_y,dim_z,dim_class,quantity,
-//                                                priority,date_updated,date_created)
-//                VALUES()";
-//                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_OPTIONS_STOCK,
-//                    $product_id, $combination, UUID(), 0,
-//                    'kg', 0.00, 0.00, 0.00, 'cm', $product_info['quantity'],
-//                    1, $product_info['date_updated'], $product_info['date_created']));
-//                database::query($sql);
-//                // 修改商品表里的总数
-//                $sql = "update %s set quantity = quantity+%d where id = %d";
-//                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS, $product_info['quantity'], $product_id));
-//                database::query($sql);
+                // ---------------------------以上操作测试无误。 ---------------------------
             } else {//存在 选项值
-                // 只更新数量，同时还要修改商品表里的总数
-                //1. 查询选项对应的value_id和group_id.
-//                $value_id = $result['value_id'];
-//                $combination = $group_id . "-" . $value_id;
-//                $sql = "select quantity from lc_products_options_stock where combination=" . $combination;
-//                $result = database::fetch($sql);
-//                $quantity = $result['quantity'];
-//                $current_quantity = $product_info['quantity'];
-//                $quantity = $current_quantity - $quantity;
-//                $sql = "update " . DB_TABLE_PRODUCTS . " set quantity = quantity + " . $quantity . " where id=" . $product_id;
-//                $result = database::query($sql);
+                $value_id = $result['value_id'];
+
+            }
+            $combination = $group_id . "-" . $value_id;
+            // 首先检查是否有对应的stock记录，如果有，则更新，如果没有则添加
+            $sql = "SELECT product_id,combination FROM " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " WHERE product_id=%d AND combination ='%s'";
+            $sql = u_utils::builderSQL($sql, array($product_id, $combination));
+            $result = database::fetch_full(database::query($sql));
+            if (empty($result)) {
+                $sql = "INSERT INTO " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " (product_id,combination,sku,weight,
+                                                weight_class,dim_x,dim_y,dim_z,dim_class,quantity,
+                                                priority,date_updated,date_created)
+                                        VALUES(%d,'%s',UUID(),%d,'%s',
+                                              '%s',%.4f,%.4f,%.4f,'%s',%d,'%s','%s')";
+                $sql = u_utils::builderSQL($sql, array($product_id, $combination, $product_info['weight'],
+                    $product_info['weight_class'], $product_info['dim_x'], $product_info['dim_y'], $product_info['dim_z'], $product_info['dim_class'], $product_info['quantity'],
+                    1, $date, $date));
+                database::query($sql);
+                // 修改商品表里的总数, 新增的时候直接加，只有修改的时候需要计算差值。因为可能库存数量会比原来的减少。
+                $sql = "update " . DB_TABLE_PRODUCTS . " set quantity = quantity+%d,date_updated='%s' where id = %d";
+                $sql = u_utils::builderSQL($sql, array($product_info['quantity'], $date, $product_id));
+                database::query($sql);
+            } else {
+                $current_quantity = $product_info['quantity'];
+                //1. 查询stock 表里选项对应的value_id和group_id 的 quantity 值，因为可能更新时会有所减少
+                $sql = "select quantity from " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " where combination='" . $combination . "' and product_id=" . $product_id;
+                $result = database::fetch(database::query($sql));
+                $quantity = $result['quantity'];
+
+                // 更新库存
+                $sql = "update " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " set quantity = %.4f,date_updated='%s' 
+                                                                        where product_id=%d and combination='%s'";
+                $sql = u_utils::builderSQL($sql, array($product_info['quantity'], $date, $product_id, $combination));
+                database::query($sql);
+                // 计算差值
+                $quantity = $current_quantity - $quantity;
+                $sql = "update " . DB_TABLE_PRODUCTS . " set quantity = quantity + " . $quantity . " where id=" . $product_id;
+                $result = database::query($sql);
             }
         }
     }
 
     /**
-     * @param $product_info
+     * @param $product_info //TODO:这里没有考虑到多个group的情况
      */
     function addProductGroup(&$product_info)
-    {   //$group_name_str数据格式：gropu_name:child_1,child_2,child_n。如果 $group_name 为空，则不做处理
-        $group_name = $product_info['product_groups'];
+    {   //$group_name_str数据格式：gropu_name:child_1,child_2,child_n|gropu_name:child_1,child_2,child_n。如果 $group_name 为空，则不做处理
+        $product_groups_str = trim($product_info['product_groups']);
         $product_groups = "";
-        if (!empty($group_name)) {
+        if (!empty($product_groups_str)) {
             // 添加product_groups 相关数据操作
             //1.在lc_product_groups_info表里查找是否存在，
-            $group_name = preg_split("/:/", $group_name);
-            $group_name = $group_name[0];
+            $multiple_groups = preg_split("/\|/", $product_groups_str);//获取多个产品组数据
+            $multiple_groups = array_filter($multiple_groups);//过滤掉空元素。因为可能会有xxx|  这样的情况
+            foreach ($multiple_groups as $simple_groups) {
+                $simple_groups = preg_split("/:/", $simple_groups);
+                $group_name = $simple_groups[0];
 
-            $group_values = $group_name[1];
-            $group_values = preg_split("/,/", $group_values);
-
-            //查找$group_name 在lc_product_groups_info表里是否存在
-            $sql = "select id,product_group_id from %s where name ='%s'";
-            $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_INFO, $group_name));
-            $result = database::fetch(database::query($sql));
-            $product_group_id = $result['product_group_id'];
-            if (empty($result)) {// 数据不存在
-                //添加$group_name 到`lc_product_groups` 和 `lc_product_groups_info`表
-                $sql = "insert into %s (status,date_updated,date_created) values(1,'%s','%s')";
-                $date = u_utils::getYMDHISDate();
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS, $date, $date));
-                $result = database::query($sql);
-                $product_group_id = database::insert_id();
-                // 添加数据到lc_product_groups_info
-                $sql = "insert into %s (product_group_id,language_code,name) values(%d,'en','%s')";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_INFO,
-                    $product_group_id, $group_name));
-                $result = database::query($sql);
-            }
-            //2. 查找子项是否存在，如果不存在则添加
-            $sql = "select name from %s where name in (";
-            $in = "";
-            $in = "'" . join("','", array_values($group_values)) . "'";
-            $in .= ")";
-            $sql .= $in . " and product_group_value_id in (select id from %s where product_group_id=%d)";
-            $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_VALUES_INFO,
-                DB_TABLE_PRODUCT_GROUPS_VALUES, $product_group_id));
-            $result = database::fetch_full(database::query($sql), 'name');
-            $diff = array_diff($group_values, $result);//寻找差值，如果result里没有，则添加
-            if (!empty($diff)) {
-                //添加子项  lc_product_groups_values
-                foreach ($diff as $value_name) {
+                $group_values = $simple_groups[1];
+                $group_values = preg_split("/,/", $group_values);
+                $group_values = array_filter($group_values);
+                //查找$group_name 在lc_product_groups_info表里是否存在
+                $sql = "select id,product_group_id from %s where name ='%s' limit 1";
+                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_INFO, $group_name));
+                $result = database::fetch(database::query($sql));
+                $product_group_id = $result['product_group_id'];
+                if (empty($result)) {// group_name数据不存在
+                    //添加$group_name 到lc_product_groups表
+                    $sql = "insert into %s (status,date_updated,date_created) values(1,'%s','%s')";
                     $date = u_utils::getYMDHISDate();
-                    $sql = "insert into %s (product_group_id,date_updated,date_created) values(%d,'%s','%s')";
-                    $sql = u_utils::builderSQL($sql,
-                        array(DB_TABLE_PRODUCT_GROUPS_VALUES, $product_group_id, $date, $date));
+                    $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS, $date, $date));
                     $result = database::query($sql);
-                    $group_value_id = database::insert_id();
-                    // 添加子项 lc_product_groups_values_info
-                    $sql = "insert into %s (`product_group_value_id`,`language_code`,`name`) values(%d,'en','%s')";
-                    $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_VALUES_INFO,
-                        $group_value_id, $value_name));
+                    $product_group_id = database::insert_id();
+                    // 添加$group_name到lc_product_groups_info
+                    $sql = "insert into %s (product_group_id,language_code,name) values(%d,'en','%s')";
+                    $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_INFO,
+                        $product_group_id, $group_name));
                     $result = database::query($sql);
-                    //TODO: 这里确认一下 如果产品属于多个product_group时，product_groups的格式是：
-                    //12-25,12-26,12-27,13-28,13-29
-                    $product_groups .= $product_group_id . "-" . $group_value_id .",";
                 }
-            } // 以上代码简单测试通过 2018-09-17
-            /**--------------添加product_groups 相关数据操作结束 ------------**/
-            $product_info['product_groups'] = substr($product_groups,0,-1);;//重设product_groups内容
-            echo "in addProductGroup product_groups:".$product_info['product_groups'].PHP_EOL;
+                //2. 查找子项是否存在，如果不存在则添加. // 改为全部查，然后做对比。
+                $sql = "SELECT product_group_value_id,`name` FROM " . DB_TABLE_PRODUCT_GROUPS_VALUES_INFO . " 
+                INNER JOIN " . DB_TABLE_PRODUCT_GROUPS_VALUES . " 
+	            ON product_group_value_id = " . DB_TABLE_PRODUCT_GROUPS_VALUES . ".id AND product_group_id = " . $product_group_id;
+//            $sql = "select name,product_group_value_id from ".DB_TABLE_PRODUCT_GROUPS_VALUES_INFO." where name in (";
+//            $in = "";
+//            $in = "'" . join("','", array_values($group_values)) . "'";
+//            $in .= ")";
+//            $sql .= $in . " and product_group_value_id in (select id from".DB_TABLE_PRODUCT_GROUPS_VALUES." where product_group_id=%d)";
+//            $sql = u_utils::builderSQL($sql, array($product_group_id));
+                $result = database::fetch_full(database::query($sql));
+                $group_value_ids = array();//$result['product_group_value_id'];
+                $value_names = array();//$result['name'];
+                foreach ($result as $row) {
+                    $group_value_ids [] = $row['product_group_value_id'];
+                    $value_names [] = $row['name'];
+                }
+                $diff = array_diff($group_values, $value_names);//寻找差值，如果result里没有，则添加
+                // 得到的是一个有一个元素，但元素为空的数组，过滤一下
+                $diff = array_filter($diff);
+                if (!empty($diff)) {// 这里 如果没有不同的，
+                    //添加group子项到lc_product_groups_values
+                    foreach ($diff as $value_name) {
+                        $date = u_utils::getYMDHISDate();
+                        $sql = "insert into %s (product_group_id,date_updated,date_created) values(%d,'%s','%s')";
+                        $sql = u_utils::builderSQL($sql,
+                            array(DB_TABLE_PRODUCT_GROUPS_VALUES, $product_group_id, $date, $date));
+                        $result = database::query($sql);
+                        $group_value_id = database::insert_id();
+                        // 添加group子项lc_product_groups_values_info
+                        $sql = "insert into %s (`product_group_value_id`,`language_code`,`name`) values(%d,'en','%s')";
+                        $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_VALUES_INFO,
+                            $group_value_id, $value_name));
+                        $result = database::query($sql);
+                        $group_value_ids[] = $group_value_id;
+                    } // 以上代码简单测试通过 2018-09-17
+                }
+                foreach ($group_value_ids as $value_id) {
+                    $product_groups .= $product_group_id . "-" . $value_id . ",";
+                }
+                /**--------------添加product_groups 相关数据操作结束 ------------**/
+                //去掉最尾部多余的逗号，否则客户页显示会有错误提示，影响观感,但是不能在这里去除，因为如果有多个group,这里就会导致类似这样的格式：
+                // 60-142,60-141,60-140,60-139,60-13861-143,61-144.
+                // 注意60-13861-143实际上应该是60-138,61-143，把去除逗号移到updateProductOther里。
+                //--------------------------------------------------
+                //$product_groups = substr($product_groups, 0, -1);
+                $product_info['product_groups'] = $product_groups;//重设product_groups内容
+            }
         }
     }
 
@@ -352,93 +402,82 @@
     {
         $line = 0;
         $categorie_names = $product_info['categorie_names'];//"Rubber Ducks|Subcategory|shot,d,d,d";
-        $category_descriptions = $product_info['category_descriptions'];// [|]ddddd[|]|[|]dssdfdf[|], 注：如果某些分类没有title，则用一个空格 | | | , ,
-        $category_short_descriptions = $product_info['category_short_descriptions'];
-        $category_meta_descriptions = $product_info['category_meta_descriptions'];
-        $category_head_titles = $product_info['category_head_titles'];
-        $category_h1_titles = $product_info['category_h1_titles'];
+        if (!empty($categorie_names)) {//如果name不为空，则进行处理，否则忽略
+            $category_descriptions = $product_info['category_descriptions'];// [|]ddddd[|]|[|]dssdfdf[|], 注：如果某些分类没有title，则用一个空格 | | | , ,
+            $category_short_descriptions = $product_info['category_short_descriptions'];
+            $category_meta_descriptions = $product_info['category_meta_descriptions'];
+            $category_head_titles = $product_info['category_head_titles'];
+            $category_h1_titles = $product_info['category_h1_titles'];
 
-        //示例： ["Collectibles","Barware","Shot Glasses,man,woman"]
-        $categorie_names = preg_split("/[|]/", $categorie_names);
-        //["Collectibles","Barware","Shot Glasses,man,woman"]
-        $categorie_names = array_filter($categorie_names);
-        //"Shot Glasses,man,woman"
-        $category_name_other_level_one = array_pop($categorie_names);
-        //["Shot Glasses","man","woman"]
-        $category_name_other_level_one = findFirstCategory($category_name_other_level_one, "/,/");
-        //将第一个分类放到原数组。["Collectibles","Barware","Shot Glasses"]
-        $categorie_names[] = array_shift($category_name_other_level_one);
+            //示例： ["Collectibles","Barware","Shot Glasses,man,woman"]
+            $categorie_names = preg_split("/[|]/", $categorie_names);
+            //["Collectibles","Barware","Shot Glasses,man,woman"]
+            $categorie_names = array_filter($categorie_names);
+            //"Shot Glasses,man,woman"
+            $category_name_other_level_one = array_pop($categorie_names);
+            //["Shot Glasses","man","woman"]
+            $category_name_other_level_one = findFirstCategory($category_name_other_level_one, "/,/");
+            //将第一个分类放到原数组。["Collectibles","Barware","Shot Glasses"]
+            $categorie_names[] = array_shift($category_name_other_level_one);
 
-        $category_descriptions = preg_split("/\[\|\]/", $category_descriptions);
-        $category_descriptions = array_filter($category_descriptions);
-        $category_descriptions_other_level_one = array_pop($category_descriptions);
-        $category_descriptions_other_level_one = findFirstCategory($category_descriptions_other_level_one, "/\[,\]/");
-        $category_descriptions[] = array_shift($category_descriptions_other_level_one);
+            $category_descriptions = preg_split("/\[\|\]/", $category_descriptions);
+            $category_descriptions = array_filter($category_descriptions);
+            $category_descriptions_other_level_one = array_pop($category_descriptions);
+            $category_descriptions_other_level_one = findFirstCategory($category_descriptions_other_level_one, "/\[,\]/");
+            $category_descriptions[] = array_shift($category_descriptions_other_level_one);
 
-        $category_short_descriptions = preg_split("/\[\|\]/", $category_short_descriptions);
-        $category_short_descriptions = array_filter($category_short_descriptions);
-        $category_short_descriptions_other_level_one = array_pop($category_short_descriptions);
-        $category_short_descriptions_other_level_one = findFirstCategory($category_short_descriptions_other_level_one, "/\[,\]/");
-        $category_short_descriptions[] = array_shift($category_short_descriptions_other_level_one);
+            $category_short_descriptions = preg_split("/\[\|\]/", $category_short_descriptions);
+            $category_short_descriptions = array_filter($category_short_descriptions);
+            $category_short_descriptions_other_level_one = array_pop($category_short_descriptions);
+            $category_short_descriptions_other_level_one = findFirstCategory($category_short_descriptions_other_level_one, "/\[,\]/");
+            $category_short_descriptions[] = array_shift($category_short_descriptions_other_level_one);
 
-        $category_meta_descriptions = preg_split("/\[\|\]/", $category_meta_descriptions);
-        $category_meta_descriptions = array_filter($category_meta_descriptions);
-        $category_meta_descriptions_other_level_one = array_pop($category_meta_descriptions);
-        $category_meta_descriptions_other_level_one = findFirstCategory($category_meta_descriptions_other_level_one, "/\[,\]/");
-        $category_meta_descriptions[] = array_shift($category_meta_descriptions_other_level_one);
+            $category_meta_descriptions = preg_split("/\[\|\]/", $category_meta_descriptions);
+            $category_meta_descriptions = array_filter($category_meta_descriptions);
+            $category_meta_descriptions_other_level_one = array_pop($category_meta_descriptions);
+            $category_meta_descriptions_other_level_one = findFirstCategory($category_meta_descriptions_other_level_one, "/\[,\]/");
+            $category_meta_descriptions[] = array_shift($category_meta_descriptions_other_level_one);
 
-        $category_head_titles = preg_split("/\[\|\]/", $category_head_titles);
-        $category_head_titles = array_filter($category_head_titles);
-        $category_head_titles_other_level_one = array_pop($category_head_titles);// 拿到最后一个
-        $category_head_titles_other_level_one = findFirstCategory($category_head_titles_other_level_one, "/\[,\]/");
-        $category_head_titles[] = array_shift($category_head_titles_other_level_one);// 拿到第一个
+            $category_head_titles = preg_split("/\[\|\]/", $category_head_titles);
+            $category_head_titles = array_filter($category_head_titles);
+            $category_head_titles_other_level_one = array_pop($category_head_titles);// 拿到最后一个
+            $category_head_titles_other_level_one = findFirstCategory($category_head_titles_other_level_one, "/\[,\]/");
+            $category_head_titles[] = array_shift($category_head_titles_other_level_one);// 拿到第一个
 
-        $category_h1_titles = preg_split("/\[\|\]/", $category_h1_titles);
-        $category_h1_titles = array_filter($category_h1_titles);
-        $category_h1_titles_other_level_one = array_pop($category_h1_titles);
-        $category_h1_titles_other_level_one = findFirstCategory($category_h1_titles_other_level_one, "/\[,\]/");
-        $category_h1_titles[] = array_shift($category_h1_titles_other_level_one);
-        //检查各数组长度是否一致
-//        if (count($categorie_names) !== count($category_descriptions)
-//            && count($categorie_names) !== count($category_meta_descriptions)
-//            && count($categorie_names) !== count($category_short_descriptions)
-//            && count($categorie_names) !== count($category_head_titles)
-//            && count($categorie_names) !== count($category_h1_titles)
-//        ) {
-//            echo "<div style='color:red'>categorie_names, category_descriptions, category_short_descriptions, category_meta_descriptions,
-//                category_head_titles, category_h1_titles column count doesn't match. Please check !</div>";
-//            exit;
-//        } else {
+            $category_h1_titles = preg_split("/\[\|\]/", $category_h1_titles);
+            $category_h1_titles = array_filter($category_h1_titles);
+            $category_h1_titles_other_level_one = array_pop($category_h1_titles);
+            $category_h1_titles_other_level_one = findFirstCategory($category_h1_titles_other_level_one, "/\[,\]/");
+            $category_h1_titles[] = array_shift($category_h1_titles_other_level_one);
             $parent_id = 0;
             //添加分类里摘出的一级分类
             for ($i = 0; $i < count($category_name_other_level_one); $i++) {
                 $parent_id = 0;
-                $category_name = $category_name_other_level_one[$i];
-                $category_description = $category_descriptions_other_level_one[$i];
-                $category_short_description = $category_short_descriptions_other_level_one[$i];
-                $category_meta_description = $category_meta_descriptions_other_level_one[$i];
-                $category_head_title = $category_head_titles_other_level_one[$i];
-                $category_h1_title = $category_h1_titles_other_level_one[$i];
+                $category_name = u_utils::getArrayIndexValue($category_name_other_level_one,$i);
+                $category_description = u_utils::getArrayIndexValue($category_descriptions_other_level_one,$i);
+                $category_short_description = u_utils::getArrayIndexValue($category_short_descriptions_other_level_one,$i);
+                $category_meta_description = u_utils::getArrayIndexValue($category_meta_descriptions_other_level_one,$i);
+                $category_head_title = u_utils::getArrayIndexValue($category_head_titles_other_level_one,$i);
+                $category_h1_title = u_utils::getArrayIndexValue($category_h1_titles_other_level_one,$i);
                 insertOrUpdateSimpleCategory($product_info, $category_name, $parent_id, $category_description, $category_short_description,
                     $category_meta_description, $category_head_title, $category_h1_title, false);
             }
             //添加多级分类数据及关系
             $parent_id = 0;
             for ($i = 0; $i < count($categorie_names); $i++) {
-                $category_name = $categorie_names[$i];
-                $category_description = $category_descriptions[$i];
-                $category_short_description = $category_short_descriptions[$i];
-                $category_meta_description = $category_meta_descriptions[$i];
-                $category_head_title = $category_head_titles[$i];
-                $category_h1_title = $category_h1_titles[$i];
+                $category_name = u_utils::getArrayIndexValue($categorie_names,$i);
+                $category_description = u_utils::getArrayIndexValue($category_descriptions,$i);
+                $category_short_description = u_utils::getArrayIndexValue($category_short_descriptions,$i);
+                $category_meta_description = u_utils::getArrayIndexValue($category_meta_descriptions,$i);
+                $category_head_title = u_utils::getArrayIndexValue($category_head_titles,$i);
+                $category_h1_title = u_utils::getArrayIndexValue($category_h1_titles,$i);
                 insertOrUpdateSimpleCategory($product_info, $category_name, $parent_id, $category_description, $category_short_description,
-                    $category_meta_description, $category_head_title, $category_h1_title);
-
+                        $category_meta_description, $category_head_title, $category_h1_title);
             }
-        //}
-
-
+        }
     }// import_categories end.
+
+
 
     function findFirstCategory($category_name_tmp, $pattern)
     {
@@ -463,57 +502,57 @@
     function insertOrUpdateSimpleCategory(&$product_info, $category_name, &$parent_id, $category_description, $category_short_description,
                                           $category_meta_description, $category_head_title, $category_h1_title, $isTree = true)
     {
-        // 查找每个分类数据，如果找到，则跳过，如果没找到，则添加
-        $sql = "SELECT id,parent_id FROM %s WHERE id = (SELECT category_id FROM %s WHERE NAME = '%s' limit 1) and parent_id = %d limit 1";
-        $sql = u_utils::builderSQL($sql, array(DB_TABLE_CATEGORIES, DB_TABLE_CATEGORIES_INFO, $category_name, $parent_id));
-        $result = database::fetch(database::query($sql));
-        $category_id = $result['id'];
-        $product_id = $product_info['id'];
-        if (empty($result)) {//记录不存在，添加分类数据
-            // 1. 插入新的分类到lc_categories，插入的数据有：langunge_code,date_created,插入完成后拿到id值。
-            $sql = "insert into " . DB_TABLE_CATEGORIES
-                . " (parent_id, dock, status, list_style, date_created) values (%d,'%s',%d,'%s','%s')";
-            $sql = u_utils::builderSQL($sql, array($parent_id, 'tree', 1, 'rows', date('Y-m-d H:i:s')));
-            $result = database::query($sql);
-            $category_id = database::insert_id();//query("select max(id) from " . DB_TABLE_CATEGORIES);//2. 拿到刚才添加的id。
-            // 如果$id不为null且不是""，这设置parent_id
-            if (isset($category_id) && !empty($category_id)) {//TODO:二级分类插入时，parent_id为0，上一次的赋值失败。
-                $parent_id = $category_id;//改变父类id
-            }
-            // 新增数据到lc_categories_info表。先测试通过，后期再看如何优化。
-            $sql = "insert into %s (category_id, language_code, name, description, short_description, meta_description, head_title, h1_title) 
-                  values(%d,'%s','%s','%s','%s','%s','%s','%s')";
-            $sql = u_utils::builderSQL($sql, array(DB_TABLE_CATEGORIES_INFO, $category_id, 'en',
-                $category_name, $category_description, $category_short_description, $category_meta_description,
-                $category_head_title, $category_h1_title));
-            database::query($sql);
-            echo 'Creating new category: ' . $category_name . PHP_EOL;
-            //--------------- 更新 default_category_id 同时更新 lc_products_to_categories
-            // TODO: 还要更新 lc_products_to_categories 表和product 表里的default_category_id
-            // 1. 检查是否存在product_id 和 category_id 数据存在
-            $sql = "select product_id from %s where product_id=%d and category_id=%d";
-            $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_TO_CATEGORIES, $product_id, $category_id));
+        if(!empty($category_name)) {//如果category_name不为空，才进行数据操作，否则不进行任何操作
+            // 查找每个分类数据，如果找到，则跳过，如果没找到，则添加
+            $sql = "SELECT id,parent_id FROM %s WHERE id = (SELECT category_id FROM %s WHERE NAME = '%s' limit 1) and parent_id = %d limit 1";
+            $sql = u_utils::builderSQL($sql, array(DB_TABLE_CATEGORIES, DB_TABLE_CATEGORIES_INFO, $category_name, $parent_id));
             $result = database::fetch(database::query($sql));
-            if(empty($result)) {
-                $sql = "INSERT INTO %s (product_id, category_id) VALUES (%d, %d)";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_TO_CATEGORIES, $product_id, $category_id));
+            $category_id = $result['id'];
+            $product_id = $product_info['id'];
+            if (empty($result)) {//记录不存在，添加分类数据
+                // 1. 插入新的分类到lc_categories，插入的数据有：langunge_code,date_created,插入完成后拿到id值。
+                $sql = "insert into " . DB_TABLE_CATEGORIES
+                    . " (parent_id, dock, status, list_style, date_created) values (%d,'%s',%d,'%s','%s')";
+                $sql = u_utils::builderSQL($sql, array($parent_id, 'tree', 1, 'rows', date('Y-m-d H:i:s')));
                 $result = database::query($sql);
+                $category_id = database::insert_id();//query("select max(id) from " . DB_TABLE_CATEGORIES);//2. 拿到刚才添加的id。
+                // 如果$id不为null且不是""，这设置parent_id
+                if (isset($category_id) && !empty($category_id)) {
+                    $parent_id = $category_id;//改变父类id
+                }
+                // 新增数据到lc_categories_info表。先测试通过，后期再看如何优化。
+
+                $sql = "insert into ". DB_TABLE_CATEGORIES_INFO ." (category_id, language_code, name, description, short_description, meta_description, head_title, h1_title) 
+                  values(%d,'%s','%s','%s','%s','%s','%s','%s')";
+                $sql = u_utils::builderSQL($sql, array($category_id, 'en',
+                    $category_name, $category_description, $category_short_description, $category_meta_description,
+                    $category_head_title, $category_h1_title));
+                database::query($sql);
+                echo 'Creating new category: ' . $category_name . PHP_EOL;
+                //--------------- 更新 default_category_id 同时更新 lc_products_to_categories
+                // 1. 检查是否存在product_id 和 category_id 数据存在
+                $sql = "select product_id from ".DB_TABLE_PRODUCTS_TO_CATEGORIES."%s where product_id=%d and category_id=%d";
+                $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
+                $result = database::fetch(database::query($sql));
+                if (empty($result)) {// 添加分类和商品的关联 lc_products_to_categories表
+                    $sql = "INSERT INTO ".DB_TABLE_PRODUCTS_TO_CATEGORIES." (product_id, category_id) VALUES (%d, %d)";
+                    $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
+                    $result = database::query($sql);
+                }
+            } else {
+                if ($isTree == true) {//如果是添加有层级关系的分类，则父类id等于当前找到的id。
+                    $parent_id = $category_id;
+                } else {//如果是添加平级关系的分类，则父类id为当前的父类id
+                    $parent_id = $category_id;
+                }
+                // update..  lc_categories_info
+                updateCategoryInfo($category_id, $category_description, $category_short_description,
+                    $category_meta_description, $category_head_title, $category_h1_title);
+
+                echo "Updated  category :" . $category_name . "default_category_id:" . $product_info['default_category_id'] . PHP_EOL;
             }
-
-        } else {// update..  lc_categories_info
-            if ($isTree == true) {//如果是添加有层级关系的分类，则父类id等于当前找到的id。
-                $parent_id = $category_id;
-            } else {//如果是添加平级关系的分类，则父类id为当前的父类id
-                $parent_id = $category_id;
-            }
-            updateCategoryInfo($category_id, $category_description, $category_short_description,
-                $category_meta_description, $category_head_title, $category_h1_title);
-
-
-            echo "Updated  category :" . $category_name . "default_category_id:".$product_info['default_category_id'].PHP_EOL;
+            $product_info['default_category_id'] = $category_id;// seting default_category_id for product.
         }
-        $product_info['default_category_id'] = $category_id;
-        echo "default_category_id:".$product_info['default_category_id'].PHP_EOL;
     }
 
     function updateCategoryInfo($category_id, $category_description, $category_short_description, $category_meta_description, $category_head_title, $category_h1_title)
@@ -528,18 +567,35 @@
     /**
      * @param $product_info
      */
-    function updateProductOther(&$product_info)
+    function updateProductOther($product_info)
     {
-        //1. Update products.default_category_id,
-        //2. Update products.product_groups,
-        //echo "in updateProductOther product_groups:".$product_info['product_groups'].",id:".$product_info['id'].PHP_EOL;
-        $product_groups = $product_info['product_groups'];
 
-        $sql = "update %s set default_category_id=%d,product_groups='%s' where id=%d";
-        $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS,
-            $product_info['default_category_id'], $product_groups, $product_info['id']));
+        $product_groups = $product_info['product_groups'];
+        $product_id = $product_info['id'];
+        $price = $product_info['price'];
+        // 判断$product_groups 是否最后一个是逗号，如果是则截取，不是则不处理。
+        $lastIndex = strripos($product_groups,",");//拿到索引0开始
+        $count = strlen($product_groups);//拿到长度,1开始，所以会比index大1.
+        if($lastIndex === $count -1 ) {
+            $product_groups = substr($product_groups,0,-1);//去除逗号
+        }
+        //1. Update products.default_category_id,product_groups field
+        $sql = "update ". DB_TABLE_PRODUCTS ." set default_category_id=%d,product_groups='%s' where id=%d";
+        $sql = u_utils::builderSQL($sql, array($product_info['default_category_id'],
+            $product_groups, $product_info['id']));
         database::query($sql);
-        //3. Update
+        //2. Update lc_products_prices table;
+        $sql = "select id from " . DB_TABLE_PRODUCTS_PRICES . " where product_id=" . $product_id;
+        $result = database::fetch(database::query($sql));
+        if (empty($result)) {
+            $sql = "insert into " . DB_TABLE_PRODUCTS_PRICES . " (product_id,USD,EUR) values(%d,%.4f,0.000)";
+            $sql = u_utils::builderSQL($sql, array($product_id, $price));
+            $result = database::query($sql);
+        } else {
+            $sql = "update " . DB_TABLE_PRODUCTS_PRICES . "set USD=%.4f where product_id=%d";
+            $sql = u_utils::builderSQL($sql, array($price, $product_id));
+            $result = database::query($sql);
+        }
     }
 
     /**
@@ -561,7 +617,6 @@
 
             $csv = file_get_contents($_FILES['file']['tmp_name']);
             $csv = functions::csv_decode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset']);
-            //importCategories($csv);
             importProducts($csv);
             exit;
         } catch (Exception $e) {
@@ -569,170 +624,6 @@
         }
     }
 
-    /**
-     * 导出分类
-     */
-    function exportCategories()
-    {
-        ///if (isset($_POST['export_categories'])) {
-
-        try {
-            if (empty($_POST['language_code'])) throw new Exception(language::translate('error_must_select_a_language', 'You must select a language'));
-
-            //$csv = array();
-
-            $categories_query = database::query("select id from " . DB_TABLE_CATEGORIES . " order by parent_id;");
-            while ($category = database::fetch($categories_query)) {
-                $category = new ref_category($category['id'], $_POST['language_code']);
-                // 根据产品id筛选分类
-                $csv[] = array(
-                    'id' => $category->id,
-                    'status' => $category->status,
-                    'parent_id' => $category->parent_id,
-                    'code' => $category->code,
-                    'name' => $category->name,
-                    'keywords' => implode(',', $category->keywords),
-                    'short_description' => $category->short_description,
-                    'description' => $category->description,
-                    'meta_description' => $category->meta_description,
-                    'head_title' => $category->head_title,
-                    'h1_title' => $category->h1_title,
-                    'image' => $category->image,
-                    'priority' => $category->priority,
-                    'language_code' => $_POST['language_code'],
-                );
-            }
-
-            ob_clean();
-
-//      if ($_POST['output'] == 'screen') {
-//        header('Content-Type: text/plain; charset=' . $_POST['charset']);
-//      } else {
-//        header('Content-Type: application/csv; charset=' . $_POST['charset']);
-//        header('Content-Disposition: attachment; filename=categories-' . $_POST['language_code'] . '.csv');
-//      }
-//
-//      switch ($_POST['eol']) {
-//        case 'Linux':
-//          echo functions::csv_encode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset'], "\r");
-//          break;
-//        case 'Mac':
-//          echo functions::csv_encode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset'], "\n");
-//          break;
-//        case 'Win':
-//        default:
-//          echo functions::csv_encode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset'], "\r\n");
-//          break;
-//      }
-
-//      exit;
-            return $csv;
-        } catch (Exception $e) {
-            notices::add('errors', $e->getMessage());
-        }
-        //}
-
-    }
-
-    /*
-     * 导出产品
-     */
-    function exportProducts()
-    {
-        //export_products start
-        //if (isset($_POST['export_products'])) {
-
-        try {
-
-            if (empty($_POST['language_code'])) throw new Exception(language::translate('error_must_select_a_language', 'You must select a language'));
-
-            //$csv = array();
-            // select p.id from `litecart`.`lc_products` p left join `litecart`.`lc_products_info` pi on (pi.product_id = p.id and pi.language_code = 'en') order by pi.name;
-            $query_sql = "select p.id from " . DB_TABLE_PRODUCTS . " p left join "
-                . DB_TABLE_PRODUCTS_INFO
-                . " pi on (pi.product_id = p.id and pi.language_code = '"
-                . database::input($_POST['language_code']) . "') order by pi.name;";
-            $products_query = database::query($query_sql);
-
-            while ($product = database::fetch($products_query)) {
-                $product = new ref_product($product['id'], $_POST['language_code'], $_POST['currency_code']);
-
-                $csv[] = array(
-                    'id' => $product->id,
-                    'status' => $product->status,
-                    'categories' => implode(',', array_keys($product->categories)),
-                    'product_groups' => implode(',', array_keys($product->product_groups)),
-                    'manufacturer_id' => $product->manufacturer_id,
-                    'supplier_id' => $product->supplier_id,
-                    'code' => $product->code,
-                    'sku' => $product->sku,
-                    'mpn' => $product->mpn,
-                    'gtin' => $product->gtin,
-                    'taric' => $product->taric,
-                    'name' => $product->name,
-                    'short_description' => $product->short_description,
-                    'description' => $product->description,
-                    'keywords' => implode(',', $product->keywords),
-                    'attributes' => $product->attributes,
-                    'head_title' => $product->head_title,
-                    'meta_description' => $product->meta_description,
-                    'images' => implode(';', $product->images),
-                    'purchase_price' => $product->purchase_price,
-                    'purchase_price_currency_code' => $product->purchase_price_currency_code,
-                    'price' => $product->price,
-                    'tax_class_id' => $product->tax_class_id,
-                    'quantity' => $product->quantity,
-                    'quantity_unit_id' => $product->quantity_unit['id'],
-                    'weight' => $product->weight,
-                    'weight_class' => $product->weight_class,
-                    'delivery_status_id' => $product->delivery_status_id,
-                    'sold_out_status_id' => $product->sold_out_status_id,
-                    'language_code' => $_POST['language_code'],
-                    'currency_code' => $_POST['currency_code'],
-                    'date_valid_from' => $product->date_valid_from,
-                    'date_valid_to' => $product->date_valid_to,
-                );
-            }
-
-            ob_clean();
-
-            if ($_POST['output'] == 'screen') {
-                header('Content-Type: text/plain; charset=' . $_POST['charset']);
-            } else {
-                header('Content-Type: application/csv; charset=' . $_POST['charset']);
-                header('Content-Disposition: attachment; filename=products-' . $_POST['language_code'] . '.csv');
-            }
-
-            switch ($_POST['eol']) {
-                case 'Linux':
-                    echo functions::csv_encode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset'], "\r");
-                    break;
-                case 'Mac':
-                    echo functions::csv_encode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset'], "\n");
-                    break;
-                case 'Win':
-                default:
-                    echo functions::csv_encode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset'], "\r\n");
-                    break;
-            }
-
-            exit;
-
-        } catch (Exception $e) {
-            notices::add('errors', $e->getMessage());
-        }
-        //}//export_products end.
-
-    }
-
-    /**
-     * 完整导出分类和产品
-     */
-    function exportCategoriesAndProducts()
-    {
-        exportProducts();
-        exportCategories();
-    }
 
     function md5Product($product_info)
     {
@@ -743,21 +634,12 @@
         return md5($md5_str);
     }
 
-    /**
-     * 查找对应的id是否存在md5值。如果不存在，返回""或null,存在则返回对应的product_id值
-     * @param $md5_value
-     */
-    function findProductIdByMd5($md5_value)
-    {
-        return $product_map[$md5_value];
-    }
-
     // import or export run.
     if (isset($_POST['import_products'])) {
         importCategoriesAndProducts();
     } elseif (isset($_POST['export_products'])) {
         //$csv_array = builderExportCSVArray();
-        exportCategoriesAndProducts();
+        //exportCategoriesAndProducts();
     }
 ?>
 <h1><?php echo $app_icon; ?><?php echo language::translate('title_csv_import_export', 'CSV Import/Export'); ?></h1>

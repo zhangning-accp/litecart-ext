@@ -18,5 +18,11 @@
 //    $sql = u_utils::builderSQL($sql,array(4443564565.78,56,799));
 //    echo $sql;
         $names = "23-5,45-5,";
-    $names = substr($names,0,-1);
-    echo $names;
+    //$names = substr($names,0,-1);
+    $lastIndex = strripos($names,",");
+    $count = strlen($names);
+    if($lastIndex === $count -1 ) {
+        $names = substr($names,0,-1);
+        echo "names:" . $names.PHP_EOL;
+    }
+    echo "lastIndex:". $lastIndex ." count:".$count." name:".$names.PHP_EOL;
