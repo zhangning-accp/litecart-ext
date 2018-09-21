@@ -206,6 +206,7 @@
         $option_groups_str = $product_info['option_groups'];
         $date = u_utils::getYMDHISDate();
         $combination = "";
+        $value_id = "";
         if (!empty($option_groups_str)) {
             $option_groups = preg_split("/:/", $option_groups_str);
             $group_name = $option_groups[0];
@@ -234,6 +235,12 @@
             }
             //添加$option_value 开始`lc_option_values`
             // 先查询$option_value在表lc_option_values_info是否存在，如果不存在，则添加，如果存在则忽略
+            /*
+             * SELECT `litecart`.`lc_option_values`.id as value_id,`litecart`.`lc_option_values`.group_id
+             * FROM `litecart`.`lc_option_values_info` INNER JOIN `litecart`.`lc_option_values`
+             *  ON value_id = `litecart`.`lc_option_values`.id
+                AND `litecart`.`lc_option_values`.group_id = 115 AND `litecart`.`lc_option_values_info`.name = 'M'
+             */
             $sql = "SELECT %s.id as value_id,%s.group_id FROM %s INNER JOIN %s ON value_id = %s.id 
                 AND %s.group_id = %d AND %s.name = '%s'";
             $sql = u_utils::builderSQL($sql, array(
@@ -242,30 +249,37 @@
                 $group_id, DB_TABLE_OPTION_VALUES_INFO, $option_name));
             $result = database::fetch(database::query($sql));
             if (empty($result)) {//如果$option_name不存在。则添加，如果存在则更新。
-                $sql = "insert into %s (group_id,value,priority) VALUES (%d,'',1)";
+                // 添加到 option_values 表
+                $sql = "insert into " . DB_TABLE_OPTION_VALUES . " (group_id,value,priority) VALUES (%d,'',1)";
                 $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_VALUES, $group_id));
                 $result = database::query($sql);
                 $value_id = database::insert_id();
-                //`lc_option_values_info`
+                //添加到`lc_option_values_info`
                 $sql = "insert into " . DB_TABLE_OPTION_VALUES_INFO . " (value_id,language_code,name) VALUES (%d,'en','%s')";
                 $sql = u_utils::builderSQL($sql, array($value_id, $option_name));
                 $result = database::query($sql);
                 // --------- value_info 添加结束 -------------------
-
-                //关联商品操作 lc_products_options 和 lc_products_options_stock
-                //1. 先关联lc_products_options，这样页面上购买商品是才有可选项。
-                $sql = "insert into" . DB_TABLE_PRODUCTS_OPTIONS . " (product_id,group_id,value_id,price_operator,USD,
-                                    priority,date_updated,date_created) 
-                    VALUES (%d,%d,%d,'+',0.000,1,'%s','%s')";
-                $sql = u_utils::builderSQL($sql, array($product_id, $group_id, $value_id, $date, $date));
-                $result = database::query($sql);
                 // ---------------------------以上操作测试无误。 ---------------------------
             } else {//存在 选项值
+                // 如果已经存在 option_value,则赋值value_id.
                 $value_id = $result['value_id'];
-
             }
+            // ------------ 关联商品操作 lc_products_options这样页面上购买商品是才有可选项。 ---------
+            //1. 查找在product_optioins 表里有没有product_id,group_id,value_id 一一对应的记录，如果没有，则需要添加
+            $sql = "SELECT product_id FROM " . DB_TABLE_PRODUCTS_OPTIONS . " 
+                    WHERE product_id=%d AND group_id=%d AND value_id=%d";
+            $sql = u_utils::builderSQL($sql, array($product_id, $group_id, $value_id));
+            $result = database::fetch(database::query($sql));
+            if (empty($result)) {// 导入是应该不会存在更新问题，所以此处忽略
+                $sql = "insert into" . DB_TABLE_PRODUCTS_OPTIONS . " (product_id,group_id,value_id,price_operator,USD,
+                                        priority,date_updated,date_created) 
+                        VALUES (%d,%d,%d,'+',0.000,1,'%s','%s')";
+                $sql = u_utils::builderSQL($sql, array($product_id, $group_id, $value_id, $date, $date));
+                $result = database::query($sql);
+            }
+            // ----------------------------------------------------------------------------
             $combination = $group_id . "-" . $value_id;
-            // 首先检查是否有对应的stock记录，如果有，则更新，如果没有则添加
+            // 关联 lc_products_options_stock，首先检查是否有对应的stock记录，如果有，则更新，如果没有则添加
             $sql = "SELECT product_id,combination FROM " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " WHERE product_id=%d AND combination ='%s'";
             $sql = u_utils::builderSQL($sql, array($product_id, $combination));
             $result = database::fetch_full(database::query($sql));
@@ -304,7 +318,7 @@
     }
 
     /**
-     * @param $product_info //TODO:这里没有考虑到多个group的情况
+     * @param $product_info
      */
     function addProductGroup(&$product_info)
     {   //$group_name_str数据格式：gropu_name:child_1,child_2,child_n|gropu_name:child_1,child_2,child_n。如果 $group_name 为空，则不做处理
@@ -477,8 +491,6 @@
         }
     }// import_categories end.
 
-
-
     function findFirstCategory($category_name_tmp, $pattern)
     {
         $category_name_tmp = preg_split($pattern, $category_name_tmp);
@@ -521,7 +533,6 @@
                     $parent_id = $category_id;//改变父类id
                 }
                 // 新增数据到lc_categories_info表。先测试通过，后期再看如何优化。
-
                 $sql = "insert into ". DB_TABLE_CATEGORIES_INFO ." (category_id, language_code, name, description, short_description, meta_description, head_title, h1_title) 
                   values(%d,'%s','%s','%s','%s','%s','%s','%s')";
                 $sql = u_utils::builderSQL($sql, array($category_id, 'en',
@@ -531,7 +542,7 @@
                 echo 'Creating new category: ' . $category_name . PHP_EOL;
                 //--------------- 更新 default_category_id 同时更新 lc_products_to_categories
                 // 1. 检查是否存在product_id 和 category_id 数据存在
-                $sql = "select product_id from ".DB_TABLE_PRODUCTS_TO_CATEGORIES."%s where product_id=%d and category_id=%d";
+                $sql = "select product_id from ".DB_TABLE_PRODUCTS_TO_CATEGORIES." where product_id=%d and category_id=%d";
                 $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
                 $result = database::fetch(database::query($sql));
                 if (empty($result)) {// 添加分类和商品的关联 lc_products_to_categories表
@@ -549,7 +560,7 @@
                 updateCategoryInfo($category_id, $category_description, $category_short_description,
                     $category_meta_description, $category_head_title, $category_h1_title);
 
-                echo "Updated  category :" . $category_name . "default_category_id:" . $product_info['default_category_id'] . PHP_EOL;
+                echo "Updated  category :" . $category_name . " default_category_id:" . $product_info['default_category_id'] . PHP_EOL;
             }
             $product_info['default_category_id'] = $category_id;// seting default_category_id for product.
         }
