@@ -91,7 +91,7 @@
             }
             // -------------- 商品数据构建完毕 ---------------
             $product_name = $product_info['name'];
-            if(!empty($product_name)) {
+            if (!empty($product_name)) {
                 importProduct($product_info, $product_map);
             }
         }
@@ -111,7 +111,7 @@
         //1. 拆分image字符串
         $product_info['image'] = array_filter(preg_split("/\|/", $product_info['image']));
         $main_image = "";
-        if(!empty($product_info['image'])) {
+        if (!empty($product_info['image'])) {
             $main_image = $product_info['image'][0];
         }
         if (empty($product_id)) {//新增
@@ -155,7 +155,7 @@
                 $date = u_utils::getYMDHISDate();
                 $sql = "UPDATE " . DB_TABLE_PRODUCTS . "SET status = %d,quantity = %d,purchase_price = %.4f,image = '%s',date_updated = '%s' WHERE id = %d";
                 $sql = u_utils::builderSQL($sql, array($product_info['status'], $product_info['quantity'],
-                    $product_info['price'], $product_info['image'][0], $date, $product_id));
+                    $product_info['price'], $main_image, $date, $product_id));
                 database::query($sql);
                 // 更新product_info表
                 $sql = "UPDATE " . DB_TABLE_PRODUCTS_INFO . " SET name = '%s', short_description = '%s', description = '%s', head_title = '%s', 
@@ -184,7 +184,7 @@
     {
         //---------------------对于lc_products_images表，先删后增。---------------------
         $product_id = $product_info['id'];
-        if(!empty($product_info['image']) && !empty($product_id)) {
+        if (!empty($product_info['image']) && !empty($product_id)) {
             $sql = "delete from %s where product_id = %d";
             $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_IMAGES, $product_id));
             $result = database::query($sql);
@@ -215,12 +215,15 @@
             //1. 需要查找lc_option_groups_info和lc_option_values_info。
             //类型是textarea和input的选项数据是放在lc_option_values表里。暂时不考虑这两种类型
             // 其它类型的选项数据是放在lc_option_values_info表里
+
+            // 查找group_name 是否在 option_groups_info 表里，如果不存在就添加。
             $sql = "select id,group_id from " . DB_TABLE_OPTION_GROUPS_INFO . " where name = '%s'";
             $sql = u_utils::builderSQL($sql, array($group_name));
             $result = database::fetch(database::query($sql));
             $group_id = $result['group_id'];
-            if (empty($result)) {// 如果不存在选项则添加，存在则忽略
-                //添加如下数据到对应表：
+            if (empty($result)) {
+                // 添加一个group_name 需要在两张表里添加数据，`lc_option_groups` 和 lc_option_groups_info`.
+                //添加 如下数据到对应表：
                 //1. `lc_option_groups`
                 $sql = "insert into " . DB_TABLE_OPTION_GROUPS . " (function,required,sort,date_created) VALUES ('%s',1,'%s','%s')";
                 $sql = u_utils::builderSQL($sql,
@@ -233,7 +236,7 @@
                 $result = database::query($sql);
                 // 添加$option_name 数据结束
             }
-            //添加$option_value 开始`lc_option_values`
+
             // 先查询$option_value在表lc_option_values_info是否存在，如果不存在，则添加，如果存在则忽略
             /*
              * SELECT `litecart`.`lc_option_values`.id as value_id,`litecart`.`lc_option_values`.group_id
@@ -241,6 +244,7 @@
              *  ON value_id = `litecart`.`lc_option_values`.id
                 AND `litecart`.`lc_option_values`.group_id = 115 AND `litecart`.`lc_option_values_info`.name = 'M'
              */
+            //查找$option_value是否存在，查询时涉及两张表lc_option_values和lc_option_values_info。只有在info表里才有具体的值。
             $sql = "SELECT %s.id as value_id,%s.group_id FROM %s INNER JOIN %s ON value_id = %s.id 
                 AND %s.group_id = %d AND %s.name = '%s'";
             $sql = u_utils::builderSQL($sql, array(
@@ -248,10 +252,10 @@
                 DB_TABLE_OPTION_VALUES_INFO, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
                 $group_id, DB_TABLE_OPTION_VALUES_INFO, $option_name));
             $result = database::fetch(database::query($sql));
-            if (empty($result)) {//如果$option_name不存在。则添加，如果存在则更新。
-                // 添加到 option_values 表
+            if (empty($result)) {//如果$option_value不存在。则添加，如果存在则更新。
+                // 添加 option_values 也涉及两张表lc_option_values和lc_option_values_info
                 $sql = "insert into " . DB_TABLE_OPTION_VALUES . " (group_id,value,priority) VALUES (%d,'',1)";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_VALUES, $group_id));
+                $sql = u_utils::builderSQL($sql, array($group_id));
                 $result = database::query($sql);
                 $value_id = database::insert_id();
                 //添加到`lc_option_values_info`
@@ -412,7 +416,7 @@
      * @param $isInsertNew 当数据不存在时是否插入新数据。如果true，当数据库找不到导入的数据时，则将新增数据到数据库.
      * 该方法测试通过。 2018-9-16 11:30
      */
-    function addCategories(&$product_info)
+    function addCategories($product_info)
     {
         $line = 0;
         $categorie_names = $product_info['categorie_names'];//"Rubber Ducks|Subcategory|shot,d,d,d";
@@ -467,26 +471,26 @@
             //添加分类里摘出的一级分类
             for ($i = 0; $i < count($category_name_other_level_one); $i++) {
                 $parent_id = 0;
-                $category_name = u_utils::getArrayIndexValue($category_name_other_level_one,$i);
-                $category_description = u_utils::getArrayIndexValue($category_descriptions_other_level_one,$i);
-                $category_short_description = u_utils::getArrayIndexValue($category_short_descriptions_other_level_one,$i);
-                $category_meta_description = u_utils::getArrayIndexValue($category_meta_descriptions_other_level_one,$i);
-                $category_head_title = u_utils::getArrayIndexValue($category_head_titles_other_level_one,$i);
-                $category_h1_title = u_utils::getArrayIndexValue($category_h1_titles_other_level_one,$i);
+                $category_name = u_utils::getArrayIndexValue($category_name_other_level_one, $i);
+                $category_description = u_utils::getArrayIndexValue($category_descriptions_other_level_one, $i);
+                $category_short_description = u_utils::getArrayIndexValue($category_short_descriptions_other_level_one, $i);
+                $category_meta_description = u_utils::getArrayIndexValue($category_meta_descriptions_other_level_one, $i);
+                $category_head_title = u_utils::getArrayIndexValue($category_head_titles_other_level_one, $i);
+                $category_h1_title = u_utils::getArrayIndexValue($category_h1_titles_other_level_one, $i);
                 insertOrUpdateSimpleCategory($product_info, $category_name, $parent_id, $category_description, $category_short_description,
                     $category_meta_description, $category_head_title, $category_h1_title, false);
             }
             //添加多级分类数据及关系
             $parent_id = 0;
             for ($i = 0; $i < count($categorie_names); $i++) {
-                $category_name = u_utils::getArrayIndexValue($categorie_names,$i);
-                $category_description = u_utils::getArrayIndexValue($category_descriptions,$i);
-                $category_short_description = u_utils::getArrayIndexValue($category_short_descriptions,$i);
-                $category_meta_description = u_utils::getArrayIndexValue($category_meta_descriptions,$i);
-                $category_head_title = u_utils::getArrayIndexValue($category_head_titles,$i);
-                $category_h1_title = u_utils::getArrayIndexValue($category_h1_titles,$i);
+                $category_name = u_utils::getArrayIndexValue($categorie_names, $i);
+                $category_description = u_utils::getArrayIndexValue($category_descriptions, $i);
+                $category_short_description = u_utils::getArrayIndexValue($category_short_descriptions, $i);
+                $category_meta_description = u_utils::getArrayIndexValue($category_meta_descriptions, $i);
+                $category_head_title = u_utils::getArrayIndexValue($category_head_titles, $i);
+                $category_h1_title = u_utils::getArrayIndexValue($category_h1_titles, $i);
                 insertOrUpdateSimpleCategory($product_info, $category_name, $parent_id, $category_description, $category_short_description,
-                        $category_meta_description, $category_head_title, $category_h1_title);
+                    $category_meta_description, $category_head_title, $category_h1_title);
             }
         }
     }// import_categories end.
@@ -514,10 +518,12 @@
     function insertOrUpdateSimpleCategory(&$product_info, $category_name, &$parent_id, $category_description, $category_short_description,
                                           $category_meta_description, $category_head_title, $category_h1_title, $isTree = true)
     {
-        if(!empty($category_name)) {//如果category_name不为空，才进行数据操作，否则不进行任何操作
+        if (!empty($category_name)) {//如果category_name不为空，才进行数据操作，否则不进行任何操作
             // 查找每个分类数据，如果找到，则跳过，如果没找到，则添加
-            $sql = "SELECT id,parent_id FROM %s WHERE id = (SELECT category_id FROM %s WHERE NAME = '%s' limit 1) and parent_id = %d limit 1";
-            $sql = u_utils::builderSQL($sql, array(DB_TABLE_CATEGORIES, DB_TABLE_CATEGORIES_INFO, $category_name, $parent_id));
+            $sql = "SELECT id,parent_id FROM " . DB_TABLE_CATEGORIES . " 
+                    WHERE id = (SELECT category_id FROM " . DB_TABLE_CATEGORIES_INFO . " 
+                    WHERE NAME = '%s' limit 1) and parent_id = %d limit 1";
+            $sql = u_utils::builderSQL($sql, array($category_name, $parent_id));
             $result = database::fetch(database::query($sql));
             $category_id = $result['id'];
             $product_id = $product_info['id'];
@@ -533,29 +539,20 @@
                     $parent_id = $category_id;//改变父类id
                 }
                 // 新增数据到lc_categories_info表。先测试通过，后期再看如何优化。
-                $sql = "insert into ". DB_TABLE_CATEGORIES_INFO ." (category_id, language_code, name, description, short_description, meta_description, head_title, h1_title) 
+                $sql = "insert into " . DB_TABLE_CATEGORIES_INFO . " (category_id, language_code, name, description, short_description, meta_description, head_title, h1_title) 
                   values(%d,'%s','%s','%s','%s','%s','%s','%s')";
                 $sql = u_utils::builderSQL($sql, array($category_id, 'en',
                     $category_name, $category_description, $category_short_description, $category_meta_description,
                     $category_head_title, $category_h1_title));
                 database::query($sql);
                 echo 'Creating new category: ' . $category_name . PHP_EOL;
-                //--------------- 更新 default_category_id 同时更新 lc_products_to_categories
-                // 1. 检查是否存在product_id 和 category_id 数据存在
-                $sql = "select product_id from ".DB_TABLE_PRODUCTS_TO_CATEGORIES." where product_id=%d and category_id=%d";
-                $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
-                $result = database::fetch(database::query($sql));
-                if (empty($result)) {// 添加分类和商品的关联 lc_products_to_categories表
-                    $sql = "INSERT INTO ".DB_TABLE_PRODUCTS_TO_CATEGORIES." (product_id, category_id) VALUES (%d, %d)";
-                    $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
-                    $result = database::query($sql);
-                }
             } else {
                 if ($isTree == true) {//如果是添加有层级关系的分类，则父类id等于当前找到的id。
                     $parent_id = $category_id;
                 } else {//如果是添加平级关系的分类，则父类id为当前的父类id
                     $parent_id = $category_id;
                 }
+                /**----------------------------------------------------------------------------------*/
                 // update..  lc_categories_info
                 updateCategoryInfo($category_id, $category_description, $category_short_description,
                     $category_meta_description, $category_head_title, $category_h1_title);
@@ -563,6 +560,17 @@
                 echo "Updated  category :" . $category_name . " default_category_id:" . $product_info['default_category_id'] . PHP_EOL;
             }
             $product_info['default_category_id'] = $category_id;// seting default_category_id for product.
+
+            //--------------- 添加产品和分类的关系，涉及的表是 products_to_categories ------------
+            // 1. 检查products_to_categories表里是否存在product_id 和 category_id 数据，如果存在则忽略，如果不存在则加上。
+            $sql = "select product_id from " . DB_TABLE_PRODUCTS_TO_CATEGORIES . " where product_id=%d and category_id=%d";
+            $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
+            $result = database::fetch(database::query($sql));
+            if (empty($result)) {// 添加分类和商品的关联 lc_products_to_categories表
+                $sql = "INSERT INTO " . DB_TABLE_PRODUCTS_TO_CATEGORIES . " (product_id, category_id) VALUES (%d, %d)";
+                $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
+                $result = database::query($sql);
+            }
         }
     }
 
@@ -585,13 +593,13 @@
         $product_id = $product_info['id'];
         $price = $product_info['price'];
         // 判断$product_groups 是否最后一个是逗号，如果是则截取，不是则不处理。
-        $lastIndex = strripos($product_groups,",");//拿到索引0开始
+        $lastIndex = strripos($product_groups, ",");//拿到索引0开始
         $count = strlen($product_groups);//拿到长度,1开始，所以会比index大1.
-        if($lastIndex === $count -1 ) {
-            $product_groups = substr($product_groups,0,-1);//去除逗号
+        if ($lastIndex === $count - 1) {
+            $product_groups = substr($product_groups, 0, -1);//去除逗号
         }
         //1. Update products.default_category_id,product_groups field
-        $sql = "update ". DB_TABLE_PRODUCTS ." set default_category_id=%d,product_groups='%s' where id=%d";
+        $sql = "update " . DB_TABLE_PRODUCTS . " set default_category_id=%d,product_groups='%s' where id=%d";
         $sql = u_utils::builderSQL($sql, array($product_info['default_category_id'],
             $product_groups, $product_info['id']));
         database::query($sql);
