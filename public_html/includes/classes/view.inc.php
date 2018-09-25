@@ -60,7 +60,7 @@
       }
 
       ob_start();
-      include vmod::check($_file);
+      include vmod::check($_file);// 这里image数据就会发生变化，include 到底做了什么
       $html = ob_get_clean();
 
       return $html;

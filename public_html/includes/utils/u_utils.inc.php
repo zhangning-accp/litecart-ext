@@ -27,7 +27,6 @@
         public static function getYMDHISDate($format = 'Y-m-d H:i:s') {
             return date($format);
         }
-
         /**
          * 获得数组指定索引的值。
          * @param $array 数字索引数组
@@ -40,5 +39,19 @@
             } else {
                 return "";
             }
+        }
+
+        /**
+         * 判断一个字符串是否以$start_str代表的字符串开头。如果是返回true，否则返回false；
+         * @param $start_str ： 开头的字符串
+         * @param $str 要查找的字符串
+         */
+        public static function startWith($start_str,$str) {
+            $start_str_length = strlen($start_str);
+            $start_str_tmp = substr($str,0,$start_str_length);
+            if($start_str_tmp === $start_str) {
+                return true;
+            }
+            return false;
         }
     }

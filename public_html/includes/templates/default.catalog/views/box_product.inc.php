@@ -1,3 +1,9 @@
+<?php
+    /** ------------------------------------------------
+     *   前端商品弹出层和详情页的view
+     */
+?>
+
 <div id="box-product" class="box" style="max-width: 980px;" data-id="<?php echo $product_id; ?>" data-name="<?php echo htmlspecialchars($name); ?>" data-price="<?php echo currency::format_raw($campaign_price ? $campaign_price : $regular_price); ?>">
   <div class="row">
     <div class="col-sm-6 col-md-4">

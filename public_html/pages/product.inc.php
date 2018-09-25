@@ -106,7 +106,17 @@
   );
 
   list($width, $height) = functions::image_scale_by_width(320, settings::get('product_image_ratio'));
-
+    //TODO: 主图内容
+    $main_image = !empty($product->images) ? @array_shift(array_values($product->images)) : 'no_image.png';
+    if(u_utils::startWith("http",$main_image)) {
+        $main_original = $main_image;
+        $main_thumbnail = $main_original;
+        $main_thumbnail_2x = $main_original;
+    } else {
+        $main_original = WS_DIR_IMAGES . $main_image;
+        $main_thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $main_image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+        $main_thumbnail_2x = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $main_image, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+    }
   $_page->snippets = array(
     'product_id' => $product->id,
     'link' => document::ilink('product', array(), true),
@@ -122,9 +132,9 @@
     'keywords' => $product->keywords,
     'attributes' => !empty($product->attributes) ? preg_split('#\r\n|\r|\n#', $product->attributes) : array(),
     'image' => array(
-      'original' => !empty($product->images) ? WS_DIR_IMAGES . @array_shift(array_values($product->images)) : WS_DIR_IMAGES . 'no_image.png',
-      'thumbnail' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . @array_shift(array_values($product->images)), $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim')),
-      'thumbnail_2x' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . @array_shift(array_values($product->images)), $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim')),
+      'original' => $main_original,
+      'thumbnail' => $main_thumbnail,
+      'thumbnail_2x' => $main_thumbnail_2x,
       'viewport' => array(
         'width' => $width,
         'height' => $height,
@@ -150,13 +160,26 @@
     'options' => array(),
   );
 
-// Extra Images
+    // Extra Images
+    //TODO: 底部小图内容
   list($width, $height) = functions::image_scale_by_width(160, settings::get('product_image_ratio'));
   foreach (array_slice(array_values($product->images), 1) as $image) {
+      $original = "";
+      $thumbnail = "";
+      $thumbnail_2x = "";
+      if(u_utils::startWith("http",$image)) {
+          $original = $image;
+          $thumbnail = $image;
+          $thumbnail_2x = $image;
+      } else {
+          $original = WS_DIR_IMAGES . $image;
+          $thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+          $thumbnail_2x = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $image, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+      }
     $_page->snippets['extra_images'][] = array(
-      'original' => WS_DIR_IMAGES . $image,
-      'thumbnail' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim')),
-      'thumbnail_2x' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $image, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim')),
+      'original' => $original,
+      'thumbnail' => $thumbnail,
+      'thumbnail_2x' => $thumbnail_2x,
       'viewport' => array(
         'width' => $width,
         'height' => $height,

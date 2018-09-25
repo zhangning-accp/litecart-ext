@@ -2,7 +2,7 @@
   if (settings::get('box_popular_products_num_items') == 0) return;
 
   functions::draw_lightbox();
-
+    // 获取缓存数据
   $box_popular_products_cache_id = cache::cache_id('box_popular_products', array('language', 'currency', 'prices'));
   if (cache::capture($box_popular_products_cache_id, 'file')) {
 

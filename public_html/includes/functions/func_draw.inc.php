@@ -66,7 +66,18 @@
     }
 
     list($width, $height) = functions::image_scale_by_width(320, settings::get('product_image_ratio'));
-
+    // TODO:这里改变了商品的图片。首页+分类下的列表
+      //TODO: 主图内容
+      $main_image = !empty($product['image']) ? $product['image'] : 'no_image.png';
+      if(u_utils::startWith("http",$main_image)) {
+          $main_original = $main_image;
+          $main_thumbnail = $main_original;
+          $main_thumbnail_2x = $main_original;
+      } else {
+          $main_original = WS_DIR_IMAGES . $main_image;
+          $main_thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $main_image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+          $main_thumbnail_2x = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $main_image, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+      }
     $listing_product->snippets = array(
       'listing_type' => $listing_type,
       'product_id' => $product['id'],
@@ -74,13 +85,21 @@
       'name' => $product['name'],
       'link' => document::ilink('product', array('product_id' => $product['id']), array('category_id', 'manufacturer_id')),
       'image' => array(
-        'original' => $product['image'] ? WS_DIR_IMAGES . $product['image'] : '',
-        'thumbnail' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $product['image'], $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim')),
-        'thumbnail_2x' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $product['image'], $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim')),
+        'original' => $main_original,
+        'thumbnail' => $main_thumbnail,
+        'thumbnail_2x' => $main_thumbnail_2x,
         'viewport' => array(
-          'width' => $width,
-          'height' => $height,
+            'width' => $width,
+            'height' => $height,
         ),
+//      'image' => array(
+//        'original' => $product['image'] ? WS_DIR_IMAGES . $product['image'] : '',
+//        'thumbnail' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $product['image'], $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim')),
+//        'thumbnail_2x' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $product['image'], $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim')),
+//        'viewport' => array(
+//          'width' => $width,
+//          'height' => $height,
+//        ),
       ),
       'sticker' => $sticker,
       'manufacturer' => array(),

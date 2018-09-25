@@ -1,3 +1,8 @@
+<?php
+    /** ------------------------------------------------
+     *   前端网站首页商品列表的view
+     */
+?>
 <?php if ($listing_type == 'column') { ?>
   <div class="col-xs-6 col-sm-4 col-md-3">
     <div class="product column hover-light" data-id="<?php echo $product_id; ?>" data-name="<?php echo htmlspecialchars($name); ?>" data-price="<?php echo currency::format_raw($campaign_price ? $campaign_price : $regular_price); ?>">
