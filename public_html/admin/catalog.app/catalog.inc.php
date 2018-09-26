@@ -364,7 +364,7 @@
       global $num_product_rows;
 
       $output = '';
-
+        // TODO:查询当前分类下的产品信息
       $products_query = database::query(
         "select p.id, p.status, p.image, pi.name, p2c.category_id from ". DB_TABLE_PRODUCTS ." p
         left join ". DB_TABLE_PRODUCTS_INFO ." pi on (pi.product_id = p.id and pi.language_code = '". language::$selected['code'] ."')
@@ -381,13 +381,25 @@
 
       while ($product=database::fetch($products_query)) {
         $num_product_rows++;
-
+        //TODO: 后台分类下的商品。
+      $product_status_style = "";
+          switch ($product['status']){
+              case 0:// 下架 Enabled
+                  $product_status_style = "#a9a9a9";
+                  break;
+              case 1:// 上架 Disabled
+                  $product_status_style = "#347bd9";
+                  break;
+              case 2://隐藏 Online only
+                  $product_status_style = "#d0cb2b";
+                  break;
+          }
         $output .= '<tr class="'. (!$product['status'] ? ' semi-transparent' : null) .'">' . PHP_EOL
                  . '  <td>'. functions::form_draw_checkbox('products['. $product['id'] .']', $product['id'], true) .'</td>' . PHP_EOL
-                 . '  <td>'. functions::draw_fonticon('fa-circle', 'style="color: '. (!empty($product['status']) ? '#88cc44' : '#ff6644') .';"') .'</td>' . PHP_EOL;
-
+                 . '  <td>'. functions::draw_fonticon('fa-circle', 'style="color: '. $product_status_style .';"') .'</td>' . PHP_EOL;
         if ($display_images) {
-          $output .= '  <td><img src="'. functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $product['image'], 16, 16, 'FIT_USE_WHITESPACING') .'" style="margin-left: '. ($depth*16) .'px; width: 16px; height: 16px; vertical-align: bottom;" /> <a href="'. document::href_link('', array('app' => $_GET['app'], 'doc' => 'edit_product', 'category_id' => $category_id, 'product_id' => $product['id'])) .'">'. ($product['name'] ? $product['name'] : '[untitled]') .'</a></td>' . PHP_EOL;
+          $output .= '  <td><img src="'. functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $product['image'], 16, 16, 'FIT_USE_WHITESPACING') .'" style="margin-left: '. ($depth*16) .'px; width: 16px; height: 16px; vertical-align: bottom;" /> 
+            <a href="'. document::href_link('', array('app' => $_GET['app'], 'doc' => 'edit_product', 'category_id' => $category_id, 'product_id' => $product['id'])) .'" style="color:'. $product_status_style .'">'. ($product['name'] ? $product['name'] : '[untitled]') .'</a></td>' . PHP_EOL;
         } else {
           $output .= '  <td><span style="margin-left: '. (($depth+1)*16) .'px;">&nbsp;<a href="'. document::href_link('', array('app' => $_GET['app'], 'doc' => 'edit_product', 'category_id' => $category_id, 'product_id' => $product['id'])) .'">'. $product['name'] .'</a></span></td>' . PHP_EOL;
         }
@@ -397,7 +409,6 @@
                  . '</tr>' . PHP_EOL;
       }
       database::free($products_query);
-
       return $output;
     }
 
