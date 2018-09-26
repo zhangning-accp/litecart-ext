@@ -27,28 +27,23 @@
   );
 
   $code_regex = functions::format_regex_code($_GET['query']);
-
+  // TODO: 这里是搜索时的sql语句，将status 改为1即可
   $query =
     "select p.*, pi.name, pi.short_description, m.name as manufacturer_name, pp.price, pc.campaign_price, if(pc.campaign_price, pc.campaign_price, if(pc.campaign_price, pc.campaign_price, pp.price)) as final_price,
     match(pi.name, pi.short_description, pi.description) against ('*". database::input($_GET['query']) ."*' in boolean mode) as relevance
-
     from (
       select id, code, mpn, gtin, sku, manufacturer_id, default_category_id, keywords, product_groups, image, tax_class_id, quantity, views, purchases, date_updated, date_created
       from ". DB_TABLE_PRODUCTS ."
-      where status
+      where status = 1
       and (date_valid_from <= '". date('Y-m-d H:i:s') ."')
       and (year(date_valid_to) < '1971' or date_valid_to >= '". date('Y-m-d H:i:s') ."')
     ) p
-
     left join ". DB_TABLE_PRODUCTS_INFO ." pi on (pi.product_id = p.id and pi.language_code = '". language::$selected['code'] ."')
-
     left join ". DB_TABLE_MANUFACTURERS ." m on (m.id = p.manufacturer_id)
-
     left join (
       select product_id, if(`". database::input(currency::$selected['code']) ."`, `". database::input(currency::$selected['code']) ."` / ". (float)currency::$selected['value'] .", `". database::input(settings::get('store_currency_code')) ."`) as price
       from ". DB_TABLE_PRODUCTS_PRICES ."
     ) pp on (pp.product_id = p.id)
-
     left join (
       select product_id, if(`". database::input(currency::$selected['code']) ."`, `". database::input(currency::$selected['code']) ."` / ". (float)currency::$selected['value'] .", `". database::input(settings::get('store_currency_code')) ."`) as campaign_price
       from ". DB_TABLE_PRODUCTS_CAMPAIGNS ."
@@ -56,15 +51,12 @@
       and (year(end_date) < '1971' or end_date >= '". date('Y-m-d H:i:s') ."')
       order by end_date asc
     ) pc on (pc.product_id = p.id)
-
     having relevance > 0
     ". ((!empty($_GET['query'])) ? "or p.code regexp '". database::input($code_regex) ."'" : "") ."
     ". ((!empty($_GET['query'])) ? "or p.sku regexp '". database::input($code_regex) ."'" : "") ."
     ". ((!empty($_GET['query'])) ? "or p.mpn regexp '". database::input($code_regex) ."'" : "") ."
     ". ((!empty($_GET['query'])) ? "or p.gtin regexp '". database::input($code_regex) ."'" : "") ."
-
     order by %sql_sort;";
-
   switch($_GET['sort']) {
     case 'name':
       $query = str_replace("%sql_sort", "name asc", $query);

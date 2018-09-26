@@ -65,8 +65,9 @@
 
   function catalog_products_query($filter=array()) {
 
-    if (!is_array($filter)) trigger_error('Invalid array filter for products query', E_USER_ERROR);
-
+    if (!is_array($filter)) {
+        trigger_error('Invalid array filter for products query', E_USER_ERROR);
+    }
     if (empty($filter['categories'])) $filter['categories'] = array();
     if (empty($filter['manufacturers'])) $filter['manufacturers'] = array();
     if (empty($filter['products'])) $filter['products'] = array();
@@ -113,11 +114,10 @@
         $sql_outer_sort[] = "(p.purchases / (datediff(now(), p.date_created)/7)) desc, (p.views / (datediff(now(), p.date_created)/7)) desc";
         break;
     }
-
-    if (!empty($filter['exclude_products']) && !is_array($filter['exclude_products'])) $filter['exclude_products'] = array($filter['exclude_products']);
-
+    if (!empty($filter['exclude_products']) && !is_array($filter['exclude_products'])) {
+        $filter['exclude_products'] = array($filter['exclude_products']);
+    }
     $sql_andor = "and";
-
   // Define match points
     if ($filter['sort'] == 'occurrences') {
       $sql_select_occurrences = "(0
@@ -131,7 +131,6 @@
       ) as occurrences";
       $sql_andor = "or";
     }
-
     $sql_where_product_groups = "";
     if (!empty($filter['product_groups'])) {
       $product_groups = array();
@@ -143,7 +142,6 @@
         $sql_where_product_groups .= "$sql_andor (find_in_set('". implode("', product_groups) or find_in_set('", $group_value) ."', product_groups))";
       }
     }
-
     $sql_where_prices = "";
     if (!empty($filter['price_ranges'])) {
       foreach ($filter['price_ranges'] as $price_range) {
@@ -152,15 +150,14 @@
       }
       $sql_where_prices = "$sql_andor (". ltrim($sql_where_prices, " or ") .")";
     }
-
+    //TODO:这条语句查询了商品相关的信息，已经将状态修改为 status=1.首页以及各个列表都只显示状态为1的商品，但是搜索时仍会找到非0状态的商品。
     $query = "
       select p.*, pi.name, pi.short_description, m.id as manufacturer_id, m.name as manufacturer_name, pp.price, pc.campaign_price, if(pc.campaign_price, pc.campaign_price, pp.price) as final_price". (($filter['sort'] == 'occurrences') ? ", " . $sql_select_occurrences : false) ."
-
       from (
         select p.id, p.code, p.sku, p.manufacturer_id, group_concat(ptc.category_id separator ',') as categories, p.keywords, p.product_groups, p.image, p.tax_class_id, p.quantity, p.views, p.purchases, p.date_created
         from ". DB_TABLE_PRODUCTS ." p
         left join ". DB_TABLE_PRODUCTS_TO_CATEGORIES ." ptc on (p.id = ptc.product_id)
-        where p.status
+        where p.status = 1 
           and (id
           ". (!empty($filter['products']) ? "$sql_andor p.id in ('". implode("', '", database::input($filter['products'])) ."')" : null) ."
           ". (!empty($filter['categories']) ? "$sql_andor ptc.category_id in (". implode(",", database::input($filter['categories'])) .")" : null) ."
@@ -176,16 +173,12 @@
         ". ((!empty($sql_inner_sort) && !empty($filter['limit'])) ? "order by " . implode(",", $sql_inner_sort) : null) ."
         ". ((!empty($filter['limit']) && empty($filter['sql_where']) && empty($filter['product_name']) && empty($filter['product_name']) && empty($filter['campaign']) && empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : "") ."
       ) p
-
       left join ". DB_TABLE_PRODUCTS_INFO ." pi on (pi.product_id = p.id and pi.language_code = '". language::$selected['code'] ."')
-
       left join ". DB_TABLE_MANUFACTURERS ." m on (m.id = p.manufacturer_id)
-
       left join (
         select product_id, if(`". database::input(currency::$selected['code']) ."`, `". database::input(currency::$selected['code']) ."` / ". (float)currency::$selected['value'] .", `". database::input(settings::get('store_currency_code')) ."`) as price
         from ". DB_TABLE_PRODUCTS_PRICES ."
       ) pp on (pp.product_id = p.id)
-
       left join (
         select product_id, if(`". database::input(currency::$selected['code']) ."`, `". database::input(currency::$selected['code']) ."` / ". (float)currency::$selected['value'] .", `". database::input(settings::get('store_currency_code')) ."`) as campaign_price
         from ". DB_TABLE_PRODUCTS_CAMPAIGNS ."
@@ -193,18 +186,15 @@
         and (year(end_date) < '1971' or end_date >= '". date('Y-m-d H:i:s') ."')
         order by end_date asc
       ) pc on (pc.product_id = p.id)
-
       where (p.id
         ". (!empty($filter['sql_where']) ? "$sql_andor (". $filter['sql_where'] .")" : null) ."
         ". (!empty($filter['product_name']) ? "$sql_andor pi.name like '%". database::input($filter['product_name']) ."%'" : null) ."
         ". (!empty($filter['campaign']) ? "$sql_andor campaign_price > 0" : null) ."
         ". (!empty($sql_where_prices) ? $sql_where_prices : null) ."
       )
-
       order by ". implode(",", $sql_outer_sort) ."
       ". (!empty($filter['limit']) && (!empty($filter['sql_where']) || !empty($filter['product_name']) || !empty($filter['campaign']) || !empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : null) .";
     ";
-
     $products_query = database::query($query);
 
     return $products_query;

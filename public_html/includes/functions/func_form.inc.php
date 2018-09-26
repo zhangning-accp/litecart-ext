@@ -380,10 +380,12 @@
   }
 
   function form_draw_toggle($name, $input=true, $type='e/d', $parameters='') {
-    if ($input === true) $input = form_reinsert_value($name);
-
-    $input = in_array(strtolower($input), array('1', 'active', 'enabled', 'on', 'true', 'yes')) ? '1' : '0';
-
+    if ($input === true) {
+        $input = form_reinsert_value($name);
+    }
+    if($input != 2) {// 这里源码没有这个if状态判断。只有if里的语句。非0既1.
+        $input = in_array(strtolower($input), array('1', 'active', 'enabled', 'on', 'true', 'yes')) ? '1' : '0';
+    }
     switch ($type) {
       case 'a/i':
         $true_text = language::translate('title_active', 'Active');
@@ -392,6 +394,7 @@
       case 'e/d':
         $true_text = language::translate('title_enabled', 'Enabled');
         $false_text = language::translate('title_disabled', 'Disabled');
+        $online_text = language::translate('title_online', 'Online only');
         break;
       case 'y/n':
         $true_text = language::translate('title_yes', 'Yes');
@@ -412,6 +415,7 @@
          . '  <div class="btn-group btn-block btn-group-inline" data-toggle="buttons">'. PHP_EOL
          . '    <label '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="btn btn-default'. (($input == '1') ? ' active' : '') .'"' : '') .'><input type="radio" name="'. htmlspecialchars($name) .'" value="1" '. (($input == '1') ? 'checked="checked"' : '') .' /> '. $true_text .'</label>'. PHP_EOL
          . '    <label '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="btn btn-default'. (($input == '0') ? ' active' : '') .'"' : '') .'><input type="radio" name="'. htmlspecialchars($name) .'" value="0" '. (($input == '0') ? 'checked="checked"' : '') .' /> '. $false_text .'</label>' . PHP_EOL
+         . '    <label '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="btn btn-default'. (($input == '2') ? ' active' : '') .'"' : '') .'><input type="radio" name="'. htmlspecialchars($name) .'" value="2" '. (($input == '2') ? 'checked="checked"' : '') .' /> '. $online_text .'</label>' . PHP_EOL
          . '  </div>' . PHP_EOL
          . '</div>';
   }

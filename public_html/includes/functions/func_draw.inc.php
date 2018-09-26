@@ -66,8 +66,7 @@
     }
 
     list($width, $height) = functions::image_scale_by_width(320, settings::get('product_image_ratio'));
-    // TODO:这里改变了商品的图片。首页+分类下的列表
-      //TODO: 主图内容
+    // TODO:这里是首页+分类下商品列表的呈现代码，该代码里对url等做了处理。修改此处实现在这两个地方支持外部url图片地址显示。
       $main_image = !empty($product['image']) ? $product['image'] : 'no_image.png';
       if(u_utils::startWith("http",$main_image)) {
           $main_original = $main_image;

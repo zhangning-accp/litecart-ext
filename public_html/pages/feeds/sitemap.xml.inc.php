@@ -45,11 +45,8 @@
   }
 
   custom_output_categories(0, $output);
-
   $products_query = database::query(
-    "select id, date_updated from ". DB_TABLE_PRODUCTS ."
-    where status
-    order by id;"
+    "select id, date_updated from ". DB_TABLE_PRODUCTS ." where status order by id;"
   );
   while ($product = database::fetch($products_query)) {
 
