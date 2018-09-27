@@ -87,7 +87,8 @@
       $title = $value;
     }
 
-    return '<button '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="btn btn-default"' : '') .' type="'. htmlspecialchars($type) .'" name="'. htmlspecialchars($name) .'" value="'. htmlspecialchars($value) .'"'. (($parameters) ? ' '.$parameters : false) .'>'. ((!empty($icon)) ? $icon . ' ' : '') . $title .'</button>';
+    $button_node = '<button '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="btn btn-default"' : '') .' type="'. htmlspecialchars($type) .'" name="'. htmlspecialchars($name) .'" value="'. htmlspecialchars($value) .'"'. (($parameters) ? ' '.$parameters : false) .'>'. ((!empty($icon)) ? $icon . ' ' : '') . $title .'</button>';
+    return $button_node;
   }
 
   function form_draw_captcha_field($name, $id, $parameters='') {
@@ -394,7 +395,7 @@
       case 'e/d':
         $true_text = language::translate('title_enabled', 'Enabled');
         $false_text = language::translate('title_disabled', 'Disabled');
-        $online_text = language::translate('title_online', 'Online only');
+        $online_text = language::translate('title_online', 'Online only'); // TODO：这里处理状态绘制的项.
         break;
       case 'y/n':
         $true_text = language::translate('title_yes', 'Yes');
@@ -410,7 +411,7 @@
         $false_text = language::translate('title_false', 'False');
         break;
     }
-
+    //TODO: 这里生成 Enabled、Disabled、Online only 三个选项的HTML结构。
     return '<div>' . PHP_EOL
          . '  <div class="btn-group btn-block btn-group-inline" data-toggle="buttons">'. PHP_EOL
          . '    <label '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="btn btn-default'. (($input == '1') ? ' active' : '') .'"' : '') .'><input type="radio" name="'. htmlspecialchars($name) .'" value="1" '. (($input == '1') ? 'checked="checked"' : '') .' /> '. $true_text .'</label>'. PHP_EOL

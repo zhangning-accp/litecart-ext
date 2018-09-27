@@ -150,7 +150,7 @@
       }
       $sql_where_prices = "$sql_andor (". ltrim($sql_where_prices, " or ") .")";
     }
-    //TODO:这条语句查询了商品相关的信息，已经将状态修改为 status=1.首页以及各个列表都只显示状态为1的商品，但是搜索时仍会找到非0状态的商品。
+    //TODO:这条语句查询了商品相关的信息，已经将状态修改为 status=1.首页以及各个列表都只显示状态为1的商品。此处不负责搜索结果。
     $query = "
       select p.*, pi.name, pi.short_description, m.id as manufacturer_id, m.name as manufacturer_name, pp.price, pc.campaign_price, if(pc.campaign_price, pc.campaign_price, pp.price) as final_price". (($filter['sort'] == 'occurrences') ? ", " . $sql_select_occurrences : false) ."
       from (
