@@ -1,13 +1,18 @@
 <?php
+    /**
+     * 订单处理。这里做支付，以及支付成功后等操作
+     */
   header('X-Robots-Tag: noindex');
   document::$layout = 'checkout';
 
-  if (settings::get('catalog_only_mode')) return;
+  if (settings::get('catalog_only_mode')) {
+      return;
+  }
 
   $shipping = new mod_shipping();
-
+    //创建payment支付集合。
   $payment = new mod_payment();
-
+  // 判断是否有订单
   if (empty(session::$data['order'])) {
     notices::add('errors', 'Missing order object');
     header('Location: '. document::ilink('checkout'));
@@ -16,6 +21,7 @@
 
   $order = &session::$data['order'];
 
+  //订单验证
   if ($error_message = $order->validate()) {
     notices::add('errors', $error_message);
     header('Location: '. document::ilink('checkout'));
@@ -36,7 +42,7 @@
       header('Location: '. document::ilink('checkout'));
       exit;
     }
-
+    // 判断是否选中了支付方式
     if (!empty($payment->modules) && count($payment->options()) > 0) {
       if (empty($payment->data['selected'])) {
         notices::add('errors', language::translate('error_no_payment_method_selected', 'No payment method selected'));
@@ -56,9 +62,9 @@
           'text' => $_POST['comments'],
         );
       }
-
+      // 这里返回的geteway 是干什么用的。
       if ($gateway = $payment->transfer($order)) {
-
+            //接受网关参数后，发送支付请求？还是应该verify验证后再发？
         if (!empty($gateway['error'])) {
           notices::add('errors', $gateway['error']);
           header('Location: '. document::ilink('checkout'));
@@ -66,25 +72,41 @@
         }
 
         switch (@strtoupper($gateway['method'])) {
-
+            // 这个部分需要根据具体情况进行修改。
           case 'POST':
-            echo '<p>'. language::translate('title_redirecting', 'Redirecting') .'...</p>' . PHP_EOL
+              /*----------------------------------------------------------------------------------------------
+                以下$from 的html结构类似：
+                <p>Redirecting...</p>
+                <form name="gateway_form" method="post" action="http://www.paymentgateway.com/form_process.ext">
+                  <input type="hidden" name="cancel_url" value="http://localhost/litecart/public_html/en/checkout" />
+                  <input type="hidden" name="success_url" value="http://localhost/litecart/public_html/en/order_process" />
+                  <input type="hidden" name="callback_url" value="http://localhost/litecart/public_html/en/ext/payment_service_provider/my_external_callback_file.php?order_uid=5bb0d76907087" />
+                </form>
+                <script>
+                  document.forms["gateway_form"].submit();
+                </script>
+               */
+              $from = "";
+              $from =  '<p>'. language::translate('title_redirecting', 'Redirecting') .'...</p>' . PHP_EOL
                . '<form name="gateway_form" method="post" action="'. (!empty($gateway['action']) ? $gateway['action'] : document::ilink('order_process')) .'">' . PHP_EOL;
             if (is_array($gateway['fields'])) {
-              foreach ($gateway['fields'] as $key => $value) echo '  ' . functions::form_draw_hidden_field($key, $value) . PHP_EOL;
+              foreach ($gateway['fields'] as $key => $value) {
+                  //$from .= '  ' . functions::form_draw_hidden_field($key, $value) . PHP_EOL;
+                  $from .= '  ' . functions::form_draw_hidden_field($key, $value) . PHP_EOL;
+              }
             } else {
-              echo $gateway['fields'];
+                $from.= $gateway['fields'];
             }
-            echo '</form>' . PHP_EOL
-               . '<script>' . PHP_EOL;
+              $from .= '</form>' . PHP_EOL;//. '<script>' . PHP_EOL;
             if (!empty($gateway['delay'])) {
-              echo '  var t=setTimeout(function(){' . PHP_EOL
+                $from .= '  var t=setTimeout(function(){' . PHP_EOL
                  . '    document.forms["gateway_form"].submit();' . PHP_EOL
                  . '  }, '. ($gateway['delay']*1000) .');' . PHP_EOL;
             } else {
-              echo '  document.forms["gateway_form"].submit();' . PHP_EOL;
+                //$from.= '  document.forms["gateway_form"].submit();' . PHP_EOL;
             }
-            echo '</script>';
+              //$from .= '</script>';
+            echo $from;
             exit;
 
           case 'HTML':
@@ -101,7 +123,7 @@
     }
   }
 
-// Verify transaction
+// Verify transaction 上面都已经exit了，这里怎么能执行？
   if (!empty($payment->modules) && count($payment->options()) > 0) {
     $result = $payment->verify($order);
 

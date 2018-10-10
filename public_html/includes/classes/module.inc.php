@@ -21,12 +21,11 @@
           $directory = FS_DIR_HTTP_ROOT . WS_DIR_MODULES . $type . '/';
           break;
       }
-
-      $modules_query = database::query(
-        "select * from ". DB_TABLE_MODULES ."
+      $sql = "select * from ". DB_TABLE_MODULES ."
         where type = '". database::input($type) ."'
-        ". (!empty($module_id) ? "and module_id in ('". implode("', '", database::input($filter)) ."')" : "") .";"
-      );
+        ". (!empty($module_id) ? "and module_id in ('". implode("', '", database::input($filter)) ."')" : "") .";";
+
+      $modules_query = database::query($sql);
 
       while($module = database::fetch($modules_query)){
 

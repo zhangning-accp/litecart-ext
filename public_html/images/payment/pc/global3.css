@@ -1,0 +1,867 @@
+body
+{
+    /*background: #f5f5f5;*/
+    font-size: 9pt;
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    margin: 0 auto;
+    padding: 0;
+    /*padding: 75px 0 0;
+    +padding: 90px 0 25px;*/
+    min-width: 700px;
+}
+select, input, button, textarea, pre
+{
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+}
+h1, h2, h3, h4, h5, h6
+{
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+}
+form
+{
+    margin: 0;
+    padding: 0;
+    width:700px;
+}
+
+.highlight
+{
+    margin: auto;
+    font-weight: bold;
+    color: #f00;
+}
+.nospam
+{
+    display: none;
+}
+span.required
+{
+    font-weight: bold;
+    color: #f00;
+}
+
+div#language
+{
+    width: 70px;
+    margin: 15px auto 0;
+    display: block;
+    text-align: right;
+}
+div#language h2
+{
+    display: none;
+}
+div#language select
+{
+    border: 1px solid #c0c0c0;
+    padding: 3px 3px 3px 20px;
+    background: #fff url("resources/worldwide.png") no-repeat 4px center;
+    border-radius: 2px;
+    /*font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;*/
+}
+
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+    div#language select
+    {
+        padding: 3px;
+        background: none;
+    }
+}
+div#language select:hover
+{
+    border: 1px solid #999;
+}
+div#language select:focus
+{
+    border: 1px solid #999;
+}
+
+h1
+{
+     border-bottom: 3px solid #55b0e6;
+    color: #aaa;
+    font-size: 20pt;
+    font-weight: normal;
+    height: 78px;
+    line-height: 85px;
+    margin: 0;
+    overflow: hidden;
+    padding-top: 15px;
+    white-space: nowrap;
+    width: 100%;
+}
+h1 > span
+{
+    width: 700px;
+    margin: auto;
+    display: block;
+}
+h1 span.domain
+{
+    color: #888;
+    /*font-weight: bold;*/
+}
+div#secured
+{
+    padding: 0 0 0 685px;
+    width: 215px;
+    height: 61px;
+    margin: -74px auto 0;
+}
+div#secured a
+{
+    display: block;
+    height: 58px;
+    background: url(resources/securedseal.png) no-repeat;
+    padding: 43px 0 0 111px;
+    font-family: Arial, Helvetica, Sans-Serif;
+    font-size: 9px;
+    text-decoration: none;
+    color: #999;
+}
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+    div#secured a
+    {
+        padding: 40px 0 0 111px;
+    }
+}
+@-moz-document url-prefix()
+{
+    div#secured a
+    {
+        padding: 41px 0 0 111px;
+    }
+}
+div#main
+{
+
+    width: 900px;
+	margin:auto;
+
+}
+div#main p.error
+{
+    font-size: 10.5pt;
+    line-height: 150%;
+}
+div#main p.error em
+{
+    font-weight: bold;
+    font-style: italic;
+}
+div#main p.title
+{
+    font-size: 11pt;
+    font-weight: bold;
+}
+div#main p.info
+{
+    font-size: 10.5pt;
+    line-height: 150%;
+}
+div#main p.info em
+{
+    font-weight: bold;
+    font-style: italic;
+}
+div#main h2
+{
+  color: #444;
+    font-size: 18pt;
+    font-weight: normal;
+    margin: 0 0 5px;
+    padding: 0;
+    text-transform: capitalize;
+}
+div#main table
+{
+    margin: 0 0 5px 0;  border: 1px solid #ddd;
+    border-collapse: collapse;
+    width: 100%;
+}
+div#main table tr
+{
+}
+div#main table tr th
+{
+    background: none repeat scroll 0 0 #efefef;
+    border-bottom: 1px solid #e2e2e2;
+    border-right: 1px solid #d9d9d9;
+    height: 20px;
+    line-height: 150%;
+    padding: 4px 9px;
+    text-align: left;
+}
+div#main table tr th.qty,
+div#main table tr th.price,
+div#main table tr th.subtotal,
+div#main table tr th.status
+{
+    text-align: center;
+    width: 12%;
+}
+div#main table tr td
+{
+    line-height: 150%;
+    text-align: left;  height: 30px;
+    padding: 4px 9px;  border-right: 1px solid #e2e2e2;
+
+}
+div#main table tr td.qty,
+div#main table tr td.price,
+div#main table tr td.subtotal,
+div#main table tr td.status
+{
+    text-align: center;
+    width: 12%;
+}
+div#main table tr th.no,
+div#main table tr td.no
+{
+    width: 20px;
+    text-align: center;
+}
+div#main table tr th.sku,
+div#main table tr td.sku
+{
+    width: 120px;
+    text-align: center;
+}
+div#main table tr th.datetime,
+div#main table tr td.datetime
+{
+    width: 150px;
+    text-align: center;
+}
+div#main table tr th.action,
+div#main table tr td.action
+{
+    width: 12%;
+    text-align: center;
+}
+div#main p#info
+{
+    text-align: right;
+    margin:10px 0 0;
+    line-height: 150%;
+}
+div#main p#info strong
+{
+    margin-left: 5px;
+}
+div#main p#total
+{
+    color: #f00;
+    font-size: 2.5em;
+    text-align: right;
+    font-weight: bold;
+    margin: 0;
+    line-height: 150%;
+}
+div#main p#total strong
+{
+    color: #000;
+}
+div#main p.summary
+{
+    margin: 15px 0 0 3px;
+    padding: 0;
+    line-height: 27px;
+}
+div#main div#creditcardinfo,
+div#main div#shippingaddress,
+div#main div#billingaddress
+{
+    padding-bottom: 20px;
+    width:700px;
+}
+div#main div#creditcardinfo h3,
+div#main div#shippingaddress h3,
+div#main div#billingaddress h3
+{
+   border-bottom: 1px solid #ddd;
+    color: #444;
+    font-size: 18pt;
+    font-weight: normal;
+    margin: 25px 0 25px;
+    padding: 0 0 5px;
+    text-transform: capitalize;
+
+}
+div#main div#creditcardinfo dl,
+div#main div#shippingaddress dl,
+div#main div#billingaddress dl
+{
+    margin: 15px 0 0 0;
+    padding: 0;
+    display: block;
+}
+div#main div#creditcardinfo dl dt,
+div#main div#shippingaddress dl dt,
+div#main div#billingaddress dl dt
+{
+   display: block;
+    float: left;
+    line-height: 25px;
+    margin: 0 10px 0 0;
+    text-align: right;
+    width: 200px;
+}
+div#main div#creditcardinfo dl dt label:after,
+div#main div#shippingaddress dl dt label:after,
+div#main div#billingaddress dl dt label:after
+{
+    content: ':';
+}
+div#main div#creditcardinfo dl dd,
+div#main div#shippingaddress dl dd,
+div#main div#billingaddress dl dd
+{
+    line-height: 23px;
+    *line-height: 27px;
+    display: block;
+  margin: 0 0 0 250px;
+    padding: 0;
+}
+div#main div#creditcardinfo dl dd input[type='text'],
+div#main div#shippingaddress dl dd input[type='text'],
+div#main div#billingaddress dl dd input[type='text']
+{
+    border: 1px solid #c0c0c0;
+    margin: 0;
+    padding: 3px;
+    border-radius: 2px;
+    width: 200px;
+}
+div#main div#creditcardinfo dl dd select,
+div#main div#shippingaddress dl dd select,
+div#main div#billingaddress dl dd select
+{
+    border: 1px solid #c0c0c0;
+    margin: 0;
+    padding: 2px;
+    border-radius: 2px;
+}
+div#main div#creditcardinfo dl dd input[type='text']:hover,
+div#main div#shippingaddress dl dd input[type='text']:hover,
+div#main div#billingaddress dl dd input[type='text']:hover,
+div#main div#creditcardinfo dl dd select:hover,
+div#main div#shippingaddress dl dd select:hover,
+div#main div#billingaddress dl dd select:hover
+{
+    border: 1px solid #999;
+}
+div#main div#creditcardinfo dl dd input[type='text']:focus,
+div#main div#shippingaddress dl dd input[type='text']:focus,
+div#main div#billingaddress dl dd input[type='text']:focus,
+div#main div#creditcardinfo dl dd select:focus,
+div#main div#shippingaddress dl dd select:focus,
+div#main div#billingaddress dl dd select:focus
+{
+    border: 1px solid #999;
+}
+div#main div#creditcardinfo dl dd span.help,
+div#main div#shippingaddress dl dd span.help,
+div#main div#billingaddress dl dd span.help
+{
+    font-weight: bold;
+}
+div#main div#creditcardinfo dl dd span.tips,
+div#main div#shippingaddress dl dd span.tips,
+div#main div#billingaddress dl dd span.tips
+{
+    display: block;
+    font-style: italic;
+    font-size: .9em;
+    margin-top: -3px;
+}
+/*20130727*/
+div#main div#creditcardinfo
+{
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    margin-left:100px;
+}
+div#main div#creditcardinfo dl.creditcardtype dd img
+{
+    vertical-align: bottom;
+    margin-right: 15px;
+}
+div#main div#creditcardinfo dl.creditcardnumber dd input
+{
+    width: 303px;
+}
+div#main div#creditcardinfo dl.creditcardnumber dd div#supportedcreditcards
+{
+    position: absolute;
+     width: 170px;
+    margin-left: 137px;
+    text-align: right;
+    margin-top: -23px;
+    margin-top: -22px\0; /* IE8 or later */
+    +margin-top: 1px; /* IE7 */
+    +margin-left: -130px; /* IE7 */
+    _margin-top: 3px; /* IE6 */
+}
+@media screen and (-webkit-min-device-pixel-ratio:0)
+{
+    div#main div#creditcardinfo dl.creditcardnumber dd div#supportedcreditcards
+    {
+        margin-top: -22px;
+    }
+}
+div#main div#creditcardinfo dl.creditcardnumber dd div#supportedcreditcards img
+{
+    height: 19px;
+    opacity: .5;
+}
+div#main div#creditcardinfo dl.securitycode dd span.help img
+{
+    display: none;
+}
+div#main div#creditcardinfo dl.securitycode dd span.help:hover img
+{
+    display: inline;
+    position: absolute;
+    margin-left: -110px;
+    margin-top: 20px
+}
+div#main div#shippingaddress dl.shippingaddress1 dd input,
+div#main div#shippingaddress dl.shippingaddress2 dd input,
+div#main div#billingaddress dl.billingaddress1 dd input,
+div#main div#billingaddress dl.billingaddress2 dd input
+{
+    width: 300px;
+}
+div#main div#shippingaddress dl.shippingaddress2 dt label,
+div#main div#billingaddress dl.billingaddress2 dt label
+{
+    display: none;
+}
+div#main p.submit
+{
+    padding: 0 0 5px 350px;
+    margin: 0;
+}
+div#main p.submit input
+{
+    border: none;
+    padding: 7px 15px;
+    min-width: 160px;
+    /* font-style: italic; */
+    font-size: 13pt;
+    font-weight: bold;
+    border-radius: 2px;
+    cursor: pointer;
+    background: #fc0;
+    color: #a64015;
+}
+
+div#main div.collapse h3, div#main div.collapse h3
+{
+    border-top: 1px solid #ccc;
+    cursor: pointer;
+    background: url("resources/expand.gif") no-repeat right;
+}
+div#main div.collapse h3:hover,
+div#main div.collapse h3:hover
+{
+    background-color: #f5f5f5;
+}
+div#main div.collapse div.form,
+div#main div.collapse div.form
+{
+    display: none;
+}
+div#main div#billingaddress div.form
+{
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+}
+
+div#main table#orderinfo
+{
+    margin-bottom: 15px;
+}
+div#main div.order-related-info
+{
+    margin-top: 10px;
+    width: 50%;
+    float: left;
+}
+div#main div.order-related-info h3
+{
+    margin: 0 0 5px 0;
+    padding: 0;
+    display: block;
+    font-size: 10.5pt;
+}
+div#main div.order-related-info table
+{
+    margin-top: 3px;
+    border-collapse: collapse;
+    width: 405px;
+}
+div#main div.order-related-info table tr th
+{
+    line-height: 23px;
+    font-weight: normal;
+    text-align: left;
+    width: 125px;
+}
+div#main div.order-related-info table tr td
+{
+    line-height: 23px;
+    font-weight: normal;
+    text-align: left;
+}
+div#main div.order-related-info p
+{
+    line-height: 150%;
+    margin: 3px 0 0 0;
+}
+div#main div#billing
+{
+}
+div#main div#shipping h3,
+div#main div#shipping table
+{
+    margin-right: 5px;
+}
+div#main div#billing h3,
+div#main div#billing table,
+div#main div#billing p
+{
+    margin-left: 5px;
+}
+div#main div#custproblem
+{
+    clear: both;
+}
+div#main div#custproblem h3
+{
+    font-size: 10.5pt;
+    margin: 0 0 5px 0;
+    padding: 10px 0 0;
+}
+div#main div#newproblem
+{
+    margin-top: 15px;
+}
+div#main div#newproblem h3
+{
+    font-size: 10.5pt;
+    margin: 0 0 5px 0;
+    padding: 10px 0 0;
+}
+div#main div#newproblem dl
+{
+    display: block;
+    margin: 0 0 10px 0;
+}
+div#main div#newproblem dl dt
+{
+    margin: 0 0 3px 0;
+    padding: 0;
+}
+div#main div#newproblem dl dt label:after
+{
+    content: ":";
+}
+div#main div#newproblem dl dd
+{
+    margin: 0;
+    padding: 0;
+}
+div#main div#newproblem dl dd input[type="text"],
+div#main div#newproblem dl dd textarea
+{
+    border: 1px solid #c0c0c0;
+    margin: 0;
+    padding: 3px;
+    border-radius: 2px;
+    width: 280px;
+}
+div#main div#newproblem dl dd textarea
+{
+    width: 400px;
+    height: 100px;
+}
+div#main div#newproblem dl dd input[type="text"]:hover,
+div#main div#newproblem dl dd textarea:hover
+{
+    border: 1px solid #999;
+}
+div#main div#newproblem p.submit
+{
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+div#main pre
+{
+    word-wrap: break-word; 
+    word-break: normal;
+    border: 1px solid #c0c0c0;
+    padding: 10px;
+    margin: 0;
+    background: #d2dde4;
+}
+div#main p.rinfo
+{
+    margin: 5px 0 15px 0;
+    padding: 0;
+}
+div#main div#item-cr div#reply dl
+{
+    display: block;
+    margin: 0 0 10px 0;
+}
+div#main div#item-cr div#reply dl dt
+{
+    margin: 0 0 3px 0;
+    padding: 0;
+}
+div#main div#item-cr div#reply dl dt label:after
+{
+    content: ':';
+}
+div#main div#item-cr div#reply dl dd
+{
+    margin: 0;
+    padding: 0;
+}
+div#main div#item-cr div#reply dl dd textarea
+{
+    border: 1px solid #c0c0c0;
+    margin: 0;
+    padding: 3px;
+    border-radius: 2px;
+    width: 400px;
+    height: 100px;
+}
+div#main div#item-cr div#reply dl dd textarea:hover
+{
+    border: 1px solid #999;
+}
+
+
+div#main div#item-cr div#reply p.submit
+{
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+div#footer
+{
+    width: 550px;
+    padding: 0 350px 0 0;
+    margin: 15px auto 50px;
+    font-size: 9.5pt;
+    color: #888;
+    line-height: 150%;
+    background: url(resources/certservices.png) no-repeat 590px 3px;
+    height: 50px;
+}
+div#footer p
+{
+    padding: 0;
+    margin: 0;
+}
+div#footer p a
+{
+    color: #888;
+}
+div#footer p a:hover
+{
+    color: #888;
+    text-decoration: none;
+}
+div#footer p#protect
+{
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    /*20130727*/
+    display: none;
+}
+div#footer p#protect img
+{
+    vertical-align: middle;
+    margin-bottom: 2px;
+}
+div#footer p#copyright 
+{
+    display: inline;
+}
+div#footer p#docs
+{
+    display: inline;
+    margin-left: 5px;
+}
+
+p#noscript
+{
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    background: #fc6;
+    font-size: 11pt;
+    text-align: center;
+    margin: 0;
+    height: 65px;
+    line-height: 65px;
+}
+p#noscript a
+{
+    color: #333;
+}
+p#noscript a:hover
+{
+    text-decoration: none;
+}
+
+.field-validation-error
+{
+    padding: 2px 5px;
+    color: #f00;
+    border-radius: 2px;
+   /*  background-color: #fcc; */
+}
+.input-validation-error
+{
+    border: 1px solid #f00 !important;
+    box-shadow: 0 0 3px #f00;
+}
+.validation-summary-errors
+{
+    padding: 10px;
+    background: #ffc;
+    margin: 0 0 5px;
+    border: 1px solid #ccc;
+    color: #f00;
+    font-weight: bold;
+}
+.validation-summary-errors ul
+{
+    margin: 0 0 0 25px;
+    padding: 0;
+    line-height: 18px;
+}
+
+body.redirect div#main p.info
+{
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+
+
+body.docs div#main div#feedback dl
+{
+    margin: 15px 0 0 0;
+    padding: 0;
+    display: block;
+}
+body.docs div#main div#feedback dl dt
+{
+    display: block;
+    margin: 0 10px 0 0;
+    line-height: 25px;
+    font-weight: bold;
+}
+body.docs div#main div#feedback dl dt label:after
+{
+    content: ':';
+}
+body.docs div#main div#feedback dl dd
+{
+    line-height: 23px;
+    *line-height: 27px;
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+body.docs div#main div#feedback dl dd input[type='text'],
+body.docs div#main div#feedback dl dd textarea
+{
+    border: 1px solid #c0c0c0;
+    margin: 0;
+    padding: 3px;
+    border-radius: 2px;
+    width: 200px;
+}
+body.docs div#main div#feedback dl dd textarea
+{
+    width: 400px;
+}
+body.docs div#main div#feedback p.submit
+{
+    margin: 15px 0 0;
+    padding: 0;
+}
+
+/*����ҳ����ʾ����*/
+
+div#main div.details-wrapper{
+     display:none;
+}
+div#main div#securedcardlogo,
+div#main div#shippingaddress,
+div#main div#billingaddress
+{
+    display:none;
+}
+#foot{
+  border: 1px solid #ddd;
+    margin: 20px auto;
+    padding: 10px;
+    text-align: right;
+    width: 700px;
+	}
+.lanclick{
+    clear: both;
+    margin: auto;
+    width: 700px;
+	}
+.language{
+ margin: auto;
+    padding-right: 20px;
+    padding-top: 10px;
+    text-align: right;
+    width: 700px;
+	}
+.lanclick p span{
+	   color: #158fb0;
+    font-size: 30px;
+    padding-left: 20px;
+    vertical-align: super;
+	}
+#ProductsTable{
+   background: none repeat scroll 0 0 #158fb0;
+    border: 1px solid #ffffff;
+    padding: 10px;
+	}
+#Total label {
+	 color: #fff;
+    font-size: 16px;
+    font-weight: bold
+	}
+#Total span{
+	   color: #efefc6;
+    font-size: 15px;
+    margin-right: 5px;
+	}#Total a,#Total a span{
+	color:#ffff3f;
+	}
+.language img{
+    display: none;
+	 vertical-align: top;
+	}
+#foot img{
+	}

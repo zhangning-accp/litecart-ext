@@ -25,7 +25,7 @@
     // Attach userdata to module
       if (!empty($this->data['selected'])) {
         list($module_id, $option_id) = explode(':', $this->data['selected']['id']);
-        if (!empty($this->modules[$module_id])) $this->modules[$module_id]->userdata = &$this->data['userdata'][$module_id];
+        if (!empty($this->modules[$module_id])) {$this->modules[$module_id]->userdata = &$this->data['userdata'][$module_id];}
       }
     }
 
@@ -137,7 +137,10 @@
 
       list($module_id, $option_id) = explode(':', $this->data['selected']['id']);
 
-      if (!method_exists($this->modules[$module_id], 'pre_check')) return;
+      // 如果支付对象不存在方法pre_check，则返回，否则执行pre_check方法。
+      if (!method_exists($this->modules[$module_id], 'pre_check')){
+          return;
+      }
 
       return $this->modules[$module_id]->pre_check($order);
     }

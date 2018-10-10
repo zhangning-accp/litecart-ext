@@ -1,3 +1,9 @@
+<?php
+    /**
+     * 订单页的整个主页面。
+     */
+?>
+
 <main id="content" class="twelve-eighty">
   {snippet:notices}
 
@@ -13,9 +19,18 @@
 
       <div class="col-md-6">
         <div class="shipping wrapper"></div>
-
-        <div class="payment wrapper"></div>
+        <div class="payment wrapper">
+        </div>
+          <div class="row">
+              <!-- 增加 payment details part 试试-->
+              <div>
+                  <div class="payment_detail wrapper"></div>
+              </div>
+              <!-- end -->
+          </div>
       </div>
+
+
     </div>
 
     <div class="summary wrapper"></div>
@@ -32,6 +47,7 @@
     {component: 'customer', data: null, refresh: true},
     {component: 'shipping', data: null, refresh: true},
     {component: 'payment',  data: null, refresh: true},
+    {component: 'payment_detail',  data: null, refresh: true},
     {component: 'summary',  data: null, refresh: true}
   ];
 
@@ -90,6 +106,9 @@
       case 'summary':
         url = '<?php echo document::ilink('ajax/checkout_summary.html'); ?>';
         break;
+        case 'payment_detail':
+            url = '<?php echo document::ilink('ajax/checkout_payment_detail.html'); ?>';
+            break;
       default:
         alert('Error: Invalid component ' + task.component);
         break;

@@ -1,7 +1,12 @@
 <?php
 
   function form_draw_form_begin($name='', $method='post', $action=false, $multipart=false, $parameters='') {
-    return  '<form'. (($name) ? ' name="'. htmlspecialchars($name) .'"' : false) .' method="'. ((strtolower($method) == 'get') ? 'get' : 'post') .'" enctype="'. (($multipart == true) ? 'multipart/form-data' : 'application/x-www-form-urlencoded') .'" accept-charset="'. language::$selected['charset'] .'"'. (($action) ? ' action="'. htmlspecialchars($action) .'"' : '') . (($parameters) ? ' ' . $parameters : false) .'>'. PHP_EOL
+    return  '<form'. (($name) ? ' name="'. htmlspecialchars($name) .'"' : false) .
+        ' method="'. ((strtolower($method) == 'get') ? 'get' : 'post') .
+        '" enctype="'. (($multipart == true) ? 'multipart/form-data' : 'application/x-www-form-urlencoded') .
+        '" accept-charset="'. language::$selected['charset'] .'"'.
+        (($action) ? ' action="'. htmlspecialchars($action) .'"' : '')
+        . (($parameters) ? ' ' . $parameters : false) .'>'. PHP_EOL
           . ((strtolower($method) == 'post') ? form_draw_hidden_field('token', form::session_post_token()) . PHP_EOL : '');
   }
 
@@ -26,6 +31,12 @@
     return '</form>' . PHP_EOL;
   }
 
+    /**
+     * 这个方法是干嘛的？
+     * @param $name
+     * @param null $array_value
+     * @return string|void
+     */
   function form_reinsert_value($name, $array_value=null) {
     if (empty($name)) return;
 
@@ -101,18 +112,48 @@
     return $output;
   }
 
+    /**
+     * 绘制多选框，
+     * @param $name
+     * @param $value
+     * @param bool $input
+     * @param string $parameters
+     * @return string
+     */
   function form_draw_checkbox($name, $value, $input=true, $parameters='') {
     if ($input === true) $input = form_reinsert_value($name, $value);
 
-    return '<input type="checkbox" name="'. htmlspecialchars($name) .'" value="'. htmlspecialchars($value) .'" '. ($input === $value ? ' checked="checked"' : false) . (($parameters) ? ' ' . $parameters : false) .' />';
+    $check_box = '<input type="checkbox" name="'. htmlspecialchars($name) .
+        '" value="'. htmlspecialchars($value) .
+        '" '. ($input === $value ? ' checked="checked"' : false) . (($parameters) ? ' ' . $parameters : false) .' />';
+
+      return  $check_box;
   }
 
+    /**
+     * 绘制颜色域
+     * @param $name
+     * @param bool $value
+     * @param string $parameters
+     * @return string
+     */
   function form_draw_color_field($name, $value=true, $parameters='') {
     if ($value === true) $value = form_reinsert_value($name);
 
-    return '<input '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .' type="color" name="'. htmlspecialchars($name) .'" value="'. htmlspecialchars($value) .'" data-type="color" '. (($parameters) ? ' '.$parameters : false) .' />';
+    return '<input '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .
+        ' type="color" name="'. htmlspecialchars($name) .
+        '" value="'. htmlspecialchars($value) .
+        '" data-type="color" '. (($parameters) ? ' '.$parameters : false) .' />';
   }
 
+    /**
+     * 绘制货币域
+     * @param $currency_code
+     * @param $name
+     * @param bool $value
+     * @param string $parameters
+     * @return string
+     */
   function form_draw_currency_field($currency_code, $name, $value=true, $parameters='') {
     if ($value === true) $value = form_reinsert_value($name);
 
@@ -131,6 +172,13 @@
          . '</div>';
   }
 
+    /**
+     * 绘制日期域
+     * @param $name
+     * @param bool $value
+     * @param string $parameters
+     * @return string
+     */
   function form_draw_date_field($name, $value=true, $parameters='') {
     if ($value === true) $value = form_reinsert_value($name);
 
@@ -140,7 +188,9 @@
       $value = '';
     }
 
-    return '<input '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .' type="date" name="'. htmlspecialchars($name) .'" value="'. htmlspecialchars($value) .'" data-type="date" maxlength="10" pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="YYYY-MM-DD"'. (($parameters) ? ' '.$parameters : false) .' />';
+    return '<input '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .
+        ' type="date" name="'. htmlspecialchars($name) .'" value="'. htmlspecialchars($value) .
+        '" data-type="date" maxlength="10" pattern="^[0-9]{4}-[0-9]{2}-[0-9]{2}" placeholder="YYYY-MM-DD"'. (($parameters) ? ' '.$parameters : false) .' />';
   }
 
   function form_draw_datetime_field($name, $value=true, $parameters='') {

@@ -1,3 +1,8 @@
+<?php
+    /**
+     * 订单页，原框架就有
+     */
+?>
 <div id="box-checkout-customer" class="box">
   <?php echo functions::form_draw_hidden_field('customer_details', 'true'); ?>
 
@@ -86,7 +91,10 @@
 
   <div class="address shipping-address">
 
-    <h3><?php echo functions::form_draw_checkbox('different_shipping_address', '1', !empty($_POST['different_shipping_address']) ? '1' : '', 'style="margin: 0px;"'); ?> <?php echo language::translate('title_different_shipping_address', 'Different Shipping Address'); ?></h3>
+      <?php //I want to set another address for my invoice. ?>
+    <h3><?php echo functions::form_draw_checkbox('different_shipping_address', '1',
+            !empty($_POST['different_shipping_address']) ? '1' : '', 'style="margin: 0px;"'); ?>
+        <?php echo language::translate('title_invoice_address', 'I want to set another address for my invoice.'); ?></h3>
 
     <div id="shipping-address-container"<?php echo (empty($_POST['different_shipping_address'])) ? ' style="display: none;"' : false; ?>>
 
@@ -191,7 +199,6 @@
     <?php } ?>
   </div>
   <?php } ?>
-
   <div>
     <button class="btn btn-block btn-default" name="save_customer_details" type="submit" disabled="disabled"><?php echo language::translate('title_save_changes', 'Save Changes'); ?></button>
   </div>

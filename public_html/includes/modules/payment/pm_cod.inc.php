@@ -11,8 +11,13 @@
     public $priority = 0;
 
     public function __construct() {
+       // echo __CLASS__."-__construct-i:".PHP_EOL;
     }
 
+    /**-------------------------------------------------------------------------
+     Called in checkout used to display all avaliable payment options.
+     A payment module may output several payment options if necessary i.e. card, directbank, etc.
+    */
     public function options($items, $subtotal, $tax, $currency_code, $customer) {
 
       if (empty($this->settings['status'])) return;
@@ -43,27 +48,74 @@
     }
 
     public function pre_check() {
+       // echo __CLASS__."-pre_check-i:".PHP_EOL;
     }
 
-    public function transfer() {
-      return array(
-        'action' => '',
-        'method' => '',
-        'fields' => '',
-      );
+
+      /** ----------------------------------------------------------------------------------------
+        The transfer() method is used to send the user to a payment gateway.
+        The return is an array of the destination and transaction data.
+        If not declared the transfer operation will be skipped.
+       * @return array
+       */
+    public function transfer() {//转账
+//      return array(
+//        'action' => '',
+//        'method' => '',
+//        'fields' => '',
+//      );
+       // echo __CLASS__."-transfer-i:".PHP_EOL;
     }
 
+      /** --------------------------------------------------------------------------------------
+          The verify() method is used to verify the transaction. There are a few security questions you may ask yourself:
+          Does the transaction result come from a trusted source?
+          Is this a valid order ID or UID
+          Is the payment flagged as okay by the payment service provider?
+          Is the payment amount the same as the order amount? Be aware of rounding.
+          Is the payment currency same as the order currency?
+        verify（）方法用于验证交易。你可能会问自己一些安全问题：
+          1. 事务结果是否来自可信的来源？
+          2. 这是一个有效的订单ID还是UID
+          3. 支付服务提供商的支付是否被标记为ok？
+          4. 付款金额与订单金额相同吗？注意四舍五入。
+          5. 支付货币与订单货币相同吗？
+       * @return array
+       */
     public function verify() {
-      return array(
-        'order_status_id' => $this->settings['order_status_id'],
-        'payment_transaction_id' => '',
-        'errors' => '',
-      );
+//      return array(
+//        'order_status_id' => $this->settings['order_status_id'],
+//        'payment_transaction_id' => '',
+//        'errors' => '',
+//      );
+        //echo __CLASS__."-verify-i:".PHP_EOL;
     }
 
+      /**
+       * This method does not have a return. It is available for after order operations if necessary i.e.
+       * updating order reference with the order number.
+       * 该方法没有返回，。如有必要，它可用于订单操作，例如，使用订单号更新订单引用。
+       */
     public function after_process() {
+        //echo __CLASS__."-after_process-i:".PHP_EOL;
     }
 
+
+      /** ------------------------------------------------------------------------------
+       * This method returns html code that is output on the order success page.
+       * It was intended to display a payment receipt but your imagination sets the limit.
+       * 当支付成功后，该方法返回一个html页面，类似交易单。
+       * @param $order
+       */
+    public function receipt($order) {
+       // echo __CLASS__."-receipt-i:".PHP_EOL;
+    }
+
+      /**
+       * This method sets up the payment module with a settings structure. The return is an array of the structure.
+       * @return array
+       * 在admin payment module里点击module时页面显示的内容
+       */
     function settings() {
       return array(
         array(
@@ -118,7 +170,36 @@
       );
     }
 
-    public function install() {}
+      /**
+       * This method does not have a return. It is executed upon installing the module in the admin panel.
+       * It can be used for creating third party mysql tables etc.
+       * Note: install() doesn't run until the “Save” button is clicked.
+       * 这个方法没有返回，它是在在管理面板中安装模块时执行的。
+       * 它可以用于创建第三方mysql表等。注意：install（）在点击“保存”按钮之前不会运行。
+       */
+    public function install() {
+       // echo __CLASS__."-install-i:".PHP_EOL;
+    }
 
-    public function uninstall() {}
+      /**
+       * This method does not have a return. It is executed upon uninstalling the module in the admin panel.
+       * It can be used for deleting orphan data.
+       * 这个方法没有返回值。它是在卸载管理面板中的模块时执行的。它可以用于删除孤儿数据。
+       */
+    public function uninstall() {
+        //echo __CLASS__."-uninstall-i:".PHP_EOL;
+    }
+
+      /**
+       * This method does not have a return. It is executed upon saving the module settings in the admin panel.
+       * This method is triggered when the module is already installed.
+       * It can be used for updating third party mysql tables etc.
+       * Note: update() doesn't run until the “Save” button is clicked.
+       *
+       * 这个方法没有返回值。它是在管理面板中保存模块设置时执行的。这个方法是在模块已经安装时触发的。
+       * 它可以用于更新第三方mysql表等。注意：update（）直到点击“保存”按钮时才会运行。
+       */
+    public function update() {
+        //echo __CLASS__."-update-i:".PHP_EOL;
+    }
   }
