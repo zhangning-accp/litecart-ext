@@ -218,9 +218,16 @@
       return self::$_links[$link]->info;
     }
 
+      /**
+       * 对需要添加的数据进行转义处理，避免关键字和漏洞。
+       * @param $string
+       * @param bool $allowable_tags
+       * @param string $link
+       * @return array|string
+       */
     public static function input($string, $allowable_tags=false, $link='default') {
 
-      if (is_array($string)) {
+      if (is_array($string)) {// 如果参数是数组
         foreach (array_keys($string) as $key) {
           $string[$key] = self::input($string[$key]);
         }
@@ -233,7 +240,7 @@
 
       if (!isset(self::$_links[$link])) self::connect($link);
 
-      return self::$_links[$link]->escape_string($string);
+      return self::$_links[$link]->escape_string($string);//做关键字转义
     }
 
     private static function _error($query, $object) {

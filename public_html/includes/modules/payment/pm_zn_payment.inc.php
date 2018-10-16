@@ -5,6 +5,9 @@
      * User: zn
      * Date: 2018/9/29
      * Time: 13:44
+     *
+     * 通过查看order_process.inc.php的逻辑，方法的调用顺序为
+     * pre_check->transfer->
      */
     class pm_zn_payment
     {
@@ -45,10 +48,29 @@
         }
 
         /**
-         * 预检查，用来检查什么，暂时不知。
+         * 预检查，用来检查什么，暂时不知。可以检查订单完整性等。返回boolean | 错误信息
+         * 在 order_process.inc.php 第 61行。
          */
-        public function pre_check($order) {
+        public function pre_check($order) { // 检查必填项是否具备，如果不具备，则返回
             //echo __CLASS__."-pre_check-i:".PHP_EOL;
+            //因为原框架会检查页面的其它输入项，目前还买找到怎么采用和框架一致的解决方案，所以这里先对Credit Card Information项做检查
+//            $order->data['card'] = array(
+//                'CurrCode' => '840', // * 货币代码 CHAR(8)
+//                'CardPAN' => $_POST['CardPAN'],// * 卡号 CHAR(16)
+//                'ExpirationMonth' => $_POST['ExpirationMonth'], // * 有效期月份 CHAR(2)
+//                'ExpirationYear' => $_POST['ExpirationYear'], // * 有效期年份 CHAR(2)
+//                'CVV2' => $_POST['CVV2'], // * 卡片安全码 CHAR(3) 其实就是CardPAN后3位数字
+//            );
+            $CurrCode = $order->data['card']['CurrCode'];
+            $CardPAN = $order->data['card']['CardPAN'];
+            $ExpirationMonth = $order->data['card']['ExpirationMonth'];
+            $ExpirationYear = $order->data['card']['ExpirationYear'];
+            $CVV2 = $order->data['card']['CVV2'];
+            $error = false;
+            if(u_utils::checkEmpty($CurrCode,$CardPAN,$ExpirationMonth,$ExpirationYear,$CVV2)) {
+                $error = "Please check your credit card number or CVV2/CVC2/CAV2 ";
+            }
+            return $error;
         }
 
         /** ----------------------------------------------------------------------------------------
@@ -61,24 +83,29 @@
          * @return array
          * 参看 public_html/pages/order_process.inc.php  66 line进行理解
          */
-        public function transfer($order) {
+        public function transfer(&$order) {
+            $hash_value = u_utils::hashValue('8030jfewfrwe98qwer',
+                '7998h8h5',$order->data['uid'],$order->data['payment_due']);
             // 可以在这里直接处理支付，并不返回任何信息，但是错误怎么获取并提示？
             //echo __CLASS__."-transfer-i:".PHP_EOL;
             //$order->save(); // Save session order to database before transaction creates an $order->data['id']. Not recommended
+//            if(empty($order->data['id'])) {
+//                $order->data['id'] = u_utils::guid();
+//            }
             $fields = array(
               'OrderID' => $order->data['uid'], // * 订单号 CHAR(30)
-              'CartID' => '', // * 购物车编码 CHAR(30)
-              'CurrCode' => '840', // * 货币代码 CHAR(8)
+              'CartID' => $order->data['uid'], // * 购物车编码 CHAR(30)
+              'CurrCode' => $order->data['card']['CurrCode'], // * 货币代码 CHAR(8)
               'Amount' => $order->data['payment_due'], // * 交易金额 CHAR(20)
-              'CardPAN' => '',// * 卡号 CHAR(16)
-              'ExpirationMonth' => '', // * 有效期月份 CHAR(2)
-              'ExpirationYear' => '', // * 有效期年份 CHAR(2)
-              'CVV2' => '', // * 卡片安全码 CHAR(3) 其实就是CardPAN后3位数字
-              'IPAddress' => '', // * 持卡人的 ip 地址 CHAR(20)
+              'CardPAN' => $order->data['card']['CardPAN'],// * 卡号 CHAR(16)
+              'ExpirationMonth' => $order->data['card']['ExpirationMonth'], // * 有效期月份 CHAR(2)
+              'ExpirationYear' => $order->data['card']['ExpirationYear'], // * 有效期年份 CHAR(2)
+              'CVV2' => $order->data['card']['CVV2'], // * 卡片安全码 CHAR(3) 其实就是CardPAN后3位数字
+              'IPAddress' => '45.76.74.87', // * 持卡人的 ip 地址 CHAR(20)
               'CName' => $order->data['customer']['firstname'].$order->data['customer']['lastname'], // * 收货人姓名 CHAR(16)
               'BAddress' => $order->data['customer']['address1'], // * 收货人地址 CHAR(32)
               'BCity' => $order->data['customer']['city'], // * 收货人所在城市 CHAR(32)
-              'Bstate' => '', // * 收货人州（省） CHAR(32)
+              'Bstate' => 'Nevada(NE)', // * 收货人州（省） CHAR(32)
               'Bcountry' => $order->data['customer']['country_code'], // * 收货人国家 CHAR(32)
               'BCountryCode' =>$order->data['customer']['country_code'], // * 国家代码  CHAR(2)
               'PostCode' => $order->data['customer']['postcode'], // * 邮编 CHAR(32)
@@ -86,23 +113,50 @@
               'Telephone' => $order->data['customer']['phone'], // * 电话号码 CHAR(20)
               'Pname' => 'other', // *产品和品牌 CHAR(32)
               'IFrame' => 1, // * 是否内嵌框架    CHAR(1)
-              'URL' => 'http://www.baidu.com', // * 商户网站网址  CHAR(32)
-              'OrderUrl' => 'http://www.baidu.com', // * 同 URL  CHAR(32)
+              'URL' => $_SERVER['SERVER_NAME'], // * 商户网站网址  CHAR(32)
+              'OrderUrl' => $_SERVER['SERVER_NAME'], // * 同 URL  CHAR(32)
               'callbackUrl' => '',//document::link(WS_DIR_TEST.pp_callback.php),// option 用于更新网店订单状态的地址   CHAR(50)
               'Framework' => 'litecart', // * 网店框架类型    CHAR(20)
               'IVersion' => 'V8.0', // * 版本    CHAR(10)
               'Language' => 'en', // * 语言(国际化)  CHAR(2)
-              'HashValue' => '' // * 加密数据   CHAR(500)
+              'HashValue' => $hash_value // * 加密数据   CHAR(500)
             );
-            $hash_value = u_utils::hash_value('8030jfewfrwe98qwer',
-                '7998h8h5',$fields['OrderID'],$fields['Amount']);
-            $fields['HashValue'] = $hash_value;
-            // TODO：这里直接支付，支付成功后看能不能回调处理订单问题。
-            // 发送请求。
-//            $post_url = "https://merchant.paytos.com/CubePaymentGateway/gateway/action.NewSubmitAction.do";
-//            $post_str = u_utils::sendHttpRequest($post_url,"POST",$fields);
-//            echo  $post_str;
+            // TODO：这里直接支付，支付成功后对订单进行处理，并返回true，失败后也对订单进行处理，返回false，由order_process来决定处理方式。
 
+            // 发送请求。
+            $post_url = "https://merchant.paytos.com/CubePaymentGateway/gateway/action.NewSubmitAction.do";
+//            $post_url = document::link(WS_DIR_TEST.'payment_test.php');
+            $post_str = json_decode(u_utils::sendHttpRequest($post_url,"POST",$fields),true);
+            $return_array = array(
+                'method' => 'API_CALL',
+                "status"=>1,
+                "msg"=>"Payment successed."
+            );
+            // 保存订单，保存后不用考虑清空购物车等情况。在其它地方会处理。如果保存失败呢？
+
+            if($post_str['status'] === '0000'){
+                // 表示成功
+                $return_array['status'] = 1;
+                $return_array['msg'] = 'Payment successed.';
+                // 保存订单相关信息
+                $order->save();
+                // Send email 发送邮件
+                $email = $order->data['customer']['email'];
+                $order->email_order_copy($email);//没有发送成功。
+                // Clear Shopping Cart 清空购物车等。
+                cart::clear();// 清空购物车
+            }else if($post_str['status'] !== '0000') {// 表示失败
+                $return_array['status'] = 0;
+                $return_array['msg'] = 'Payment failed. Please try again';
+            }
+            return $return_array;
+
+
+
+
+            //echo  $post_str;
+//            $order_success_ilink = document::link(WS_DIR_TEST.'payment_test.php');
+//            header('Location: '. $order_success_ilink);
 //        return array(
 //            'action' => "https://merchant.paytos.com/CubePaymentGateway/gateway/action.NewSubmitAction.do",//document::link(WS_DIR_TEST."payment_test.php"),
 //            'method' => 'POST',

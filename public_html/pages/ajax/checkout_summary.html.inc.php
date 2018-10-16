@@ -11,9 +11,11 @@
 
   if (!isset($payment)) $payment = new mod_payment();
 
-// Resume incomplete order in session
-  if (!empty(session::$data['order']->data['id'])) {
-    session::$data['order'] = new ctrl_order(session::$data['order']->data['id']);
+    // Resume incomplete order in session 这里其实有一个潜在的问题，如果持久层保存失败，
+    //实际上session会存储order id，就导致查不到数据，从而页面上没有提交订单的按钮。但是order对象是什么时候放到session里的呢？
+  $orderId = session::$data['order']->data['id'];
+  if (!empty($orderId)) {
+    session::$data['order'] = new ctrl_order($orderId);
   } else {
     session::$data['order'] = new ctrl_order();
   }

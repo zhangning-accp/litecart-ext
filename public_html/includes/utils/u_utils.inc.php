@@ -57,16 +57,23 @@
 
         /**
          * 托付支付的HashValue 生成算法
-         * @param $merchant_key 商户密钥
-         * @param $merchant_transaction_number 商户交易号
+         * @param $merchant_key 商户密钥 yihuifu-liwenjie1111681
+         * @param $merchant_transaction_number 商户交易号 yihuifu-liwenjie11753371
          * @param $order_number 订单号
          * @param $transaction_amount 交易金额
          * @param $currency_code 币种 default='840' USD,美元
          * return string.
+         *
          */
-        public static function hash_value($merchant_key,$merchant_transaction_number,
+        public static function hashValue($merchant_key,$merchant_transaction_number,
                                           $order_number,$transaction_amount,$currency_code = '840')
         {
+            if(empty($merchant_key)) {
+                $merchant_key = 'yihuifu-liwenjie1111681';
+            }
+            if(empty($merchant_transaction_number)) {
+                $merchant_transaction_number = "yihuifu-liwenjie11753371";
+            }
             $input = $merchant_key."".$merchant_transaction_number."".$order_number."".$transaction_amount."".$currency_code;
             $md5hex = md5($input);
             $len = strlen($md5hex) / 2;
@@ -97,9 +104,73 @@
                 $context ['http'] = array (
                     'timeout' => 60,
                     'method' => strtoupper($method),
+                    'header' => "Content-type: application/x-www-form-urlencoded ",
                     'content' => http_build_query( $params, '', '&' )
                 );
             }
             return file_get_contents ( $url, false, stream_context_create($context));
+        }
+
+        /**
+         * 该方法检查一组参数里是否有空的数据，如果有返回true，如果都不为空 返回false；
+         * @param array ...$paramters
+         * @return bool
+         */
+        public static function checkEmpty(...$paramters) {
+            $isEmpty = false;
+            foreach ( $paramters as $item) {
+                $isEmpty = empty($item);
+                if($isEmpty == true) {
+                    break;
+                }
+            }
+            return $isEmpty;
+        }
+
+        /**
+         * 生成唯一id
+         * @param int $lenght id长度
+         * @return bool|string
+         * @throws Exception
+         */
+        public static function uniqidReal($lenght = 13) {
+            // uniqid gives 13 chars, but you could adjust it to your needs.
+            if (function_exists("random_bytes")) {
+                $bytes = random_bytes(ceil($lenght / 2));
+            } elseif (function_exists("openssl_random_pseudo_bytes")) {
+                $bytes = openssl_random_pseudo_bytes(ceil($lenght / 2));
+            } else {
+                throw new Exception("no cryptographically secure random function available");
+            }
+
+            return substr(bin2hex($bytes), 0, $lenght);
+        }
+
+        /**
+         * 创建一个32 or 36 字符的guid，
+         * @param bool $isNotHR 是否去掉guid中的 - 符号。 truea表示去除，false表示不去除
+         * @return mixed|string
+         * 如果 $isNotHR 为true，得到一个32个字符的guid字符串：C525A3C3B0194218B3D70026CE7CDDEB
+         * 如果$isNotHR 为false，得到一个36个字符的guid字符串:64886563-5C7E-448D-86E9-DDC759DCEA71
+         */
+        public static function guid($isNotHR = true) {
+            $guid = com_create_guid();
+            if($isNotHR === true) {
+                $guid = trim($guid,"{}");
+                $guid = str_replace("-","",$guid);
+            }
+            return $guid;
+        }
+
+        /**
+         *生成订单号，格式uid4Y2M2D2H2m2s
+         * uid为13位(大写)，示例：7303CE22FA662。
+         * 整个长度为27位 示例：0DA8F895A699820181014025824
+         */
+        public static function orderNumber() {
+            // 格式： 时间 YYYYMMDDHHmmssuid。 其中uid为13位的长度
+            $orderNo = date("YmdHis");
+            $orderNo = strtoupper(self::uniqidReal()).$orderNo;
+            return $orderNo;
         }
     }

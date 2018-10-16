@@ -1,3 +1,8 @@
+<?php
+    /**
+     * //TODO: 前端首页右上角 Shopping Cart....
+     */
+?>
 <div id="cart">
   <a href="<?php echo htmlspecialchars($link); ?>">
     <div class="details">

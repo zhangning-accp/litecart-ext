@@ -7,7 +7,7 @@
   breadcrumbs::add(language::translate('title_order_success', 'Order Success'));
 
   $order = &session::$data['order'];
-
+    // 订单id是什么时候生成的？ 在order_process 里需要保存订单。这就有问题了。
   if (empty($order->data['id'])) die('Error: Missing session order object');
 
   $payment = new mod_payment();

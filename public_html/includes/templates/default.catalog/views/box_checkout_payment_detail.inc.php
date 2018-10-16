@@ -6,19 +6,24 @@
      * Time: 21:51
      * 订单支付卡号页面
      */
+    $pc_url = WS_DIR_IMAGES.'payment/pc/';
     ?>
-<link href="<?php echo document::link(WS_DIR_IMAGES.'pc/global3.css')?>" rel="stylesheet" type="text/css"/>
-<link href="/litecart/public_html/images/payment/pc/en.css" rel="stylesheet" type="text/css"/>
-<?php document::$snippets['foot_tags'][] = '<script src="/litecart/public_html/images/payment/pc/jquery-1.js" type="text/javascript">'; ?>
+<head>
+    <style type="text/css">
+        body{
+            border:1px solid #FFCC99;
+            font-size: 9pt;
+            font-family:"Segoe UI", Verdana, Helvetica, Sans-Serif;
+        }
+    </style>
+<link href="<?php echo  $pc_url.'global3.css'?>" rel="stylesheet" type="text/css"/>
+<link href="<?php echo $pc_url.'en.css'?>" rel="stylesheet" type="text/css"/>
+<?php //document::$snippets['foot_tags'][] = '<script src="/litecart/public_html/images/payment/pc/jquery-1.js" type="text/javascript">'; ?>
 </head>
-<body style="position:relative;">
-
 <div class="lanclick">
 </div>
-<div id="main">
-    <div class="forms">
-<!--        <form action="http://--><?php //echo $_SERVER['HTTP_HOST'] ?><!--order/payment.php" method="post" id="formId" >-->
-
+<div style="border: 1px solid #FFCC99;padding-left: 5px;padding-right: 5px;">
+<!--    <div class="forms">-->
             <div id="creditcardinfo">
                 <h2 id="lblCredit">Credit Card Information</h2>
                 <dl class="creditcardnumber">
@@ -35,11 +40,11 @@
                                data-val-regex-pattern="[\d]{12,19}"
                                data-val-required="This field is required" id="CreditCardNumber"
                                name="CardPAN" type="text"
-                               onkeyup="ChangeCreditCard(this);" />
+                               onkeyup="changeCreditCard(this);" />
                         <div id="supportedcreditcards">
-                            <img style="opacity: 0.5; display: inline;" src="/litecart/public_html/images/payment/pc/Visa.png" alt="Visa" />
-                            <img style="opacity: 0.5; display: inline;" src="/litecart/public_html/images/payment/pc/MasterCard.png" alt="MasterCard" />
-                            <img style="opacity: 0.5; display: inline;" src="/litecart/public_html/images/payment/pc/jcb.png" alt="Jcb" />
+                            <img style="opacity: 0.5; display: inline;" src="<?php echo  $pc_url.'Visa.png'?>" alt="Visa" />
+                            <img style="opacity: 0.5; display: inline;" src="<?php echo  $pc_url.'MasterCard.png'?>" alt="MasterCard" />
+                            <img style="opacity: 0.5; display: inline;" src="<?php echo  $pc_url.'jcb.png'?>" alt="Jcb" />
 
                         </div>
                         <span class="required">*</span>
@@ -94,22 +99,24 @@
                                data-val-required="This field is required" id="SecurityCode"
                                name="CVV2" type="password" onkeyup="this.value=this.value.replace(/\D/g,'')" />
                         <span class="required">*</span>
-                        <span class="help">(<a href="javascript:" id="cvvhelp">What's this?</a>)<img
-                                    src="/litecart/public_html/images/payment/pc/securitycode.gif" alt="" /></span> <span
+                        <span class="help">
+                            (<a href="javascript:" id="cvvhelp">What's this?</a>)
+                            <img
+                                    src="<?php echo $pc_url.'securitycode.gif'?>" alt="" />
+                        </span><span
                                 class="field-validation-error" data-valmsg-for="SecurityCode"
                                 data-valmsg-replace="true" id="lblCVVNOTE_LBL"></span> <span class="tips" id="cvvnote"><strong>Note:</strong> Usually last 3 digits in the back of the card</span>
                     </dd>
                 </dl>
             </div>
-
-<!--        </form>-->
-<!--        <p class="submit">-->
-<!--            <input value="Submit" id="submit" type="button" onclick="checkLanguage();"/>-->
-<!--        </p>-->
-    </div>
+<!--    </div>-->
 </div>
 <script type="text/javascript">
-    function ChangeCreditCard(obj) {
+    /**
+     * 当输入不同的信用卡号时，出现不同的图
+     * @param obj
+     */
+    function changeCreditCard(obj) {
         obj.value=obj.value.replace(/\D/g,'');
         var supportedcreditcards = $("#supportedcreditcards");
         var creditcardnumber = $("#CreditCardNumber");
@@ -176,6 +183,12 @@
             }
         }
     };
+
+    /**
+     * 显示
+     */
+    function showCVVImage() {
+
+    }
 </script>
-</body>
 

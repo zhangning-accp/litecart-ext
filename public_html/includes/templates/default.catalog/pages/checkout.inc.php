@@ -1,6 +1,6 @@
 <?php
     /**
-     * 订单页的整个主页面。
+     * //TODO:订单页的整个主页面。
      */
 ?>
 
@@ -29,8 +29,6 @@
               <!-- end -->
           </div>
       </div>
-
-
     </div>
 
     <div class="summary wrapper"></div>
@@ -40,7 +38,7 @@
 </main>
 
 <script>
-// Queue Handler
+// Queue Handler TODO: 卡号详情在这加入的
 
   var updateQueue = [
     {component: 'cart',     data: null, refresh: true},
@@ -391,7 +389,7 @@
     queueUpdateTask('summary', null, true);
   });
 
-// Summary Form: Process Data
+// TODO: 提交订单的按钮脚本 Summary Form: Process Data
 
   $('#box-checkout-summary-wrapper').on('click', 'button[name="confirm_order"]', function(e) {
     if (window.customer_form_changed) {
@@ -401,6 +399,9 @@
   });
 
   $('body').on('submit', 'form[name="checkout_form"]', function(e) {
-    $('#box-checkout-summary button[name="confirm_order"]').css('display', 'none').before('<div class="btn btn-block btn-default btn-lg disabled"><?php echo functions::draw_fonticon('fa-spinner'); ?> <?php echo htmlspecialchars(language::translate('text_please_wait', 'Please wait')); ?>&hellip;</div>');
+    $('#box-checkout-summary button[name="confirm_order"]')
+        .css('display', 'none')
+        .before('<div class="btn btn-block btn-default btn-lg disabled"><?php echo functions::draw_fonticon('fa-spinner'); ?><?php echo htmlspecialchars(language::translate('text_please_wait', 'Please wait')); ?>&hellip;</div>');
+
   });
 </script>
