@@ -16,7 +16,7 @@
      * attributes:* required.
      * head_title:* required.
      * meta_description:* required.
-     * image:* required.
+     * image:* required. 多个使用 ｜ 分隔
      * price:* required.
      * quantity:* required.
      * option_groups: option_name:option_value. 键值对，值只有一个，不支持多个。
@@ -31,7 +31,7 @@
      */
     function importProducts($csv)
     {
-        $product_map = array();
+        //$product_map = array();
         $line = 0;
         foreach ($csv as $row) {//遍历csv文件
             $date = u_utils::getYMDHISDate();
@@ -86,34 +86,51 @@
                 "md5" => "",
                 "price" => 0
             );
+
+//            foreach($rows as $key => $value) {
+//                if($key === 'code' && empty($value)) {
+//                    //TODO: 跳转到导入界面，同时提醒数据有误。后期实现。
+            //notices::add('errors', $e->getMessage());
+//                }
+//            }
             foreach ($row as $key => $value) {
                 $product_info[$key] = addslashes(trim($value));
             }
             // -------------- 商品数据构建完毕 ---------------
-            $product_name = $product_info['name'];
-            if (!empty($product_name)) {
-                importProduct($product_info, $product_map);
+            //$product_name = $product_info['name'];
+            $product_code = $product_info['code'];
+            if (!empty($product_code)) {
+                importProduct($product_info);
             }
         }
     }
 
-    function importProduct(&$product_info, &$product_map)
+    function importProduct(&$product_info)
     {
         //------------ 添加商品信息 -----------------
-        $product_id = $product_info['id'];
-        $md5_value = md5Product($product_info);
-        if (empty($product_id)) {
-            $product_id = $product_map["'" . $md5_value . "'"];
-            if (!empty($product_id)) {
-                $product_info['id'] = $product_id;
-            }
-        }
+
+        $product_code = $product_info['code'];
+//        $product_id = $product_info['id'];
+//        $md5_value = md5Product($product_info);
+//        if (empty($product_id)) {
+//            $product_id = $product_map["'" . $md5_value . "'"];
+//            if (!empty($product_id)) {
+//                $product_info['id'] = $product_id;
+//            }
+//        }
         //1. 拆分image字符串
         $product_info['image'] = array_filter(preg_split("/\|/", $product_info['image']));
         $main_image = "";
         if (!empty($product_info['image'])) {
             $main_image = $product_info['image'][0];
         }
+        // 以后这里逻辑要改为如果根据code查询，如果没有，则添加，如果有则修改
+        if (!empty($product_code)) {
+            $sql = "select id from " . DB_TABLE_PRODUCTS . " where code = '". $product_code . "'";
+            $result = database::fetch(database::query($sql));
+            $product_id = $result['id'];
+            $product_info['id'] = $product_id;
+
         if (empty($product_id)) {//新增
             // 新增，新增后，将product_id赋值给id
             $sql = "INSERT INTO " . DB_TABLE_PRODUCTS . " (status,manufacturer_id,supplier_id,delivery_status_id,
@@ -123,13 +140,13 @@
                       tax_class_id,image,views,purchases,date_valid_from,date_valid_to,date_updated,date_created)
                        values (%d,%d,%d,%d,
                               %d,%d,%d,'%s',
-                              uuid(),uuid(),'%s','%s','%s','%s',%.4f,%d,%d,
+                              '%s',uuid(),'%s','%s','%s','%s',%.4f,%d,%d,
                               '%s',%d,%d,%d,'%s',%.4f,'%s',
                               %d,'%s',%d,%d,'%s','%s','%s','%s')";
             $sql = u_utils::builderSQL($sql, array(
                 $product_info['status'], $product_info['manufacturer_id'], $product_info['supplier_id'], $product_info['delivery_status_id'],
                 $product_info['sold_out_status_id'], $product_info['default_category_id'], '', $product_info['keywords'],
-                $product_info['mpn'], $product_info['upc'], $product_info['gtin'], $product_info['taric'],
+                $product_code,$product_info['mpn'], $product_info['upc'], $product_info['gtin'], $product_info['taric'],
                 0, $product_info['quantity_unit_id'], $product_info['weight'],
                 $product_info['weight_class'], $product_info['dim_x'], $product_info['dim_y'], $product_info['dim_z'],
                 $product_info['dim_class'], $product_info['price'], $product_info['purchase_price_currency_code'],
@@ -149,8 +166,8 @@
                 $product_info['meta_description'], $product_info['attributes']));
             $result = database::query($sql);
 
-        } else {
-            if (empty($product_map["'" . $md5_value . "'"])) {// 如果MD5值对应的value为空，表示是第一次更新。
+        } else { // 更新
+            //if (empty($product_map["'" . $md5_value . "'"])) {// 如果MD5值对应的value为空，表示是第一次更新。
                 // 1. 对于product表，进行更新，
                 $date = u_utils::getYMDHISDate();
                 $sql = "UPDATE " . DB_TABLE_PRODUCTS . "SET status = %d,quantity = %d,purchase_price = %.4f,image = '%s',date_updated = '%s' WHERE id = %d";
@@ -164,9 +181,9 @@
                     $product_info['description'], $product_info['head_title'], $product_info['meta_description'],
                     $product_info['attributes'], $product_id));
                 database::query($sql);
-            }
+            //}
         }// 以上代码测试通过 2018-09-18 14:50
-        $product_map["'" . $md5_value . "'"] = $product_id;
+        //$product_map["'" . $md5_value . "'"] = $product_id;
         addImages($product_info); //处理图片数据
         addOptionGroup($product_info);
         //echo "addProductGroup before:".$product_info['product_groups'].PHP_EOL;
@@ -174,6 +191,7 @@
         //echo "addProductGroup after:".$product_info['product_groups'].PHP_EOL;
         addCategories($product_info);
         updateProductOther($product_info);
+    }
     }
 
     /**
@@ -631,8 +649,7 @@
 
             header('Content-Type: text/plain; charset=' . language::$selected['charset']);
 
-            echo "CSV Import\r\n"
-                . "----------\r\n";
+            echo "CSV Import\r\n" . "----------\r\n";
 
             $csv = file_get_contents($_FILES['file']['tmp_name']);
             $csv = functions::csv_decode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset']);
