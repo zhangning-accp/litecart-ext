@@ -331,7 +331,7 @@
           }
           break;
 
-        case 'select':
+        case 'select'://TODO: 这里是产品select 绘制的代码
 
           $options = array(array('-- '. language::translate('title_select', 'Select') .' --', ''));
           foreach ($group['values'] as $value) {

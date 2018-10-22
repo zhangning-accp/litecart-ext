@@ -1,4 +1,7 @@
 <?php
+    /**
+     * TODO: 首页左边的浏览记录
+     */
   if (empty(session::$data['recently_viewed_products'])) return;
 
   if (settings::get('box_recently_viewed_products_num_items') == 0) return;
@@ -29,10 +32,17 @@
 
   $count = 0;
   foreach($recently_viewed_products as $product) {
+      //TODO: 前端首页左边 最近浏览的商品信息
+      $thumbnail = $product['image'];
+      if(!u_utils::startWith("http",$thumbnail)) {
+//          $original = WS_DIR_IMAGES . $image;
+          $thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $thumbnail, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+//          $thumbnail_2x = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $image, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+      }
     $box_recently_viewed_products->snippets['products'][] = array(
       'id' => $product['id'],
       'name' => $product['name'],
-      'thumbnail' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $product['image'], $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim')),
+      'thumbnail' => $thumbnail,//functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $product['image'], $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim')),
       'link' => document::ilink('product', array('product_id' => $product['id'])),
     );
     if (++$count >= settings::get('box_recently_viewed_products_num_items')) break;

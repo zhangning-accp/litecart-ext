@@ -33,5 +33,7 @@ includes/routes/url_index.inc.php
 includes/routes/url_information.inc.php
 includes/routes/url_manufacturer.inc.php
 includes/routes/url_product.inc.php
+includes/references/ref_product.inc.php
+includes/controllers/ctrl_option_group.inc.php
 includes/templates/default.catalog/config.inc.php
 pages/ajax/cart.json.inc.php

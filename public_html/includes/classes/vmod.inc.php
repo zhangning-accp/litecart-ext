@@ -1,4 +1,9 @@
 <?php
+
+    /**
+     * // TODO: 需要研究这个类的作用
+     * Class vmod
+     */
   class vmod {
 
     public static function check($file) {

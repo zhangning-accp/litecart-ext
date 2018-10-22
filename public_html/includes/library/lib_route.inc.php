@@ -1,5 +1,9 @@
 <?php
 
+    /**
+     * 这个应该是路由处理方法的相关算法类
+     * Class route
+     */
   class route {
     private static $_classes = array();
     private static $_links_cache = array();

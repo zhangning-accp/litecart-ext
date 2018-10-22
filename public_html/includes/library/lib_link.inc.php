@@ -1,5 +1,9 @@
 <?php
 
+    /**
+     * 连接基础处理的类
+     * Class link
+     */
   class link {
 
     //public static function construct() {

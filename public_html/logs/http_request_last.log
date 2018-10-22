@@ -1,199 +1,181 @@
-## [2018-09-09 18:31:46] Request ##############################
+## [2018-10-22 10:33:43] Request ##############################
 
-GET /feeds/discussions.rss HTTP/1.1
+POST /feeds/addons?whoami=http%3A%2F%2Flocalhost%2Flitecart%2Fpublic_html%2Fen%2F&version=2.1.3 HTTP/1.1
 Host: www.litecart.net
 User-Agent: LiteCart/2.1.3
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 162
 Connection: Close
 
+platform=LiteCart&version=2.1.3&name=My+Store&email=store%40email.com&language_code=en&country_code=CN&url=http%3A%2F%2Flocalhost%2Flitecart%2Fpublic_html%2Fen%2F
 
-
-## [2018-09-09 18:31:47] Response — 9465 bytes transferred in 1.248 s ##############################
+## [2018-10-22 10:33:45] Response — 7971 bytes transferred in 1.924 s ##############################
 
 HTTP/1.1 200 OK
-Date: Sun, 09 Sep 2018 10:31:47 GMT
-Content-Type: application/rss+xml; charset=utf-8
+Date: Mon, 22 Oct 2018 02:33:46 GMT
+Content-Type: text/plain; charset=UTF-8
 Transfer-Encoding: chunked
 Connection: close
-Set-Cookie: __cfduid=dc37dcfbea1c4560a6fbd146afbb29e561536489106; expires=Mon, 09-Sep-19 10:31:46 GMT; path=/; domain=.litecart.net; HttpOnly
+Set-Cookie: __cfduid=d011ab00358e382baebc50b345bd62cd81540175625; expires=Tue, 22-Oct-19 02:33:45 GMT; path=/; domain=.litecart.net; HttpOnly
 X-Powered-By: LiteCart HQ
 Expires: Thu, 19 Nov 1981 08:52:00 GMT
 Cache-Control: no-store, no-cache, must-revalidate
 Pragma: no-cache
 Content-Language: en
-Set-Cookie: LCSESSID=9d4f00d5ac7a1e5d1a03b1333ec0a10c; path=/
-Set-Cookie: language_code=en; expires=Tue, 09-Oct-2018 10:31:47 GMT; Max-Age=2592000; path=/
-Set-Cookie: cart[uid]=5b94f6930a13b; expires=Mon, 09-Sep-2019 10:31:47 GMT; Max-Age=31536000; path=/
-Set-Cookie: currency_code=USD; expires=Tue, 09-Oct-2018 10:31:47 GMT; Max-Age=2592000; path=/
+Set-Cookie: LCSESSID=a4595aedd3c50524061fa8a8f17ca25c; path=/
+Set-Cookie: language_code=en; expires=Wed, 21-Nov-2018 02:33:45 GMT; Max-Age=2592000; path=/
+Set-Cookie: cart[uid]=5bcd3709f1f44; expires=Tue, 22-Oct-2019 02:33:45 GMT; Max-Age=31536000; path=/
+Set-Cookie: currency_code=USD; expires=Wed, 21-Nov-2018 02:33:45 GMT; Max-Age=2592000; path=/
 Expect-CT: max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"
 Server: cloudflare
-CF-RAY: 4578fcb63dd83452-LHR
+CF-RAY: 46d88f990dff515e-SJC
 
 <?xml version="1.0" encoding="utf-8" ?>
 <rss version="2.0">
   <channel>
-    <title>LiteCart Forum Discussions</title>
-    <link>https://www.litecart.net/forums/</link>
-    <description>The most recent forum activity.</description>
+    <title>LiteCart Add-Ons</title>
+    <link>http://www.litecart.net/?</link>
+    <description></description>
     <language>en</language>
     <item>
-      <category><![CDATA[Add-ons]]></category>
-      <title><![CDATA[Customer Discount for version 2.1.3]]></title>
-      <link>https://www.litecart.net/forums/7/add-ons/8277/customer-discount-for-version-2-1-3</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[vilaiporn]]></author>
-      <pubDate>Sun, 09 Sep 2018 09:14:45 +0000</pubDate>
+      <title><![CDATA[ExchangeRatesAPI.io Currency U...]]></title>
+      <link>https://www.litecart.net/addons/238/exchangeratesapi-io-currency-updater</link>
+      <description><![CDATA[Automatically update your curr...]]></description>
+      <category><![CDATA[Job Modules]]></category>
+      <pubDate>Sun, 21 Oct 2018 01:07:01 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Installation and Configuration]]></category>
-      <title><![CDATA[404 the requested url /en was not found]]></title>
-      <link>https://www.litecart.net/forums/3/installation-and-configuration/7951/404-the-requested-url-en-was-not-found</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[bob512]]></author>
-      <pubDate>Sat, 08 Sep 2018 19:13:04 +0000</pubDate>
+      <title><![CDATA[Composer for LiteCart]]></title>
+      <link>https://www.litecart.net/addons/255/composer-for-litecart</link>
+      <description><![CDATA[PHP dependancy manager fit for...]]></description>
+      <category><![CDATA[Core Features]]></category>
+      <pubDate>Tue, 16 Oct 2018 18:34:19 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[General Discussions]]></category>
-      <title><![CDATA[5 Columns of products on main page]]></title>
-      <link>https://www.litecart.net/forums/2/general-discussions/7814/5-columns-of-products-on-main-page</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[akifmansoor]]></author>
-      <pubDate>Sat, 08 Sep 2018 14:48:38 +0000</pubDate>
+      <title><![CDATA[PayPal Standard ]]></title>
+      <link>https://www.litecart.net/addons/244/paypal-standard</link>
+      <description><![CDATA[PayPal standard checkout modul...]]></description>
+      <category><![CDATA[Payment Modules]]></category>
+      <pubDate>Sat, 13 Oct 2018 10:43:01 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Installation and Configuration]]></category>
-      <title><![CDATA[Code field in products / manufacturers]]></title>
-      <link>https://www.litecart.net/forums/3/installation-and-configuration/8381/code-field-in-products-manufacturers</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[bobdrinktech]]></author>
-      <pubDate>Sat, 08 Sep 2018 12:07:20 +0000</pubDate>
+      <title><![CDATA[Customer Discount]]></title>
+      <link>https://www.litecart.net/addons/168/customer-discount</link>
+      <description><![CDATA[Set percentage discount for an...]]></description>
+      <category><![CDATA[Core Features]]></category>
+      <pubDate>Thu, 04 Oct 2018 12:07:23 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Add-ons]]></category>
-      <title><![CDATA[Demo]]></title>
-      <link>https://www.litecart.net/forums/7/add-ons/8375/demo</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[friends4u]]></author>
-      <pubDate>Thu, 06 Sep 2018 19:57:19 +0000</pubDate>
+      <title><![CDATA[Stripe (Card Payment) - cipher...]]></title>
+      <link>https://www.litecart.net/addons/251/stripe-card-payment-ciphercoin</link>
+      <description><![CDATA[Card payment module for Stripe...]]></description>
+      <category><![CDATA[Payment Modules]]></category>
+      <pubDate>Sat, 29 Sep 2018 16:43:40 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Add-ons]]></category>
-      <title><![CDATA[Does not work and gives warnings]]></title>
-      <link>https://www.litecart.net/forums/7/add-ons/8366/does-not-work-and-gives-warnings</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[bobdrinktech]]></author>
-      <pubDate>Thu, 06 Sep 2018 06:42:52 +0000</pubDate>
+      <title><![CDATA[Related Products]]></title>
+      <link>https://www.litecart.net/addons/210/related-products</link>
+      <description><![CDATA[Display a box of related produ...]]></description>
+      <category><![CDATA[Core Features]]></category>
+      <pubDate>Thu, 27 Sep 2018 23:45:52 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Add-ons]]></category>
-      <title><![CDATA[How to add pic at VoguePay checkout]]></title>
-      <link>https://www.litecart.net/forums/7/add-ons/8369/how-to-add-pic-at-voguepay-checkout</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[lucio]]></author>
-      <pubDate>Thu, 06 Sep 2018 00:30:52 +0000</pubDate>
+      <title><![CDATA[Pre-Order]]></title>
+      <link>https://www.litecart.net/addons/253/pre-order</link>
+      <description><![CDATA[Allow pre-orders for products]]></description>
+      <category><![CDATA[Core Features]]></category>
+      <pubDate>Thu, 27 Sep 2018 01:42:55 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Feature Requests]]></category>
-      <title><![CDATA[Commissions for sellers / users]]></title>
-      <link>https://www.litecart.net/forums/5/feature-requests/8254/commissions-for-sellers-users</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[dodo]]></author>
-      <pubDate>Tue, 04 Sep 2018 22:37:54 +0000</pubDate>
+      <title><![CDATA[More  responsive cart]]></title>
+      <link>https://www.litecart.net/addons/229/more-responsive-cart</link>
+      <description><![CDATA[Responsive cart without horizo...]]></description>
+      <category><![CDATA[Templates and Themes]]></category>
+      <pubDate>Wed, 12 Sep 2018 14:50:54 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Add-ons]]></category>
-      <title><![CDATA[Does not send emails to supplier anymore]]></title>
-      <link>https://www.litecart.net/forums/7/add-ons/8365/does-not-send-emails-to-supplier-anymore</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[bobdrinktech]]></author>
-      <pubDate>Sun, 02 Sep 2018 09:20:28 +0000</pubDate>
+      <title><![CDATA[Discount Codes]]></title>
+      <link>https://www.litecart.net/addons/35/discount-codes</link>
+      <description><![CDATA[Codes that leave a discount.]]></description>
+      <category><![CDATA[Core Features]]></category>
+      <pubDate>Tue, 11 Sep 2018 22:56:36 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[General Discussions]]></category>
-      <title><![CDATA[how to: generate a dynamic info about product ]]></title>
-      <link>https://www.litecart.net/forums/2/general-discussions/8363/how-to-generate-a-dynamic-info-about-product</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[denisdemais]]></author>
-      <pubDate>Sat, 01 Sep 2018 01:50:20 +0000</pubDate>
+      <title><![CDATA[Monthly Sales By Product]]></title>
+      <link>https://www.litecart.net/addons/109/monthly-sales-by-product</link>
+      <description><![CDATA[A report of product monthly sa...]]></description>
+      <category><![CDATA[Reports and Statistics]]></category>
+      <pubDate>Mon, 10 Sep 2018 21:46:46 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[General Discussions]]></category>
-      <title><![CDATA[need subprogram script to accept credit cards]]></title>
-      <link>https://www.litecart.net/forums/2/general-discussions/8342/need-subprogram-script-to-accept-credit-cards</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[lucio]]></author>
-      <pubDate>Wed, 29 Aug 2018 13:01:51 +0000</pubDate>
+      <title><![CDATA[Nets Netaxept]]></title>
+      <link>https://www.litecart.net/addons/252/nets-netaxept</link>
+      <description><![CDATA[Payment module for Nets Netaxe...]]></description>
+      <category><![CDATA[Payment Modules]]></category>
+      <pubDate>Sun, 09 Sep 2018 01:53:36 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Errors and Troubleshooting]]></category>
-      <title><![CDATA[Warning: Passed argument cannot be empty...]]></title>
-      <link>https://www.litecart.net/forums/15/errors-and-troubleshooting/7443/warning-passed-argument-cannot-be-empty</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[colby]]></author>
-      <pubDate>Wed, 29 Aug 2018 10:16:30 +0000</pubDate>
+      <title><![CDATA[Product Quantity Prices]]></title>
+      <link>https://www.litecart.net/addons/54/product-quantity-prices</link>
+      <description><![CDATA[Set unit price by quantity]]></description>
+      <category><![CDATA[Core Features]]></category>
+      <pubDate>Wed, 05 Sep 2018 12:44:21 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Errors and Troubleshooting]]></category>
-      <title><![CDATA[Not found report continues]]></title>
-      <link>https://www.litecart.net/forums/15/errors-and-troubleshooting/8352/not-found-report-continues</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[tonny]]></author>
-      <pubDate>Tue, 28 Aug 2018 20:05:46 +0000</pubDate>
+      <title><![CDATA[Supplier Order Forwarding]]></title>
+      <link>https://www.litecart.net/addons/82/supplier-order-forwarding</link>
+      <description><![CDATA[A drop shipping solution]]></description>
+      <category><![CDATA[Core Features]]></category>
+      <pubDate>Wed, 05 Sep 2018 12:41:34 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Errors and Troubleshooting]]></category>
-      <title><![CDATA[Undefined Variable - Notice]]></title>
-      <link>https://www.litecart.net/forums/15/errors-and-troubleshooting/7215/undefined-variable-notice</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[anagramasia]]></author>
-      <pubDate>Tue, 28 Aug 2018 15:43:38 +0000</pubDate>
+      <title><![CDATA[Featured Products]]></title>
+      <link>https://www.litecart.net/addons/72/featured-products</link>
+      <description><![CDATA[Display a box of manually sele...]]></description>
+      <category><![CDATA[Boxes]]></category>
+      <pubDate>Wed, 05 Sep 2018 12:37:31 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[General Discussions]]></category>
-      <title><![CDATA[Error when i login to view products]]></title>
-      <link>https://www.litecart.net/forums/2/general-discussions/8356/error-when-i-login-to-view-products</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[dibtti]]></author>
-      <pubDate>Tue, 28 Aug 2018 15:41:03 +0000</pubDate>
+      <title><![CDATA[Android Apps Build Free]]></title>
+      <link>https://www.litecart.net/addons/141/android-apps-build-free</link>
+      <description><![CDATA[Transform website to Android a...]]></description>
+      <category><![CDATA[Other]]></category>
+      <pubDate>Thu, 30 Aug 2018 07:51:28 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Installation and Configuration]]></category>
-      <title><![CDATA[Remove required from name and last name]]></title>
-      <link>https://www.litecart.net/forums/3/installation-and-configuration/8353/remove-required-from-name-and-last-name</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[vilaiporn]]></author>
-      <pubDate>Tue, 28 Aug 2018 10:02:43 +0000</pubDate>
+      <title><![CDATA[Fortnox [SE]]]></title>
+      <link>https://www.litecart.net/addons/249/fortnox</link>
+      <description><![CDATA[Send orders to Fortnox straigh...]]></description>
+      <category><![CDATA[Order Action Modules]]></category>
+      <pubDate>Sun, 26 Aug 2018 20:22:48 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Templates and CSS]]></category>
-      <title><![CDATA[How can I add a "flipbook" effect in a description]]></title>
-      <link>https://www.litecart.net/forums/12/templates-and-css/8336/how-can-i-add-a-flipbook-effect-in-a-description</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[ash]]></author>
-      <pubDate>Sun, 26 Aug 2018 14:20:31 +0000</pubDate>
+      <title><![CDATA[LiqPay [UA]]]></title>
+      <link>https://www.litecart.net/addons/248/liqpay</link>
+      <description><![CDATA[LiqPay payment module]]></description>
+      <category><![CDATA[Payment Modules]]></category>
+      <pubDate>Thu, 23 Aug 2018 16:53:53 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Templates and CSS]]></category>
-      <title><![CDATA[ Missing picture in shipping module.]]></title>
-      <link>https://www.litecart.net/forums/12/templates-and-css/3953/missing-picture-in-shipping-module</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[kataluszek]]></author>
-      <pubDate>Fri, 24 Aug 2018 09:52:56 +0000</pubDate>
+      <title><![CDATA[Nova Poshta [UA]]]></title>
+      <link>https://www.litecart.net/addons/247/nova-poshta</link>
+      <description><![CDATA[Ukrainian delivery service]]></description>
+      <category><![CDATA[Shipping Modules]]></category>
+      <pubDate>Thu, 23 Aug 2018 13:36:10 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Installation and Configuration]]></category>
-      <title><![CDATA[quickest way to install modules]]></title>
-      <link>https://www.litecart.net/forums/3/installation-and-configuration/8327/quickest-way-to-install-modules</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[breamreaper]]></author>
-      <pubDate>Wed, 22 Aug 2018 10:23:40 +0000</pubDate>
+      <title><![CDATA[Ukrainian Language Pack [UA]]]></title>
+      <link>https://www.litecart.net/addons/246/ukrainian-language-pack</link>
+      <description><![CDATA[Ukrainian Language Pack]]></description>
+      <category><![CDATA[Translations]]></category>
+      <pubDate>Sun, 19 Aug 2018 13:11:26 +0000</pubDate>
     </item>
     <item>
-      <category><![CDATA[Installation and Configuration]]></category>
-      <title><![CDATA[product modal window]]></title>
-      <link>https://www.litecart.net/forums/3/installation-and-configuration/8326/product-modal-window</link>
-      <description><![CDATA[]]></description>
-      <author><![CDATA[bobdrinktech]]></author>
-      <pubDate>Wed, 22 Aug 2018 06:31:47 +0000</pubDate>
+      <title><![CDATA[Türkçe Çeviri - Turkish Tra... [TR]]]></title>
+      <link>https://www.litecart.net/addons/245/turkce-ceviri-turkish-translation</link>
+      <description><![CDATA[Turkish translations for LiteC...]]></description>
+      <category><![CDATA[Translations]]></category>
+      <pubDate>Thu, 19 Jul 2018 12:22:58 +0000</pubDate>
     </item>
   </channel>
 </rss>

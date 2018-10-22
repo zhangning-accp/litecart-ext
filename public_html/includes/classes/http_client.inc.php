@@ -1,5 +1,9 @@
 <?php
 
+    /**
+     * http 客户端
+     * Class http_client
+     */
   class http_client {
     public $follow_redirects = false;
     public $timeout = 20;

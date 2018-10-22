@@ -20,10 +20,15 @@
   );
 
   foreach (cart::$items as $key => $item) {
+      //TODO: 订单页面 当前订单商品列表
+      $thumbnail = $item['image'];
+      if(!u_utils::startWith("http",$thumbnail)) {
+          $thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $thumbnail, 320, 320, 'FIT_USE_WHITESPACING');
+      }
     $box_checkout_cart->snippets['items'][$key] = array(
       'product_id' => $item['product_id'],
       'link' => document::ilink('product', array('product_id' => $item['product_id'])),
-      'thumbnail' => functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $item['image'], 320, 320, 'FIT_USE_WHITESPACING'),
+      'thumbnail' =>$thumbnail,
       'name' => $item['name'],
       'sku' => $item['sku'],
       'options' => array(),

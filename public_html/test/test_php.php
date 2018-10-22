@@ -34,6 +34,7 @@
 //        $orderNo = u_utils::orderNo();
 //        echo "orderNo:".$orderNo."</br>";
 //    }
+
     echo  "Test sending email....";
     $email = new email();
     $email->add_recipient("909704945@qq.com")   // 收件人

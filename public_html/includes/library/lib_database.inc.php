@@ -33,6 +33,11 @@
       if (($key = array_search('STRICT_ALL_TABLES', $sql_mode)) !== false) {
         unset($sql_mode[$key]);
       }
+    // 发现有些数据库没有STRICT_ALL_TABLES sql_mode,所以加上这句，否则要出现 Field 'frontend' doesn't have a default value
+//        insert into `litecart`.`lc_translations` 的错误
+      if (($key = array_search('STRICT_TRANS_TABLES', $sql_mode)) !== false) {
+          unset($sql_mode[$key]);
+      }
 
       if (($key = array_search('ONLY_FULL_GROUP_BY', $sql_mode)) !== false) {
         unset($sql_mode[$key]);

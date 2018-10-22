@@ -31,6 +31,9 @@
   define('WS_DIR_ROUTES',      WS_DIR_INCLUDES  . 'routes/');
   define('WS_DIR_TEMPLATES',   WS_DIR_INCLUDES  . 'templates/');
 
+  define('WS_DIR_TEMPLATES_DEFAULT_CATALOG',   WS_DIR_TEMPLATES  . 'default.catalog/');
+  define('WS_DIR_TEMPLATES_DEFAULT_CATALOG_IMAGES',   WS_DIR_TEMPLATES_DEFAULT_CATALOG  . 'images/');
+
 
 ######################################################################
 ## Database ##########################################################

@@ -148,11 +148,10 @@
             }else if($post_str['status'] !== '0000') {// 表示失败
                 $return_array['status'] = 0;
                 $return_array['msg'] = 'Payment failed. Please try again';
+                // 修改订单状态？
+
             }
             return $return_array;
-
-
-
 
             //echo  $post_str;
 //            $order_success_ilink = document::link(WS_DIR_TEST.'payment_test.php');

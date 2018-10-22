@@ -94,7 +94,7 @@
     $(this).find('input:checkbox').trigger('click');
   });
 
-// Scroll Up
+// Scroll Up:  Scroll to scroll bar Back to top show or hidden.
   $(window).scroll(function(){
     if ($(this).scrollTop() > 100) {
       $('#scroll-up').fadeIn();
@@ -102,7 +102,7 @@
       $('#scroll-up').fadeOut();
     }
   });
-
+  // 首页返回顶部的实现
   $('#scroll-up').click(function(){
     $('html, body').animate({scrollTop: 0}, 1000, 'swing');
     return false;
@@ -149,8 +149,8 @@
       }
     });
   }
-
-  var timerCart = setInterval("updateCart()", 60000); // Keeps session alive
+// Perform at intervals of 1 minute,Keeps session alive
+  var timerCart = setInterval("updateCart()", 60000);
 
 /*
  * jQuery Animate From To plugin 1.0

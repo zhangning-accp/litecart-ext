@@ -10,27 +10,43 @@
     ?>
 <head>
     <style type="text/css">
-        body{
-            border:1px solid #FFCC99;
-            font-size: 9pt;
-            font-family:"Segoe UI", Verdana, Helvetica, Sans-Serif;
+        div#creditcardinfo {
+            /*border:1px solid blue;*/
+            padding-left:12px;
+            width:auto;
+            font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+        }
+        dl.creditcardnumber dt {
+            float:left;
+            padding-right:10px;
+        }
+        div#supportedcreditcards{
+            float:right;
+        }
+        div img {
+            opacity: 0.5;
+            display: inline;
+            /*height:16px;*/
+        }
+        span.required{
+            color: #cc0000;
+            font-size: 14pt;
         }
     </style>
-<link href="<?php echo  $pc_url.'global3.css'?>" rel="stylesheet" type="text/css"/>
-<link href="<?php echo $pc_url.'en.css'?>" rel="stylesheet" type="text/css"/>
-<?php //document::$snippets['foot_tags'][] = '<script src="/litecart/public_html/images/payment/pc/jquery-1.js" type="text/javascript">'; ?>
+<!--<link href="--><?php //echo  $pc_url.'global3.css'?><!--" rel="stylesheet" type="text/css"/>-->
+<!--<link href="--><?php //echo $pc_url.'en.css'?><!--" rel="stylesheet" type="text/css"/>-->
 </head>
-<div class="lanclick">
-</div>
-<div style="border: 1px solid #FFCC99;padding-left: 5px;padding-right: 5px;">
+<!--<div class="lanclick">-->
+<!--</div>-->
+<!--<div style="border: 1px solid #FFCC99;padding-left: 5px;padding-right: 5px;">-->
 <!--    <div class="forms">-->
             <div id="creditcardinfo">
                 <h2 id="lblCredit">Credit Card Information</h2>
                 <dl class="creditcardnumber">
                     <dt>
-                        <label for="CreditCardNumber" id="lblCardNo_LBL">Credit card number </label>
+                        <label for="CreditCardNumber" id="lblCardNo_LBL">Credit card number <span class="required">*</span></label>
                     </dt>
-                    <dd>
+                    <dd id="supportedcreditcards">
                         <input class="" maxlength="16"
                                data-val="true"
                                data-val-length="The length you entered is over the limit"
@@ -41,20 +57,20 @@
                                data-val-required="This field is required" id="CreditCardNumber"
                                name="CardPAN" type="text"
                                onkeyup="changeCreditCard(this);" />
-                        <div id="supportedcreditcards">
-                            <img style="opacity: 0.5; display: inline;" src="<?php echo  $pc_url.'Visa.png'?>" alt="Visa" />
-                            <img style="opacity: 0.5; display: inline;" src="<?php echo  $pc_url.'MasterCard.png'?>" alt="MasterCard" />
-                            <img style="opacity: 0.5; display: inline;" src="<?php echo  $pc_url.'jcb.png'?>" alt="Jcb" />
+                        <img  style="height:19px" src="<?php echo  $pc_url.'Visa.png'?>" alt="Visa" />
+                        <img  src="<?php echo  $pc_url.'MasterCard.png'?>" alt="MasterCard" />
+                        <img  src="<?php echo  $pc_url.'jcb.png'?>" alt="Jcb" />
+<!--                        <div id="supportedcreditcards">-->
+<!--                        </div>-->
 
-                        </div>
-                        <span class="required">*</span>
-                        <span class="field-validation-error"
-                              data-valmsg-for="CreditCardNumber" data-valmsg-replace="true">
-
-							<span generated="true" htmlfor="CreditCardNumber" id="label_cardnum"></span>
-							</span>
-                        <span class="tips" id="order_erorr_note"><strong>Note:</strong> Do not enter dashes or spaces</span>
+<!--                        <span class="field-validation-error"-->
+<!--                              data-valmsg-for="CreditCardNumber" data-valmsg-replace="true">-->
+<!---->
+<!--							<span generated="true" htmlfor="CreditCardNumber" id="label_cardnum"></span>-->
+<!--							</span>-->
                     </dd>
+                    <span class="tips" id="order_erorr_note"><strong>Note:</strong> Do not enter dashes or spaces</span>
+
                 </dl>
                 <dl class="expirationdate">
                     <dt>
@@ -88,7 +104,7 @@
                 </dl>
                 <dl class="securitycode">
                     <dt>
-                        <label for="SecurityCode" id="lblCVV_LBL">CVV2/CVC2/CAV2</label>
+                        <label for="SecurityCode" id="lblCVV_LBL">CVV2/CVC2/CAV2<span class="required">*</span></label>
                     </dt>
                     <dd>
                         <input maxlength="4" data-val="true"
@@ -98,27 +114,33 @@
                                data-val-regex-pattern="[\d]{3,4}"
                                data-val-required="This field is required" id="SecurityCode"
                                name="CVV2" type="password" onkeyup="this.value=this.value.replace(/\D/g,'')" />
-                        <span class="required">*</span>
+
                         <span class="help">
-                            (<a href="javascript:" id="cvvhelp">What's this?</a>)
-                            <img
-                                    src="<?php echo $pc_url.'securitycode.gif'?>" alt="" />
+<!--                            (<a href="javascript:" id="cvvhelp">What's this?</a>)-->
+                            <img style="width: 60px;height:40px;"
+                                    src="<?php echo $pc_url.'CVV-1.gif'?>" alt="" />
+                            <img style="width: 60px;height:40px;"
+                                    src="<?php echo $pc_url.'CVV-2.gif'?>" alt="" />
                         </span><span
                                 class="field-validation-error" data-valmsg-for="SecurityCode"
-                                data-valmsg-replace="true" id="lblCVVNOTE_LBL"></span> <span class="tips" id="cvvnote"><strong>Note:</strong> Usually last 3 digits in the back of the card</span>
+                                data-valmsg-replace="true" id="lblCVVNOTE_LBL"></span>
+                        <span class="tips" id="cvvnote">
+<!--                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-->
+                            <strong>Note:</strong> Usually last 3 or 4 digits in the back of the card</span>
                     </dd>
+
                 </dl>
             </div>
 <!--    </div>-->
-</div>
+<!--</div>-->
 <script type="text/javascript">
     /**
      * 当输入不同的信用卡号时，出现不同的图
      * @param obj
      */
     function changeCreditCard(obj) {
-        obj.value=obj.value.replace(/\D/g,'');
-        var supportedcreditcards = $("#supportedcreditcards");
+        obj.value=obj.value.replace(/\D/g,'');// 只能输入数字
+        var supportedcreditcards = $("#supportedcreditcards");//
         var creditcardnumber = $("#CreditCardNumber");
         var securitycode = $("#SecurityCode");
         var cardtype = $("#CardType");
