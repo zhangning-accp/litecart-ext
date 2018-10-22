@@ -87,7 +87,7 @@
                 "price" => 0
             );
             foreach ($row as $key => $value) {
-                $product_info[$key] = trim($value);
+                $product_info[$key] = addslashes(trim($value));
             }
             // -------------- 商品数据构建完毕 ---------------
             $product_name = $product_info['name'];
