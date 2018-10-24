@@ -123,6 +123,14 @@
     ini_set('display_startup_errors', 'On');
     ini_set('display_errors', 'On');
   }
-
+// Files upload set
+//    ini_set('upload_max_filesize','500M');
+//    ini_set('post_max_size','600M');
+//    ini_set('post_max_size','600M');
+//    ini_set('post_max_size','600M');
+//    ini_set('post_max_size','600M');
+//    ini_set('post_max_size','600M');
+//    ini_set('post_max_size','600M');
+//    ini_set('memory_limit','1024M');
 // Password Encryption Salt
   define('PASSWORD_SALT', 'Srb11n33pI8ytijoZnCCo2iGDpt0jijSTwkDCNYVVymv6vUnx17MsI3telV92aoRiPkJOpc8Vz72eMQ3cLcoqXgevSzutubWXjTZCWLgEALvC9J0X1jLk98b9fpHerk0');

@@ -6,7 +6,7 @@
      * Time: 10:45
      */
     require_once ('../includes/utils/u_utils.inc.php');
-    require_once ('../includes/classes/email.inc.php');
+    require_once ('../includes/library/lib_csvreader.inc.php');
 
 //    $sql_in = "(";
 //    $group_values = array("n1","n2","n3");
@@ -35,11 +35,26 @@
 //        echo "orderNo:".$orderNo."</br>";
 //    }
 
-    echo  "Test sending email....";
-    $email = new email();
-    $email->add_recipient("909704945@qq.com")   // 收件人
-    ->set_subject("Test sending email")         // 主题
-    ->add_body("Hi ZN, How are you!")            // 邮件内容
-    ->send();
-
+    $zipFile = "C:\\Users\\zn\\Desktop\\import-export-test\\test-case\\litecart_test_csv\\litecart_test_csv.csv";
+    $test = new csvreader($zipFile);
+    $data_tmp = array();
+    //$count = $test->get_lines();
+    for($j = 0; $j< 150;$j++) {
+        $start = 10000 * $j;
+        $data = $test->get_data(10000, $start);
+        if(empty($data)) {
+            break;
+        }
+        foreach ($data as $key => $value) {
+            foreach($value as $vk=>$vv) {
+                if($vk == 3) {
+                    $data_tmp[$vv] = $vv;
+                    break;
+                }
+            }
+        };
+        echo 'rows:$j--'.count($data_tmp).'</br>';
+    }
+    echo count($data_tmp);
+    //echo u_utils::getFileMIME($zipFile);
 ?>

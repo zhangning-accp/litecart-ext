@@ -1,6 +1,6 @@
 <?php
     /**
-     * 产品弹出层和详情页处理数据的地方。
+     * 产品弹出层和详情页处理数据的地方。 显示数据的地方在 public_html/includes/templates/default.catalog/views/box_product.inc.php
      */
   if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
     document::$layout = 'ajax';
@@ -270,7 +270,6 @@
       }
     }
   }
-
 // Options
   if (count($product->options) > 0) {
     foreach ($product->options as $group) {

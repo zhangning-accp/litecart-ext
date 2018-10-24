@@ -84,48 +84,78 @@
          * 参看 public_html/pages/order_process.inc.php  66 line进行理解
          */
         public function transfer(&$order) {
-            $hash_value = u_utils::hashValue('8030jfewfrwe98qwer',
-                '7998h8h5',$order->data['uid'],$order->data['payment_due']);
-            // 可以在这里直接处理支付，并不返回任何信息，但是错误怎么获取并提示？
-            //echo __CLASS__."-transfer-i:".PHP_EOL;
-            //$order->save(); // Save session order to database before transaction creates an $order->data['id']. Not recommended
-//            if(empty($order->data['id'])) {
-//                $order->data['id'] = u_utils::guid();
-//            }
+            $amount = $order->data['payment_due'];
+            $amount = intval($amount * 100);
+            $expiration_year = $order->data['card']['ExpirationYear'];
+            if(strlen($expiration_year) > 2) {
+                $expiration_year = substr($expiration_year,-2);
+            }
+            $merchant_key = "yihuifu-liwenjie11753371";// 商户密钥
+            $merchant_transaction_number = "yihuifu-liwenjie1111681"; // 商户交易号
+            $hash_value = u_utils::hashValue($merchant_key, $merchant_transaction_number,$order->data['uid'],$amount);
+//            'AcctNo' => 'yihuifu-liwenjie11753371',
             $fields = array(
-              'OrderID' => $order->data['uid'], // * 订单号 CHAR(30)
-              'CartID' => $order->data['uid'], // * 购物车编码 CHAR(30)
-              'CurrCode' => $order->data['card']['CurrCode'], // * 货币代码 CHAR(8)
-              'Amount' => $order->data['payment_due'], // * 交易金额 CHAR(20)
-              'CardPAN' => $order->data['card']['CardPAN'],// * 卡号 CHAR(16)
-              'ExpirationMonth' => $order->data['card']['ExpirationMonth'], // * 有效期月份 CHAR(2)
-              'ExpirationYear' => $order->data['card']['ExpirationYear'], // * 有效期年份 CHAR(2)
-              'CVV2' => $order->data['card']['CVV2'], // * 卡片安全码 CHAR(3) 其实就是CardPAN后3位数字
-              'IPAddress' => '45.76.74.87', // * 持卡人的 ip 地址 CHAR(20)
-              'CName' => $order->data['customer']['firstname'].$order->data['customer']['lastname'], // * 收货人姓名 CHAR(16)
-              'BAddress' => $order->data['customer']['address1'], // * 收货人地址 CHAR(32)
-              'BCity' => $order->data['customer']['city'], // * 收货人所在城市 CHAR(32)
-              'Bstate' => 'Nevada(NE)', // * 收货人州（省） CHAR(32)
-              'Bcountry' => $order->data['customer']['country_code'], // * 收货人国家 CHAR(32)
-              'BCountryCode' =>$order->data['customer']['country_code'], // * 国家代码  CHAR(2)
-              'PostCode' => $order->data['customer']['postcode'], // * 邮编 CHAR(32)
-              'Email' => $order->data['customer']['email'], // * 邮箱地址 CHAR(32)
-              'Telephone' => $order->data['customer']['phone'], // * 电话号码 CHAR(20)
-              'Pname' => 'other', // *产品和品牌 CHAR(32)
-              'IFrame' => 1, // * 是否内嵌框架    CHAR(1)
-              'URL' => $_SERVER['SERVER_NAME'], // * 商户网站网址  CHAR(32)
-              'OrderUrl' => $_SERVER['SERVER_NAME'], // * 同 URL  CHAR(32)
-              'callbackUrl' => '',//document::link(WS_DIR_TEST.pp_callback.php),// option 用于更新网店订单状态的地址   CHAR(50)
-              'Framework' => 'litecart', // * 网店框架类型    CHAR(20)
-              'IVersion' => 'V8.0', // * 版本    CHAR(10)
-              'Language' => 'en', // * 语言(国际化)  CHAR(2)
-              'HashValue' => $hash_value // * 加密数据   CHAR(500)
-            );
+                'AcctNo' =>$merchant_transaction_number,
+                'OrderID' =>$order->data['uid'],
+                'CartID' =>$order->data['uid'],
+                'CurrCode' =>$order->data['card']['CurrCode'],
+                'Amount' =>$amount,
+                'IPAddress' =>'45.76.74.87',
+                'Telephone' =>$order->data['customer']['phone'],
+                'CardPAN' =>$order->data['card']['CardPAN'],
+                'CName' =>$order->data['customer']['firstname'].$order->data['customer']['lastname'],
+                'ExpirationMonth' =>$order->data['card']['ExpirationMonth'],
+                'ExpirationYear' =>$expiration_year,
+                'CVV2' =>$order->data['card']['CVV2'],
+                'BAddress' =>$order->data['customer']['address1'],
+                'BCity' =>$order->data['customer']['city'],
+                'PostCode' =>$order->data['customer']['postcode'],
+                'Email' =>$order->data['customer']['email'],
+                'Bstate' =>'Nevada(NE)',
+                'Bcountry' =>$order->data['customer']['country_code'],
+                'BCountryCode' =>$order->data['customer']['country_code'],
+                'IFrame' =>"1",
+                'URL' =>$_SERVER['SERVER_NAME'],
+                'OrderUrl' =>$_SERVER['SERVER_NAME'],
+                'PName' =>'other',
+                'HashValue' =>$hash_value,
+                'Framework' =>'litecart',
+                'IVersion' =>'V8.0',
+                'Language' =>'en'
+        );
+//            $fields = array(
+//              'AcctNo' => 'yihuifu-liwenjie1111681',
+//              'OrderID' => $order->data['uid'], // * 订单号 CHAR(30)
+//              'CartID' => $order->data['uid'], // * 购物车编码 CHAR(30)
+//              'CurrCode' => $order->data['card']['CurrCode'], // * 货币代码 CHAR(8)
+//              'Amount' => $amount, // * 交易金额 CHAR(20) 【金额以分为单位，不能有小数】.
+//              'CardPAN' => $order->data['card']['CardPAN'],// * 卡号 CHAR(16)
+//              'ExpirationMonth' => $order->data['card']['ExpirationMonth'], // * 有效期月份 CHAR(2)
+//              'ExpirationYear' => $expiration_year, // * 有效期年份 CHAR(2) 【取后两位】
+//              'CVV2' => $order->data['card']['CVV2'], // * 卡片安全码 CHAR(3) 其实就是CardPAN后3位数字
+//              'IPAddress' => '45.76.74.87', // * 持卡人的 ip 地址 CHAR(20)
+//              'CName' => $order->data['customer']['firstname'].$order->data['customer']['lastname'], // * 收货人姓名 CHAR(16)
+//              'BAddress' => $order->data['customer']['address1'], // * 收货人地址 CHAR(32)
+//              'BCity' => $order->data['customer']['city'], // * 收货人所在城市 CHAR(32)
+//              'Bstate' => 'Nevada(NE)', // * 收货人州（省） CHAR(32)
+//              'Bcountry' => $order->data['customer']['country_code'], // * 收货人国家 CHAR(32)
+//              'BCountryCode' =>$order->data['customer']['country_code'], // * 国家代码  CHAR(2)
+//              'PostCode' => $order->data['customer']['postcode'], // * 邮编 CHAR(32)
+//              'Email' => $order->data['customer']['email'], // * 邮箱地址 CHAR(32)
+//              'Telephone' => $order->data['customer']['phone'], // * 电话号码 CHAR(20)
+//              'Pname' => 'other', // *产品和品牌 CHAR(32)
+//              'IFrame' => 1, // * 是否内嵌框架    CHAR(1)
+//              'URL' => $_SERVER['SERVER_NAME'], // * 商户网站网址  CHAR(32)
+//              'OrderUrl' => $_SERVER['SERVER_NAME'], // * 同 URL  CHAR(32)
+//              //'callbackUrl' => '',//document::link(WS_DIR_TEST.pp_callback.php),// option 用于更新网店订单状态的地址   CHAR(50)
+//              'Framework' => 'litecart', // * 网店框架类型    CHAR(20)
+//              'IVersion' => 'V8.0', // * 版本    CHAR(10)
+//              'Language' => 'en', // * 语言(国际化)  CHAR(2)
+//              'HashValue' => $hash_value // * 加密数据   CHAR(500)
+//            );
             // TODO：这里直接支付，支付成功后对订单进行处理，并返回true，失败后也对订单进行处理，返回false，由order_process来决定处理方式。
-
             // 发送请求。
             $post_url = "https://merchant.paytos.com/CubePaymentGateway/gateway/action.NewSubmitAction.do";
-//            $post_url = document::link(WS_DIR_TEST.'payment_test.php');
             $post_str = json_decode(u_utils::sendHttpRequest($post_url,"POST",$fields),true);
             $return_array = array(
                 'method' => 'API_CALL',
@@ -149,6 +179,8 @@
                 $return_array['status'] = 0;
                 $return_array['msg'] = 'Payment failed. Please try again';
                 // 修改订单状态？
+                //notices::add();
+                trigger_error($return_array['msg'],E_USER_ERRORR);
 
             }
             return $return_array;

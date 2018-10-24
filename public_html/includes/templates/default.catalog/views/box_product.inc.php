@@ -75,12 +75,16 @@
       </div>
       <?php } ?>
 
-      <?php if ($sku || $mpn || $gtin) { ?>
+      <?php if ($sku || $mpn || $gtin || $code) { ?>
       <div class="codes" style="margin: 1em 0;">
         <?php if ($sku) { ?>
         <div class="sku">
           <?php echo language::translate('title_sku', 'SKU'); ?>:
           <span class="value"><?php echo $sku; ?></span>
+        </div>
+        <div class="sku">
+            <?php echo language::translate('title_code', 'CODE'); ?>:
+            <span class="value"><?php echo $code; ?></span>
         </div>
         <?php } ?>
 
