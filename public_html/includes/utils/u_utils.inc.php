@@ -160,18 +160,38 @@
         /**
          * 创建一个32 or 36 字符的guid，
          * @param bool $isNotHR 是否去掉guid中的 - 符号。 truea表示去除，false表示不去除
+         * @param bool $opt 是否保留生成的guid中{}符号。true表示保留，false表示不保留
          * @return mixed|string
          * 如果 $isNotHR 为true，得到一个32个字符的guid字符串：C525A3C3B0194218B3D70026CE7CDDEB
          * 如果$isNotHR 为false，得到一个36个字符的guid字符串:64886563-5C7E-448D-86E9-DDC759DCEA71
          */
-        public static function guid($isNotHR = true)
+        public static function guid($isNotHR = true, $opt = false)
         {
-            $guid = com_create_guid();
-            if ($isNotHR === true) {
+            $guid = "";
+            if (function_exists('com_create_guid')) {
+                $guid =  com_create_guid();
+            } else {
+                mt_srand((double)microtime() * 10000);    // optional for php 4.2.0 and up.
+                $charid = strtoupper(md5(uniqid(rand(), true)));
+                $hyphen = chr(45);    // "-"
+                $left_curly = $opt ? chr(123) : "";     //  "{"
+                $right_curly = $opt ? chr(125) : "";    //  "}"
+                $uuid = $left_curly
+                    . substr($charid, 0, 8) . $hyphen
+                    . substr($charid, 8, 4) . $hyphen
+                    . substr($charid, 12, 4) . $hyphen
+                    . substr($charid, 16, 4) . $hyphen
+                    . substr($charid, 20, 12)
+                    . $right_curly;
+
+                $guid =  $uuid;
+            }
+            if($opt === false) {
                 $guid = trim($guid, "{}");
+            }
+            if ($isNotHR === true) {
                 $guid = str_replace("-", "", $guid);
             }
-
             return $guid;
         }
 
@@ -261,13 +281,14 @@
          * @param $head
          * @param $data
          */
-        public  static function disposalData($head,$data) {
+        public static function disposalData($head, $data)
+        {
             $newData = array();
-            for($i = 0; $i<count($data); $i ++ ) {
+            for ($i = 0; $i < count($data); $i++) {
                 $tmp = $data[$i];
                 $key_value_array = array();
-                for($j = 0; $j<count($tmp);$j++) {
-                    if($head[0][$j] !== $tmp[$j]) {
+                for ($j = 0; $j < count($tmp); $j++) {
+                    if ($head[0][$j] !== $tmp[$j]) {
                         $key_value_array[$head[0][$j]] = $tmp[$j];
                     } else {
                         break;
@@ -275,9 +296,10 @@
                 }
                 $newData[$i] = $key_value_array;
             }
-            if(empty($newData[0])) {
+            if (empty($newData[0])) {
                 unset($newData[0]);
             }
-            return  $newData;
+
+            return $newData;
         }
     }
