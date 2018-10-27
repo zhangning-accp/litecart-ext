@@ -66,24 +66,26 @@
          * @param int $start 开始条数
          * @return array|bool
          */
-        public function get_data($length = 0, $start = 0) {
-            if(!$this->_open_file()) {
+        public function get_data($length = 0, $start = 0)
+        {
+            set_time_limit(0);//设置脚本执行时间
+            if (!$this->_open_file()) {
                 return false;
             }
-
             $length = $length ? $length : $this->get_lines();
-            //if($start > 0 ) {
             $start = $start - 1;// 这个必须有，这是php的一个bug，否则第一个数据会跳行
-            //}
             $start = ($start < 0) ? 0 : $start;
             $data = array();
             $this->spl_object->seek($start);
             while ($length-- && !$this->spl_object->eof()) {
                 $data[] = $this->spl_object->fgetcsv();// fgetcsv： Gets line from file and parse as CSV fields
-                //$this->spl_object->next();// Read next line
             }
-            if(count($data[count($data) - 1]) < count($data[count($data) - 2])) {
-                unset($data[count($data) - 1]);
+            if (!empty($data) && is_array($data)) {
+                if (count($data) > 2) {
+                    if (count($data[count($data) - 1]) < count($data[count($data) - 2])) {
+                        unset($data[count($data) - 1]);
+                    }
+                }
             }
             return $data;
         }

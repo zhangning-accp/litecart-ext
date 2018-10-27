@@ -15,7 +15,7 @@
          * 如果$parameter_values 参数值个数和$format_sql 里的格式化字符个数不一致，则会出现错误。
          *
          */
-        public static function builderSQL($format_sql, $parameter_values = array())
+        public static function builderSQL(&$format_sql, &$parameter_values = array())
         {
             return vsprintf($format_sql, $parameter_values);
         }
@@ -302,4 +302,14 @@
 
             return $newData;
         }
+
+        /**
+         * This method use unset($variate) and $variate = null.
+         * @param $variate
+         */
+    public static function unsetVariate(&$variate)
+    {
+        unset($variate);
+        $variate = null;
+    }
     }

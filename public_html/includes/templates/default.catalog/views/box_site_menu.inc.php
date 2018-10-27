@@ -88,7 +88,7 @@
                     <?php echo functions::form_draw_password_field('password', '', 'placeholder="'. language::translate('title_password', 'Password') .'"'); ?>
                   </div>
 
-                  <div class="btn-group btn-block">
+                      <div class="btn-group btn-block">
                     <?php echo functions::form_draw_button('login', language::translate('title_sign_in', 'Sign In')); ?>
                   </div>
                 <?php echo functions::form_draw_form_end(); ?>

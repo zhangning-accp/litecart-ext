@@ -1,4 +1,89 @@
 <?php
+
+    echo "CSV Import\r\n" . "----------\r\n";
+    set_time_limit(0);//设置脚本执行时间
+    // import or export run.
+    if (isset($_POST['import_products'])) {
+        importCategoriesAndProducts();
+    } elseif (isset($_POST['export_products'])) {
+        //$csv_array = builderExportCSVArray();
+        //exportCategoriesAndProducts();
+    }
+    /**
+     * 完整导入分类和产品
+     */
+    function importCategoriesAndProducts()
+    {
+        try {
+            $file_name = $_FILES['file']['name'];
+            $file_type = $_FILES['file']['type'];
+            $tmp_file = $_FILES['file']['tmp_name'];
+            $tmp_folder = dirname($tmp_file);
+            if (!isset($tmp_file) || !is_uploaded_file($tmp_file)) {
+                throw new Exception(language::translate('error_must_select_file_to_upload', 'You must select a file to upload'));
+            }
+
+            ob_clean();
+
+            header('Content-Type: text/plain; charset=' . language::$selected['charset']);
+            // 判断是不是csv文件，如果是直接读取，如果是zip解压后读取。
+            if ($file_type === 'application/vnd.ms-excel') {
+                $csv = file_get_contents($_FILES['file']['tmp_name']);
+                $csv = functions::csv_decode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset']);
+                importProducts($csv);
+            } else if ($file_type === 'application/x-zip-compressed') {
+                $un_zip_folder = u_utils::guid();
+                $un_zip_folder = $tmp_folder . "/" . $un_zip_folder;
+                u_utils::mkdirs($un_zip_folder);
+                // 解压zip，并读取csv文件
+                $is_unzip = u_utils::unZip($tmp_file, $un_zip_folder);
+
+                if ($is_unzip === true) {
+                    // 1. 获取解压目录下的文件列表
+                    $files = u_utils::files($un_zip_folder);
+                    $head = array();
+                    foreach ($files as $key => $file) {
+                        $csv_head = array();// 导入的csv数据头。每次分片读取的数据都需要和头做整合。便于后期处理
+                        $file = $un_zip_folder . "/" . $file;
+                        // 循环读取，每10w一次。
+                        $rows = 200;//默认一次读取的数据行数
+                        $csvFile = new csvreader($file);
+                        $csv_head = $csvFile->get_data(1, 0);
+                        $lineNumber = $csvFile->get_lines();
+                        $loop = 1;// 循环次数
+                        if ($lineNumber > $rows) {
+                            if ($lineNumber / $rows == 0) {
+                                $loop = $lineNumber / $rows;
+                            } else {
+                                $loop = ($lineNumber / $rows) + 1;
+                            }
+                        }
+                        $loop = intval($loop);
+                        for ($i = 0; $i < $loop; $i++) {
+                            $start = ($i * $rows) + 1;//开始位置
+                            if(($start + $rows) > $lineNumber) {
+                                $rows = $lineNumber - $start;
+                            }
+                            //trigger_error($i.' csv befor:'.var_dump(memory_get_usage()).'\r\n');
+                            $csv = $csvFile->get_data($rows, $start);
+                            $csv = u_utils::disposalData($csv_head, $csv);
+                            //trigger_error($i.' csv after and insert products befor :'.var_dump(memory_get_usage()).'\r\n');
+                            importProducts($csv);
+                           // trigger_error($i.' insert products end :'.var_dump(memory_get_usage()).'\r\n');
+                            unset($csv);
+                            $csv = null;
+                            //trigger_error($i.' unset csv:'.var_dump(memory_get_usage()).'\r\n');
+                        }
+                    }
+                } else {
+                    notices::add('errors', "Upload file failure");
+                }
+            }
+            exit;
+        } catch (Exception $e) {
+            notices::add('errors', $e->getMessage());
+        }
+    }
     // catalog->CSV Import/Export page and process import/export Categories or Products
     /**
      * 导入产品相关数据
@@ -29,11 +114,10 @@
      * category_h1_titles:同category_descriptions
      * category_head_titles:同category_descriptions
      */
-    set_time_limit(0);//设置脚本执行时间
-    function importProducts($csv)
+
+    function importProducts(&$csv)
     {
         $product_map = array();
-        $line = 0;
         foreach ($csv as $row) {//遍历csv文件
             $date = u_utils::getYMDHISDate();
             //构建商品所需数据
@@ -87,15 +171,8 @@
                 "md5" => "",
                 "price" => 0
             );
-
-//            foreach($rows as $key => $value) {
-//                if($key === 'code' && empty($value)) {
-//                    //TODO: 跳转到导入界面，同时提醒数据有误。后期实现。
-            //notices::add('errors', $e->getMessage());
-//                }
-//            }
             foreach ($row as $key => $value) {
-                $product_info[$key] = addslashes(trim($value));
+                $product_info[$key] = addslashes(trim($value));// 对数据做转义处理
             }
             // -------------- 商品数据构建完毕 ---------------
             //$product_name = $product_info['name'];
@@ -112,15 +189,6 @@
         //------------ 添加商品信息 -----------------
 
         $product_code = $product_info['code'];
-
-//        $product_id = $product_info['id'];
-//        $md5_value = md5Product($product_info);
-//        if (empty($product_id)) {
-//            $product_id = $product_map["'" . $md5_value . "'"];
-//            if (!empty($product_id)) {
-//                $product_info['id'] = $product_id;
-//            }
-//        }
         //1. 拆分image字符串$product_map
         $product_info['image'] = array_filter(preg_split("/\|/", $product_info['image']));
         $main_image = "";
@@ -168,7 +236,6 @@
                     $product_info['description'], $product_info['head_title'],
                     $product_info['meta_description'], $product_info['attributes']));
                 $result = database::query($sql);
-
             } else { // 更新
                 //if (empty($product_map["'" . $md5_value . "'"])) {// 如果MD5值对应的value为空，表示是第一次更新。
                 // 1. 对于product表，进行更新， 更新逻辑是当次任务里，如果没有找到$product_code对应的map数据，则更新，否则不会，
@@ -185,8 +252,7 @@
                     $sql = u_utils::builderSQL($sql, array($product_info['name'], $product_info['short_description'],
                         $product_info['description'], $product_info['head_title'], $product_info['meta_description'],
                         $product_info['attributes'], $product_id));
-                    database::query($sql);
-//                    $product_map[$product_code] = true;
+                    $result = database::query($sql);
                 }
                 //}
             }// 以上代码测试通过 2018-09-18 14:50
@@ -200,15 +266,13 @@
             updateProductOther($product_info, $product_map);
             $product_map[$product_code] == true;
         }
-
-
     }
 
     /**
      * 添加图片，测试多次无异常，放心用
      * @param $product_info 商品信息对象
      */
-    function addImages($product_info, $product_map)
+    function addImages(&$product_info, &$product_map)
     {
         //---------------------对于lc_products_images表，先删后增。这个不太合理，当有上百万的数据时，操作太平凡，同样采用product的方式---------------------
         $product_code = $product_info['code'];
@@ -230,7 +294,7 @@
     /**
      * @param $product_info
      */
-    function addOptionGroup($product_info)
+    function addOptionGroup(&$product_info)
     {
         // 这个每次都要检测并更新或添加。这里添加的时规格。
         //option_groups  数据格式:   group_name(选项组名):option_name(选项名)
@@ -360,7 +424,7 @@
     /**
      * @param $product_info
      */
-    function addProductGroup(&$product_info, $product_map)
+    function addProductGroup(&$product_info, &$product_map)
     {
         // 这里的group实际上就是客户端左边的筛选条件。有了这个，用户可以直接点击条件进行筛选。所以按照正常情况，一个产品的多种规格都应该同属一个product
         //$group_name_str数据格式：gropu_name:child_1,child_2,child_n|gropu_name:child_1,child_2,child_n。如果 $group_name 为空，则不做处理
@@ -402,12 +466,6 @@
                     $sql = "SELECT product_group_value_id,`name` FROM " . DB_TABLE_PRODUCT_GROUPS_VALUES_INFO . " 
                 INNER JOIN " . DB_TABLE_PRODUCT_GROUPS_VALUES . " 
 	            ON product_group_value_id = " . DB_TABLE_PRODUCT_GROUPS_VALUES . ".id AND product_group_id = " . $product_group_id;
-//            $sql = "select name,product_group_value_id from ".DB_TABLE_PRODUCT_GROUPS_VALUES_INFO." where name in (";
-//            $in = "";
-//            $in = "'" . join("','", array_values($group_values)) . "'";
-//            $in .= ")";
-//            $sql .= $in . " and product_group_value_id in (select id from".DB_TABLE_PRODUCT_GROUPS_VALUES." where product_group_id=%d)";
-//            $sql = u_utils::builderSQL($sql, array($product_group_id));
                     $result = database::fetch_full(database::query($sql));
                     $group_value_ids = array();//$result['product_group_value_id'];
                     $value_names = array();//$result['name'];
@@ -457,11 +515,10 @@
      * @param $isInsertNew 当数据不存在时是否插入新数据。如果true，当数据库找不到导入的数据时，则将新增数据到数据库.
      * 该方法测试通过。 2018-9-16 11:30
      */
-    function addCategories($product_info, $product_map)
+    function addCategories(&$product_info, &$product_map)
     {
         $product_code = $product_info['code'];
         if (!isset($product_map[$product_code])) {// 只在第一次，
-            $line = 0;
             $categorie_names = $product_info['categorie_names'];//"Rubber Ducks|Subcategory|shot,d,d,d";
             if (!empty($categorie_names)) {//如果name不为空，则进行处理，否则忽略
                 $category_descriptions = $product_info['category_descriptions'];// [|]ddddd[|]|[|]dssdfdf[|], 注：如果某些分类没有title，则用一个空格 | | | , ,
@@ -630,7 +687,7 @@
     /**
      * @param $product_info
      */
-    function updateProductOther($product_info, $product_map)
+    function updateProductOther(&$product_info, &$product_map)
     {
         // 通常情况下，只在第一次做更新即可。也不应该出现每个规格的数据都有不同数据，同时数据库表结构也不支持不同规格的不同价格等。
         $product_code = $product_info['code'];
@@ -668,101 +725,17 @@
     }
 
     /**
-     * 完整导入分类和产品
-     */
-    function importCategoriesAndProducts()
-    {
-        try {
-            $file_name = $_FILES['file']['name'];
-            $file_type = $_FILES['file']['type'];
-            $tmp_file = $_FILES['file']['tmp_name'];
-            $tmp_folder = dirname($tmp_file);
-            if (!isset($tmp_file) || !is_uploaded_file($tmp_file)) {
-                throw new Exception(language::translate('error_must_select_file_to_upload', 'You must select a file to upload'));
-            }
-
-            ob_clean();
-
-            header('Content-Type: text/plain; charset=' . language::$selected['charset']);
-            // 判断是不是csv文件，如果是直接读取，如果是zip解压后读取。
-            if ($file_type === 'application/vnd.ms-excel') {
-                $csv = file_get_contents($_FILES['file']['tmp_name']);
-                $csv = functions::csv_decode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset']);
-                importProducts($csv);
-            } else if ($file_type === 'application/x-zip-compressed') {
-                $un_zip_folder = u_utils::guid();
-                $un_zip_folder = $tmp_folder . "/" . $un_zip_folder;
-                u_utils::mkdirs($un_zip_folder);
-                // 解压zip，并读取csv文件
-                $is_unzip = u_utils::unZip($tmp_file, $un_zip_folder);
-
-                if ($is_unzip === true) {
-                    // 1. 获取解压目录下的文件列表
-                    $files = u_utils::files($un_zip_folder);
-                    $head = array();
-                    foreach ($files as $key => $file) {
-                        $csv_head = array();// 导入的csv数据头。每次分片读取的数据都需要和头做整合。便于后期处理
-                        $file = $un_zip_folder . "/" . $file;
-                        // 循环读取，每10w一次。
-                        $rows = 10000;//默认一次读取的数据行数
-                        $csvFile = new csvreader($file);
-                        $csv_head = $csvFile->get_data(1, 0);
-                        $lineNumber = $csvFile->get_lines();
-                        $loop = 1;// 循环次数
-                        if ($lineNumber > $rows) {
-                            if ($lineNumber / $rows == 0) {
-                                $loop = $lineNumber / $rows;
-                            } else {
-                                $loop = ($lineNumber / $rows) + 1;
-                            }
-                        }
-                        $loop = intval($loop);
-                        for ($i = 0; $i < $loop; $i++) {
-                            $start = ($i * $rows) + 1;//开始位置
-//                            if($i === 0) {
-//                                $start = 2;// jump csv head data.
-//                            }
-                            //$end = $start + $rows;
-//                            if ($end > $lineNumber) {
-//                                $rows = $end - $lineNumber;
-//                            }
-                            $csv = $csvFile->get_data($rows, $start);
-                            $csv = u_utils::disposalData($csv_head, $csv);
-                            importProducts($csv);
-                        }
-                    }
-                } else {
-                    notices::add('errors', "Upload file failure");
-                }
-            }
-            echo "CSV Import\r\n" . "----------\r\n";
-            exit;
-        } catch (Exception $e) {
-            notices::add('errors', $e->getMessage());
-        }
-    }
-
-
-    /**
      * @deprecated  暂时弃用
      * @param $product_info
      * @return string
      */
-    function md5Product($product_info)
+    function md5Product(&$product_info)
     {
         //name,short_description,description,attributes,head_title,meta_description
         $md5_str = $product_info['name'] . $product_info['short_description'] . $product_info['description']
             . $product_info['attributes'] . $product_info['head_title'] . $product_info['meta_description'];
 
         return md5($md5_str);
-    }
-
-    // import or export run.
-    if (isset($_POST['import_products'])) {
-        importCategoriesAndProducts();
-    } elseif (isset($_POST['export_products'])) {
-        //$csv_array = builderExportCSVArray();
-        //exportCategoriesAndProducts();
     }
 ?>
 <h1><?php echo $app_icon; ?><?php echo language::translate('title_csv_import_export', 'CSV Import/Export'); ?></h1>
@@ -802,13 +775,14 @@
                         <?php echo functions::form_draw_encodings_list('charset', !empty($_POST['charset']) ? true : 'UTF-8', false); ?>
                     </div>
 
-                    <div class="form-group">
-                        <label><?php echo functions::form_draw_checkbox('insert_products', 'true', true); ?><?php echo language::translate('text_insert_new_products', 'Insert new products'); ?></label>
-                    </div>
+<!--                    <div class="form-group">-->
+<!--                        <label>--><?php //echo functions::form_draw_checkbox('insert_products', 'true', true); ?><!----><?php //echo language::translate('text_insert_new_products', 'Insert new products'); ?><!--</label>-->
+<!--                    </div>-->
 
                     <?php echo functions::form_draw_button('import_products', language::translate('title_import', 'Import'), 'submit'); ?>
 
                     <?php echo functions::form_draw_form_end(); ?>
+
                 </fieldset>
             </div><!-- import products end-->
             <!--export products -->
