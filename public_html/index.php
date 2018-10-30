@@ -29,7 +29,7 @@
       exit;
     }
   }
-
+//    echo 'route=>'.var_dump(route::$route).','.FS_DIR_HTTP_ROOT . WS_DIR_PAGES . route::$route['page'] .'.inc.php'.'</br>';
   if (!empty(route::$route)
       && is_file(FS_DIR_HTTP_ROOT . WS_DIR_PAGES . route::$route['page'] .'.inc.php')) {
         $file_path = FS_DIR_HTTP_ROOT . WS_DIR_PAGES . route::$route['page'] .'.inc.php';

@@ -169,7 +169,7 @@
         {
             $guid = "";
             if (function_exists('com_create_guid')) {
-                $guid =  com_create_guid();
+                $guid = com_create_guid();
             } else {
                 mt_srand((double)microtime() * 10000);    // optional for php 4.2.0 and up.
                 $charid = strtoupper(md5(uniqid(rand(), true)));
@@ -184,14 +184,15 @@
                     . substr($charid, 20, 12)
                     . $right_curly;
 
-                $guid =  $uuid;
+                $guid = $uuid;
             }
-            if($opt === false) {
+            if ($opt === false) {
                 $guid = trim($guid, "{}");
             }
             if ($isNotHR === true) {
                 $guid = str_replace("-", "", $guid);
             }
+
             return $guid;
         }
 
@@ -278,27 +279,34 @@
 
         /**
          * 整理数据，将data和head处理后返回一个新的数据，新数据每行都由head->value表示
-         * @param $head
-         * @param $data
+         * @param $head 表头二维数组，最有一个元素，第二维度代表表头
+         * @param $data 数据数组，实际上是个二维数组，第维度代表行数，第二维度代表该行的所有列数据
          */
         public static function disposalData($head, $data)
         {
             $newData = array();
-            for ($i = 0; $i < count($data); $i++) {
-                $tmp = $data[$i];
+            $data_size = count($data);
+            $head_size = count($head[0]);
+            for ($i = 1; $i < $data_size; $i++) {//这里只所以从１开始，是因为data里包含了表头，这是php　splitFileObject的一个bug
+                $tmp = $data[$i];// 获取d当前行的数据一维数组
+                $tmp_size = count($tmp);// 拿到数据的列数
+                // csv里的实际数据行的列有可能小于表头的列，这时为了避免数组越界，所以取最小值。同理，如果数据列数大于表头列，也取最少列值。
+                if($tmp_size < $head_size) {
+                    $head_size = $tmp_size;
+                }
                 $key_value_array = array();
-                for ($j = 0; $j < count($tmp); $j++) {
+                for ($j = 0; $j < $head_size; $j++) {
                     if ($head[0][$j] !== $tmp[$j]) {
                         $key_value_array[$head[0][$j]] = $tmp[$j];
                     } else {
                         break;
                     }
                 }
-                $newData[$i] = $key_value_array;
+                $newData[$i - 1] = $key_value_array;
             }
-            if (empty($newData[0])) {
-                unset($newData[0]);
-            }
+//            if (empty($newData[0])) {
+//                unset($newData[0]);
+//            }
 
             return $newData;
         }
@@ -307,9 +315,46 @@
          * This method use unset($variate) and $variate = null.
          * @param $variate
          */
-    public static function unsetVariate(&$variate)
-    {
-        unset($variate);
-        $variate = null;
-    }
+        public static function unsetVariate(&$variate)
+        {
+            unset($variate);
+            $variate = null;
+        }
+
+        /**
+         * 删除目录和目录下的所有子目录以及文件
+         * @param $dirName 需要删除的目录路径
+         */
+        public static function deleteDirectoryAndFile($directoryPath)
+        {
+            if ($handle = opendir($directoryPath)) {// 打开目录句柄
+                while (false !== ($item = readdir($handle))) {//从目录句柄中读取条目(改目录下的子文件或目录)
+                    if ($item != "." && $item != "..") {
+                        $child = $directoryPath."/".$item;
+                        if (is_dir($child)) {//判断当前是否是一个目录,如果是则向下搜索。
+                            self::deleteDirectoryAndFile($child);
+                        } else {// 否则删除当前的文件
+                            unlink($child);
+                        }
+                    }
+                }
+                closedir($handle);// 关闭句柄释放资源
+                rmdir($directoryPath);//清除目录。
+            }
+        }
+
+//    public static function obliterate_directory($directoryPath) {
+//            // 方式二：
+//            $iter = new RecursiveDirectoryIterator($directoryPath);
+//            foreach (new RecursiveIteratorIterator($iter,
+//                RecursiveIteratorIterator::CHILD_FIRST) as $f) {
+//                if($f->isDir()) {
+//                    rmdir($f->getPathname());
+//                } else {
+//                    unlink($f->getPathname());
+//                }
+//
+//            }
+//            rmdir($directoryPath);
+//        }
     }

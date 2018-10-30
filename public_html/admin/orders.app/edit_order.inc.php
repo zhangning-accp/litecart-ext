@@ -634,7 +634,9 @@
             </td>
             <td><?php echo functions::form_draw_hidden_field('items['. $key .'][sku]', true); ?><?php echo $_POST['items'][$key]['sku']; ?></td>
             <td><div class="input-group"><?php echo functions::form_draw_decimal_field('items['. $key .'][weight]', true, 2, 0); ?> <span class="input-group-addon"><?php echo functions::form_draw_weight_classes_list('items['. $key .'][weight_class]', true, false, 'style="width: auto;"'); ?></span></div></td>
-            <td><?php echo functions::form_draw_decimal_field('items['. $key .'][quantity]', true, 2); ?></td>
+            <td><?php
+                    $quantity_html = functions::form_draw_decimal_field('items['. $key .'][quantity]', true, 2);
+                    echo $quantity_html?></td>
             <td><?php echo functions::form_draw_currency_field($_POST['currency_code'], 'items['. $key .'][price]', true); ?></td>
             <td><?php echo functions::form_draw_currency_field($_POST['currency_code'], 'items['. $key .'][tax]', true); ?></td>
             <td><a class="remove" href="#" title="<?php echo language::translate('title_remove', 'Remove'); ?>"><?php echo functions::draw_fonticon('fa-times-circle fa-lg', 'style="color: #cc3333;"'); ?></a></td>

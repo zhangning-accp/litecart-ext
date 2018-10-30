@@ -1,4 +1,7 @@
 <?php
+    /**
+     * //TODO: search 查询处理php文件
+     */
   if (empty($_GET['query'])) $_GET['query'] = '';
   if (empty($_GET['page']) || !is_numeric($_GET['page'])) $_GET['page'] = 1;
   if (empty($_GET['sort'])) $_GET['sort'] = 'relevance';

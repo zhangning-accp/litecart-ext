@@ -5,6 +5,7 @@
 
   user::require_login();
 
+  // Assign admin template. file path: public_html/includes/templates/default.admin/layouts/default.inc.php
   document::$template = settings::get('store_template_admin');
 
   breadcrumbs::add(language::translate('title_admin_panel', 'Admin Panel'), WS_DIR_ADMIN);
@@ -78,7 +79,9 @@
         notices::add('notices', language::translate('reminder_store_in_maintenance_mode', 'The store is in maintenance mode.'));
       }
 
-    // Widgets
+    //=======================================================================
+    //                             Widgets
+    //=======================================================================
       $box_widgets = new view();
       $box_widgets->snippets['widgets'] = array();
 

@@ -15,10 +15,10 @@
     function importCategoriesAndProducts()
     {
         try {
-            $file_name = $_FILES['file']['name'];
-            $file_type = $_FILES['file']['type'];
-            $tmp_file = $_FILES['file']['tmp_name'];
-            $tmp_folder = dirname($tmp_file);
+            //$file_name = $_FILES['file']['name'];//上传的文件名
+            $file_type = $_FILES['file']['type'];//上传的文件类型
+            $tmp_file = $_FILES['file']['tmp_name'];//临时文件路径
+            $tmp_folder = dirname($tmp_file);// 得到临时存放文件的目录
             if (!isset($tmp_file) || !is_uploaded_file($tmp_file)) {
                 throw new Exception(language::translate('error_must_select_file_to_upload', 'You must select a file to upload'));
             }
@@ -32,24 +32,22 @@
                 $csv = functions::csv_decode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset']);
                 importProducts($csv);
             } else if ($file_type === 'application/x-zip-compressed') {
-                $un_zip_folder = u_utils::guid();
-                $un_zip_folder = $tmp_folder . "/" . $un_zip_folder;
-                u_utils::mkdirs($un_zip_folder);
-                // 解压zip，并读取csv文件
+                $un_zip_folder = u_utils::guid();// 生成临时解压目录
+                $un_zip_folder = $tmp_folder . "/" . $un_zip_folder;//完整的解压目录
+                u_utils::mkdirs($un_zip_folder);//创建解压目录
+                // 解压zip，到临时目录
                 $is_unzip = u_utils::unZip($tmp_file, $un_zip_folder);
-
-                if ($is_unzip === true) {
+                if ($is_unzip === true) {//如果解压成功
                     // 1. 获取解压目录下的文件列表
                     $files = u_utils::files($un_zip_folder);
-                    $head = array();
-                    foreach ($files as $key => $file) {
+                    foreach ($files as $key => $file) {//遍历解压目录下的文件
                         $csv_head = array();// 导入的csv数据头。每次分片读取的数据都需要和头做整合。便于后期处理
-                        $file = $un_zip_folder . "/" . $file;
+                        $file = $un_zip_folder . "/" . $file;// 拼接需要读取的csv文件文件路径
                         // 循环读取，每10w一次。
                         $rows = 200;//默认一次读取的数据行数
-                        $csvFile = new csvreader($file);
-                        $csv_head = $csvFile->get_data(1, 0);
-                        $lineNumber = $csvFile->get_lines();
+                        $csvFile = new csvreader($file);//创建csv文件对象
+                        $csv_head = $csvFile->get_data(1, 0);//获取表头内容
+                        $lineNumber = $csvFile->get_lines();//得到文件总行数
                         $loop = 1;// 循环次数
                         if ($lineNumber > $rows) {
                             if ($lineNumber / $rows == 0) {
@@ -58,26 +56,29 @@
                                 $loop = ($lineNumber / $rows) + 1;
                             }
                         }
-                        $loop = intval($loop);
-                        for ($i = 0; $i < $loop; $i++) {
+                        $loop = intval($loop);//处理为int型
+                        for ($i = 0; $i < $loop; $i++) {//循环读取文件数据
                             $start = ($i * $rows) + 1;//开始位置
-                            if(($start + $rows) > $lineNumber) {
+                            if(($start + $rows) > $lineNumber) {//如果最后的row大于剩下的行数，调整需要读取的行数，处理为有多少读多少。
                                 $rows = $lineNumber - $start;
                             }
                             //trigger_error($i.' csv befor:'.var_dump(memory_get_usage()).'\r\n');
-                            $csv = $csvFile->get_data($rows, $start);
-                            $csv = u_utils::disposalData($csv_head, $csv);
+                            $csv = $csvFile->get_data($rows, $start);//获得指定位置和行数的数据
+                            $csv = u_utils::disposalData($csv_head, $csv);//将数据和表头进行整合，成为key=>value
                             //trigger_error($i.' csv after and insert products befor :'.var_dump(memory_get_usage()).'\r\n');
-                            importProducts($csv);
+                            importProducts($csv);//数据入库
                            // trigger_error($i.' insert products end :'.var_dump(memory_get_usage()).'\r\n');
-                            unset($csv);
+                            unset($csv);//释放$csv
                             $csv = null;
                             //trigger_error($i.' unset csv:'.var_dump(memory_get_usage()).'\r\n');
-                        }
-                    }
+                        }// loop read simple csv data file end ...
+                    }// read csv file end ..
+
                 } else {
                     notices::add('errors', "Upload file failure");
                 }
+                // 删除临时解压目录下的所有数据
+                u_utils::deleteDirectoryAndFile($un_zip_folder);
             }
             exit;
         } catch (Exception $e) {
@@ -214,7 +215,8 @@
                               '%s',uuid(),'%s','%s','%s','%s',%.4f,%d,%d,
                               '%s',%d,%d,%d,'%s',%.4f,'%s',
                               %d,'%s',%d,%d,'%s','%s','%s','%s')";
-                $sql = u_utils::builderSQL($sql, array(
+
+                $parameter_values = array(
                     $product_info['status'], $product_info['manufacturer_id'], $product_info['supplier_id'], $product_info['delivery_status_id'],
                     $product_info['sold_out_status_id'], $product_info['default_category_id'], '', $product_info['keywords'],
                     $product_code, $product_info['mpn'], $product_info['upc'], $product_info['gtin'], $product_info['taric'],
@@ -222,8 +224,8 @@
                     $product_info['weight_class'], $product_info['dim_x'], $product_info['dim_y'], $product_info['dim_z'],
                     $product_info['dim_class'], $product_info['price'], $product_info['purchase_price_currency_code'],
                     $product_info['tax_class_id'], $main_image, $product_info['views'], $product_info['purchases'],
-                    $product_info['date_valid_from'], $product_info['date_valid_to'], $product_info['date_updated'],
-                    $product_info['date_created']));
+                    $product_info['date_valid_from'], $product_info['date_valid_to'], $product_info['date_updated'], $product_info['date_created']);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
                 $product_id = database::insert_id();
                 $product_info['id'] = $product_id;
@@ -231,10 +233,13 @@
                 $sql = "INSERT INTO %s (product_id,language_code,name,short_description,description,
                     head_title,meta_description,attributes)
                        values (%d,'%s','%s','%s','%s','%s','%s','%s')";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_INFO,
+
+                $parameter_values = array(DB_TABLE_PRODUCTS_INFO,
                     $product_id, 'en', $product_info['name'], $product_info['short_description'],
                     $product_info['description'], $product_info['head_title'],
-                    $product_info['meta_description'], $product_info['attributes']));
+                    $product_info['meta_description'], $product_info['attributes']);
+
+                $sql = u_utils::builderSQL($sql,$parameter_values);
                 $result = database::query($sql);
             } else { // 更新
                 //if (empty($product_map["'" . $md5_value . "'"])) {// 如果MD5值对应的value为空，表示是第一次更新。
@@ -243,15 +248,20 @@
                 if (!isset($product_map[$product_code])) { // 避免重复更新
                     $date = u_utils::getYMDHISDate();
                     $sql = "UPDATE " . DB_TABLE_PRODUCTS . "SET status = %d,quantity = %d,purchase_price = %.4f,image = '%s',date_updated = '%s' WHERE id = %d";
-                    $sql = u_utils::builderSQL($sql, array($product_info['status'], $product_info['quantity'],
-                        $product_info['price'], $main_image, $date, $product_id));
+                    $parameter_values = array($product_info['status'], $product_info['quantity'],
+                        $product_info['price'], $main_image, $date, $product_id);
+
+                    $sql = u_utils::builderSQL($sql, $parameter_values);
                     database::query($sql);
                     // 更新product_info表
                     $sql = "UPDATE " . DB_TABLE_PRODUCTS_INFO . " SET name = '%s', short_description = '%s', description = '%s', head_title = '%s', 
                     meta_description = '%s', attributes = '%s' WHERE product_id = %d";
-                    $sql = u_utils::builderSQL($sql, array($product_info['name'], $product_info['short_description'],
+
+                    $parameter_values = array($product_info['name'], $product_info['short_description'],
                         $product_info['description'], $product_info['head_title'], $product_info['meta_description'],
-                        $product_info['attributes'], $product_id));
+                        $product_info['attributes'], $product_id);
+
+                    $sql = u_utils::builderSQL($sql, $parameter_values);
                     $result = database::query($sql);
                 }
                 //}
@@ -264,7 +274,7 @@
 
             addCategories($product_info, $product_map);
             updateProductOther($product_info, $product_map);
-            $product_map[$product_code] == true;
+            $product_map[$product_code] = true;
         }
     }
 
@@ -280,11 +290,13 @@
             $product_id = $product_info['id'];
             if (!empty($product_info['image']) && !empty($product_id)) {
                 $sql = "delete from %s where product_id = %d";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_IMAGES, $product_id));
+                $parameter_values = array(DB_TABLE_PRODUCTS_IMAGES, $product_id);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
                 foreach ($product_info['image'] as $image) {//添加新数据
                     $sql = "insert into %s (product_id,filename,checksum,priority) values(%d,'%s','%s',1)";
-                    $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCTS_IMAGES, $product_id, $image, ""));
+                    $parameter_values = array(DB_TABLE_PRODUCTS_IMAGES, $product_id, $image, "");
+                    $sql = u_utils::builderSQL($sql, $parameter_values);
                     $result = database::query($sql);
                 }
             }
@@ -314,7 +326,8 @@
 
             // 查找group_name 是否在 option_groups_info 表里，如果不存在就添加。
             $sql = "select id,group_id from " . DB_TABLE_OPTION_GROUPS_INFO . " where name = '%s'";
-            $sql = u_utils::builderSQL($sql, array($group_name));
+            $parameter_values = array($group_name);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
             $result = database::fetch(database::query($sql));
             $group_id = $result['group_id'];
             if (empty($result)) {
@@ -322,13 +335,15 @@
                 //添加 如下数据到对应表：
                 //1. `lc_option_groups`
                 $sql = "insert into " . DB_TABLE_OPTION_GROUPS . " (function,required,sort,date_created) VALUES ('%s',1,'%s','%s')";
-                $sql = u_utils::builderSQL($sql,
-                    array('select', 'priority', $product_info['date_created']));
+                $parameter_values = array('select', 'priority', $product_info['date_created']);
+
+                $sql = u_utils::builderSQL($sql,$parameter_values);
                 $result = database::query($sql);//拿到id值
                 $group_id = database::insert_id();
                 //`lc_option_groups_info`
                 $sql = "insert into %s (group_id,language_code,name,description) VALUES (%d,'en','%s','')";
-                $sql = u_utils::builderSQL($sql, array(DB_TABLE_OPTION_GROUPS_INFO, $group_id, $group_name));
+                $parameter_values = array(DB_TABLE_OPTION_GROUPS_INFO, $group_id, $group_name);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
                 // 添加$option_name 数据结束
             }
@@ -343,20 +358,23 @@
             //查找$option_value是否存在，查询时涉及两张表lc_option_values和lc_option_values_info。只有在info表里才有具体的值。
             $sql = "SELECT %s.id as value_id,%s.group_id FROM %s INNER JOIN %s ON value_id = %s.id 
                 AND %s.group_id = %d AND %s.name = '%s'";
-            $sql = u_utils::builderSQL($sql, array(
+            $parameter_values = array(
                 DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
                 DB_TABLE_OPTION_VALUES_INFO, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
-                $group_id, DB_TABLE_OPTION_VALUES_INFO, $option_name));
+                $group_id, DB_TABLE_OPTION_VALUES_INFO, $option_name);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
             $result = database::fetch(database::query($sql));
             if (empty($result)) {//如果$option_value不存在。则添加，如果存在则更新。
                 // 添加 option_values 也涉及两张表lc_option_values和lc_option_values_info
                 $sql = "insert into " . DB_TABLE_OPTION_VALUES . " (group_id,value,priority) VALUES (%d,'',1)";
-                $sql = u_utils::builderSQL($sql, array($group_id));
+                $parameter_values = array($group_id);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
                 $value_id = database::insert_id();
                 //添加到`lc_option_values_info`
                 $sql = "insert into " . DB_TABLE_OPTION_VALUES_INFO . " (value_id,language_code,name) VALUES (%d,'en','%s')";
-                $sql = u_utils::builderSQL($sql, array($value_id, $option_name));
+                $parameter_values = array($value_id, $option_name);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
                 // --------- value_info 添加结束 -------------------
                 // ---------------------------以上操作测试无误。 ---------------------------
@@ -368,20 +386,24 @@
             //1. 查找在product_optioins 表里有没有product_id,group_id,value_id 一一对应的记录，如果没有，则需要添加
             $sql = "SELECT product_id FROM " . DB_TABLE_PRODUCTS_OPTIONS . " 
                     WHERE product_id=%d AND group_id=%d AND value_id=%d";
-            $sql = u_utils::builderSQL($sql, array($product_id, $group_id, $value_id));
+            $parameter_values = array($product_id, $group_id, $value_id);
+
+            $sql = u_utils::builderSQL($sql, $parameter_values);
             $result = database::fetch(database::query($sql));
             if (empty($result)) {// 导入是应该不会存在更新问题，所以此处忽略
                 $sql = "insert into" . DB_TABLE_PRODUCTS_OPTIONS . " (product_id,group_id,value_id,price_operator,USD,
                                         priority,date_updated,date_created) 
                         VALUES (%d,%d,%d,'+',0.000,1,'%s','%s')";
-                $sql = u_utils::builderSQL($sql, array($product_id, $group_id, $value_id, $date, $date));
+                $parameter_values = array($product_id, $group_id, $value_id, $date, $date);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
             }
             // ---------------------------- 处理库存  这里有数据问题 ------------------------------------------------
             $combination = $group_id . "-" . $value_id;
             // 关联 lc_products_options_stock，首先检查是否有对应的stock记录，如果有，则更新，如果没有则添加
             $sql = "SELECT product_id,combination FROM " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " WHERE product_id=%d AND combination ='%s'";
-            $sql = u_utils::builderSQL($sql, array($product_id, $combination));
+            $parameter_values = array($product_id, $combination);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
             $result = database::fetch_full(database::query($sql));
             if (empty($result)) {
                 $sql = "INSERT INTO " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " (product_id,combination,sku,weight,
@@ -389,9 +411,10 @@
                                                 priority,date_updated,date_created)
                                         VALUES(%d,'%s',UUID(),%d,'%s',
                                               '%s',%.4f,%.4f,%.4f,'%s',%d,'%s','%s')";
-                $sql = u_utils::builderSQL($sql, array($product_id, $combination, $product_info['weight'],
+                $parameter_values = array($product_id, $combination, $product_info['weight'],
                     $product_info['weight_class'], $product_info['dim_x'], $product_info['dim_y'], $product_info['dim_z'], $product_info['dim_class'], $product_info['quantity'],
-                    1, $date, $date));
+                    1, $date, $date);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 database::query($sql);
                 // 修改商品表里的总数, 新增的时候直接加，只有修改的时候需要计算差值。因为可能库存数量会比原来的减少。
 //                $sql = "update " . DB_TABLE_PRODUCTS . " set quantity = quantity+%d,date_updated='%s' where id = %d";
@@ -407,7 +430,9 @@
                 // 更新库存
                 $sql = "update " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " set quantity = %.4f,date_updated='%s' 
                                                                         where product_id=%d and combination='%s'";
-                $sql = u_utils::builderSQL($sql, array($current_quantity, $date, $product_id, $combination));
+
+                $parameter_values = array($current_quantity, $date, $product_id, $combination);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 database::query($sql);
             }
             // 统计总数，统一更新库存
@@ -453,13 +478,15 @@
                         //添加$group_name 到lc_product_groups表
                         $sql = "insert into %s (status,date_updated,date_created) values(1,'%s','%s')";
                         $date = u_utils::getYMDHISDate();
-                        $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS, $date, $date));
+                        $parameter_values = array(DB_TABLE_PRODUCT_GROUPS, $date, $date);
+                        $sql = u_utils::builderSQL($sql, $parameter_values);
                         $result = database::query($sql);
                         $product_group_id = database::insert_id();
                         // 添加$group_name到lc_product_groups_info
                         $sql = "insert into %s (product_group_id,language_code,name) values(%d,'en','%s')";
-                        $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_INFO,
-                            $product_group_id, $group_name));
+                        $parameter_values = array(DB_TABLE_PRODUCT_GROUPS_INFO, $product_group_id, $group_name);
+
+                        $sql = u_utils::builderSQL($sql, $parameter_values);
                         $result = database::query($sql);
                     }
                     //2. 查找子项是否存在，如果不存在则添加. // 改为全部查，然后做对比。
@@ -481,14 +508,15 @@
                         foreach ($diff as $value_name) {
                             $date = u_utils::getYMDHISDate();
                             $sql = "insert into %s (product_group_id,date_updated,date_created) values(%d,'%s','%s')";
-                            $sql = u_utils::builderSQL($sql,
-                                array(DB_TABLE_PRODUCT_GROUPS_VALUES, $product_group_id, $date, $date));
+                            $parameter_values = array(DB_TABLE_PRODUCT_GROUPS_VALUES, $product_group_id, $date, $date);
+
+                            $sql = u_utils::builderSQL($sql,$parameter_values);
                             $result = database::query($sql);
                             $group_value_id = database::insert_id();
                             // 添加group子项lc_product_groups_values_info
-                            $sql = "insert into %s (`product_group_value_id`,`language_code`,`name`) values(%d,'en','%s')";
-                            $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_VALUES_INFO,
-                                $group_value_id, $value_name));
+                            $sql = "insert into ".DB_TABLE_PRODUCT_GROUPS_VALUES_INFO." (`product_group_value_id`,`language_code`,`name`) values(%d,'en','%s')";
+                            $parameter_values = array($group_value_id, $value_name);
+                            $sql = u_utils::builderSQL($sql,$parameter_values );
                             $result = database::query($sql);
                             $group_value_ids[] = $group_value_id;
                         } // 以上代码简单测试通过 2018-09-17
@@ -624,7 +652,8 @@
             $sql = "SELECT id,parent_id FROM " . DB_TABLE_CATEGORIES . " 
                     WHERE id in (SELECT category_id FROM " . DB_TABLE_CATEGORIES_INFO . " 
                     WHERE NAME = '%s' ) and parent_id = %d";
-            $sql = u_utils::builderSQL($sql, array($category_name, $parent_id));
+            $parameter_values = array($category_name, $parent_id);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
             $result = database::fetch(database::query($sql));
             $category_id = $result['id'];
             $product_id = $product_info['id'];
@@ -632,7 +661,9 @@
                 // 1. 插入新的分类到lc_categories，插入的数据有：langunge_code,date_created,插入完成后拿到id值。
                 $sql = "insert into " . DB_TABLE_CATEGORIES
                     . " (parent_id, dock, status, list_style, date_created) values (%d,'%s',%d,'%s','%s')";
-                $sql = u_utils::builderSQL($sql, array($parent_id, 'tree', 1, 'rows', date('Y-m-d H:i:s')));
+
+                $parameter_values = array($parent_id, 'tree', 1, 'column', date('Y-m-d H:i:s'));
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
                 $category_id = database::insert_id();//query("select max(id) from " . DB_TABLE_CATEGORIES);//2. 拿到刚才添加的id。
                 // 如果$id不为null且不是""，这设置parent_id
@@ -642,9 +673,10 @@
                 // 新增数据到lc_categories_info表。先测试通过，后期再看如何优化。
                 $sql = "insert into " . DB_TABLE_CATEGORIES_INFO . " (category_id, language_code, name, description, short_description, meta_description, head_title, h1_title) 
                   values(%d,'%s','%s','%s','%s','%s','%s','%s')";
-                $sql = u_utils::builderSQL($sql, array($category_id, 'en',
+                $parameter_values = array($category_id, 'en',
                     $category_name, $category_description, $category_short_description, $category_meta_description,
-                    $category_head_title, $category_h1_title));
+                    $category_head_title, $category_h1_title);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 database::query($sql);
                 echo 'Creating new category: ' . $category_name . PHP_EOL;
             } else {
@@ -665,11 +697,13 @@
             //--------------- 添加产品和分类的关系，涉及的表是 products_to_categories ------------
             // 1. 检查products_to_categories表里是否存在product_id 和 category_id 数据，如果存在则忽略，如果不存在则加上。
             $sql = "select product_id from " . DB_TABLE_PRODUCTS_TO_CATEGORIES . " where product_id=%d and category_id=%d";
-            $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
+            $parameter_values = array($product_id, $category_id);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
             $result = database::fetch(database::query($sql));
             if (empty($result)) {// 添加分类和商品的关联 lc_products_to_categories表
                 $sql = "INSERT INTO " . DB_TABLE_PRODUCTS_TO_CATEGORIES . " (product_id, category_id) VALUES (%d, %d)";
-                $sql = u_utils::builderSQL($sql, array($product_id, $category_id));
+                $parameter_values = array($product_id, $category_id);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
             }
         }
@@ -677,10 +711,11 @@
 
     function updateCategoryInfo($category_id, $category_description, $category_short_description, $category_meta_description, $category_head_title, $category_h1_title)
     {
-        $sql = "update %s SET description = '%s', short_description = '%s',
+        $sql = "update ".DB_TABLE_CATEGORIES_INFO." SET description = '%s', short_description = '%s',
                 meta_description = '%s', head_title = '%s',h1_title = '%s' WHERE category_id = %d";
-        $sql = u_utils::builderSQL($sql, array(DB_TABLE_CATEGORIES_INFO, $category_description, $category_short_description,
-            $category_meta_description, $category_head_title, $category_h1_title, $category_id));
+        $parameter_values = array($category_description, $category_short_description,
+            $category_meta_description, $category_head_title, $category_h1_title, $category_id);
+        $sql = u_utils::builderSQL($sql, $parameter_values);
         $result = database::query($sql);
     }
 
@@ -692,21 +727,22 @@
         // 通常情况下，只在第一次做更新即可。也不应该出现每个规格的数据都有不同数据，同时数据库表结构也不支持不同规格的不同价格等。
         $product_code = $product_info['code'];
         if (!isset($product_map[$product_code])) {
-        //查找一下数据是否一致，如果一致，则不做处理，不一致则更新
-        $product_groups = $product_info['product_groups'];
-        $product_id = $product_info['id'];
-        $price = $product_info['price'];
-        // 判断$product_groups 是否最后一个是逗号，如果是则截取，不是则不处理。
-        $lastIndex = strripos($product_groups, ",");//拿到索引0开始
-        $count = strlen($product_groups);//拿到长度,1开始，所以会比index大1.
-        if ($lastIndex === $count - 1) {
-            $product_groups = substr($product_groups, 0, -1);//去除逗号
-        }
-        //1. Update products.default_category_id,product_groups field
+            //查找一下数据是否一致，如果一致，则不做处理，不一致则更新
+            $product_groups = $product_info['product_groups'];
+            $product_id = $product_info['id'];
+            $price = $product_info['price'];
+            // 判断$product_groups 是否最后一个是逗号，如果是则截取，不是则不处理。
+            $lastIndex = strripos($product_groups, ",");//拿到索引0开始
+            $count = strlen($product_groups);//拿到长度,1开始，所以会比index大1.
+            if ($lastIndex === $count - 1) {
+                $product_groups = substr($product_groups, 0, -1);//去除逗号
+            }
+            //1. Update products.default_category_id,product_groups field
 
             $sql = "update " . DB_TABLE_PRODUCTS . " set default_category_id=%d,product_groups='%s' where id=%d";
-            $sql = u_utils::builderSQL($sql, array($product_info['default_category_id'],
-                $product_groups, $product_info['id']));
+            $parameter_values =  array($product_info['default_category_id'],
+                $product_groups, $product_info['id']);
+            $sql = u_utils::builderSQL($sql,$parameter_values);
             database::query($sql);
 
             //2. Update lc_products_prices table;
@@ -714,11 +750,13 @@
             $result = database::fetch(database::query($sql));
             if (empty($result)) {
                 $sql = "insert into " . DB_TABLE_PRODUCTS_PRICES . " (product_id,USD,EUR) values(%d,%.4f,0.000)";
-                $sql = u_utils::builderSQL($sql, array($product_id, $price));
+                $parameter_values = array($product_id, $price);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
             } else {
                 $sql = "update " . DB_TABLE_PRODUCTS_PRICES . "set USD=%.4f where product_id=%d";
-                $sql = u_utils::builderSQL($sql, array($price, $product_id));
+                $parameter_values = array($price, $product_id);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
                 $result = database::query($sql);
             }
         }
