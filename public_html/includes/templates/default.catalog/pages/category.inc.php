@@ -1,3 +1,8 @@
+<?php
+    /**
+     * //TODO:　点击左边分类时　右边的页面数据
+     */
+?>
 <aside id="sidebar">
   <?php include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_TEMPLATE . 'views/column_left.inc.php'); ?>
 </aside>
@@ -28,15 +33,17 @@
     <p class="description"><?php echo $description; ?></p>
     <?php } ?>
 
-    <?php if ($_GET['page'] == 1 && $subcategories) { ?>
-    <div class="categories row half-gutter hidden-xs">
-      <?php foreach ($subcategories as $subcategory) echo functions::draw_listing_category($subcategory); ?>
-    </div>
-    <?php } ?>
+<!--    --><?php //if ($_GET['page'] == 1 && $subcategories) { ?>
+<!--    <div class="categories row half-gutter hidden-xs">-->
+<!--      --><?php //foreach ($subcategories as $subcategory) echo functions::draw_listing_category($subcategory); ?>
+<!--    </div>-->
+<!--    --><?php //} ?>
 
     <?php if ($products) { ?>
     <div class="products row half-gutter">
-      <?php foreach ($products as $product) echo functions::draw_listing_product($product, $product['listing_type']); ?>
+      <?php // 这里拿到数据通过draw_listing_product 最后还是到views/listing_product。进行呈现。
+          foreach ($products as $product) echo functions::draw_listing_product($product, $product['listing_type']);
+          ?>
     </div>
     <?php } ?>
 

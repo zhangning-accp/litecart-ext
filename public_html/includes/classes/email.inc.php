@@ -1,16 +1,20 @@
 <?php
 
+    /**
+     * email class
+     * Class email
+     */
   class email {
     private $_charset = 'UTF-8';
-    private $_sender = array();
-    private $_recipients = array();
-    private $_subject = '';
-    private $_multiparts = array();
+    private $_sender = array();//
+    private $_recipients = array();//收件人
+    private $_subject = '';//主题
+    private $_multiparts = array();//附件内容
 
     public function __construct($charset=null) {
 
       $this->_charset = $charset ? $charset : language::$selected['charset'];
-
+      // 获取store_email 和 store_name
       $this->set_sender(settings::get('store_email'), settings::get('store_name'));
 
       return $this;
@@ -20,10 +24,12 @@
 
       $email = trim($email);
 
-      if (!$this->validate_email_address($email)) trigger_error('Invalid email address ('. $email .')', E_USER_ERROR);
+      if (!$this->validate_email_address($email)){
+          trigger_error('Invalid email address ('. $email .')', E_USER_ERROR);
+      }
 
       $this->_sender = array(
-        'email' => filter_var(preg_replace('#^.*\s<([^>]+)>$#', '$1', $email), FILTER_SANITIZE_EMAIL),
+        'email' => filter_var(preg_replace('#^.*\s<([^>+])>$#', '$1', $email), FILTER_SANITIZE_EMAIL),
         'name' => $name ? $name : trim(trim(preg_replace('#^(.*)\s?<[^>]+>$#', '$1', $email)), '"'),
       );
 
@@ -39,7 +45,9 @@
 
     public function add_body($content, $html=false, $charset=null) {
 
-      if (!$charset) $charset = $this->_charset;
+      if (!$charset) {
+          $charset = $this->_charset;
+      }
 
       $this->_multiparts[] = 'Content-Type: '. ($html ? 'text/html' : 'text/plain') .'; charset='. $charset . "\r\n"
                            . 'Content-Transfer-Encoding: 8bit' . "\r\n\r\n"
@@ -48,25 +56,42 @@
       return $this;
     }
 
+      /**
+       * 添加附件
+       * @param $file 文件路径
+       * @param null $filename 文件名
+       * @param bool $parse_as_string
+       * @return $this
+       */
     public function add_attachment($file, $filename=null, $parse_as_string=false) {
 
-      if (!$filename) $filename = pathinfo($file, PATHINFO_BASENAME);
+      if (!$filename) {
+          $filename = pathinfo($file, PATHINFO_BASENAME);
+      }
 
       $data = $parse_as_string ? $file : file_get_contents($file);
 
       $this->_multiparts[] = 'Content-Type: application/octet-stream' . "\r\n"
                            . 'Content-Disposition: attachment; filename="'. basename($filename) . '"' . "\r\n"
                            . 'Content-Transfer-Encoding: base64' . "\r\n\r\n"
-                           . chunk_split(base64_encode($data)) . "\r\n\r\n";
+                           . chunk_split(base64_encode($data)) . "\r\n\r\n";//使用 RFC 2045 语义格式化 $data
 
       return $this;
     }
 
+      /**
+       * 添加收件人
+       * @param $email 收件人地址
+       * @param null $name 称呼
+       * @return $this
+       */
     public function add_recipient($email, $name=null) {
 
       $email = trim($email);
 
-      if (!$this->validate_email_address($email)) trigger_error('Invalid email address ('. $email .')', E_USER_ERROR);
+      if (!$this->validate_email_address($email)) {
+          trigger_error('Invalid email address ('. $email .')', E_USER_ERROR);
+      }
 
       $this->_recipients[] = array(
         'email' => filter_var(preg_replace('#^.*\s<([^>]+)>$#', '$1', $email), FILTER_SANITIZE_EMAIL),
@@ -76,15 +101,24 @@
       return $this;
     }
 
+      /**
+       * 格式化联系方式内容
+       * @param $contact
+       * @return string
+       */
     public function format_contact($contact) {
 
-      if (empty($contact['name'])) return '<'. $contact['email'] .'>';
-
-      if (strtoupper(language::$selected['charset']) == 'UTF-8') {
-        return '=?utf-8?b?'. base64_encode($contact['name']) .'?= <'. $contact['email'] .'>';
+      if (empty($contact['name'])) {
+          return '<'. $contact['email'] .'>';
       }
 
+      // 这里没搞懂为什么要这样
+      if (strtoupper(language::$selected['charset']) == 'UTF-8') {
+        return '=?utf-8?b?'. base64_encode($contact['name']) .'?= <'. $contact['email'] .'>';
+    }
+
       if (strpos($contact['name'], '"') !== false || strpos($contact['name'], ',') !== false) {
+          // addcslashes — 以 C 语言风格使用反斜线转义字符串中的 "字符
         return '"'. addcslashes($contact['name'], '"') .'" <'. $contact['email'] .'>';
       }
 
@@ -96,6 +130,10 @@
       return preg_match('#^([a-zA-Z0-9])+([a-zA-Z0-9\._-])*@([a-zA-Z0-9_-])+([a-zA-Z0-9\._-]+)+$#', $email) ? true : false;
     }
 
+      /**
+       * 发送邮件
+       * @return bool
+       */
     public function send() {
 
     // Perpare headers
@@ -106,20 +144,22 @@
         'MIME-Version' => '1.0',
         'X-Mailer' => PLATFORM_NAME .' '. PLATFORM_VERSION,
       );
-
+      // attachment boundary
       $multipart_boundary_string = '==Multipart_Boundary_x'. md5(time()) .'x';
       $headers['Content-Type'] = 'multipart/mixed; boundary="'. $multipart_boundary_string . '"' . "\r\n";
-
+        // 将headers 里的value数据重新组织成key:value的存储格式
       array_walk($headers,
         function (&$v, $k) {
           $v = $k.': '.$v;
         }
       );
 
+      // 转成字符串。每个元素之间用\r\n分隔
       $headers = implode("\r\n", $headers);
 
     // Prepare subject
       if (strtoupper(language::$selected['charset']) == 'UTF-8') {
+          // 为什么要这样？
         $subject = '=?utf-8?b?'. base64_encode($this->_subject) .'?=';
       } else {
         $subject = $this->subject;

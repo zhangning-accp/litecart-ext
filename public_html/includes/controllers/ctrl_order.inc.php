@@ -188,7 +188,7 @@
                 $this->data['id'] = '';
             }
 
-            // Previous order status.查询订单以前的状态。为啥会有两个状态？
+            // Previous order status.查询订单以前的状态信息？
             $sql = "select os.*, osi.name from " . DB_TABLE_ORDERS . " o
                 left join " . DB_TABLE_ORDER_STATUSES . " os on (os.id = o.order_status_id)
                 left join " . DB_TABLE_ORDER_STATUSES_INFO . " osi on (osi.order_status_id = o.order_status_id and osi.language_code = '" . database::input($this->data['language_code']) . "')
@@ -197,7 +197,7 @@
             $previous_order_status_query = database::query($sql);
             $previous_order_status = database::fetch($previous_order_status_query);
 
-            // Current order status，查询当前状态
+            // Current order status，查询当前状态信息？
             $sql = "select os.*, osi.name, osi.email_message from " . DB_TABLE_ORDER_STATUSES . " os
                 left join " . DB_TABLE_ORDER_STATUSES_INFO . " osi on (os.id = osi.order_status_id and osi.language_code = '" . database::input($this->data['language_code']) . "')
                 where os.id = " . (int)$this->data['order_status_id'] . "
@@ -239,11 +239,12 @@
                 $this->data['order_number'] = $order_number;
 
                 $sql = "insert into " . DB_TABLE_ORDERS . " (id,uid,order_number,client_ip, date_created) values('%s','%s','%s','%s','%s')";
-                $sql = u_utils::builderSQL($sql, array($id,
+                $paramters = array($id,
                     database::input($this->data['uid']),
                     database::input($order_number),
                     database::input($_SERVER['REMOTE_ADDR']),
-                    database::input($date)));
+                    database::input($date));
+                $sql = u_utils::builderSQL($sql,$paramters );
                 $result = database::query($sql);
 //        database::query(
 //          "insert into ". DB_TABLE_ORDERS ."

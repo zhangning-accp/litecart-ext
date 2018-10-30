@@ -54,6 +54,12 @@
     return $listing_category->stitch('views/listing_category');
   }
 
+    /**
+     * 绘制产品列表的数据。这个函数最后数据显示跳到了views/listing_product。
+     * @param $product
+     * @param string $listing_type
+     * @return mixed|string
+     */
   function draw_listing_product($product, $listing_type='column') {
 
     $listing_product = new view();

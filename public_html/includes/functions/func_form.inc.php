@@ -33,7 +33,7 @@
 
     /**
      * 这个方法是干嘛的？
-     * @param $name
+     * @param $name  需要抽取的数据名：items[17][quantity]
      * @param null $array_value
      * @return string|void
      */

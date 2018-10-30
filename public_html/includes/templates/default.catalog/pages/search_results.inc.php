@@ -1,3 +1,9 @@
+<?php
+    /**
+     * 查询后的页面page
+     */
+?>
+
 <aside id="sidebar">
   <?php include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_TEMPLATE . 'views/column_left.inc.php'); ?>
 </aside>

@@ -21,8 +21,10 @@
     public function send($sender, $recipients, $data='') {
 
       $this->_log_handle = fopen(FS_DIR_HTTP_ROOT . WS_DIR_LOGS . 'last_smtp.log', 'w');
-
-      if (!is_resource($this->_socket)) $this->connect();
+      // 检查 _socket 是否是资源类型
+      if (!is_resource($this->_socket)) {
+          $this->connect();
+      }
 
       $this->read(220)
            ->write("EHLO {$_SERVER['SERVER_NAME']}\r\n", 250);
@@ -37,7 +39,6 @@
       }
 
       if (!empty($this->_username)) {
-
         $auths = array();
         if (preg_match('#250.AUTH ([^\R]+)#', $this->_last_response, $matches)) {
           $auths = explode(' ', $matches[1]);
@@ -93,8 +94,12 @@
       fwrite($this->_log_handle, "Connecting to $this->_host ...\r\n");
       $this->_socket = stream_socket_client($this->_host, $errno, $errstr, 3, STREAM_CLIENT_CONNECT, $stream_context);
 
-      if ($errno) throw new Exception('Could not connect to socket '. $this->_host .': '. $errstr);
-      if (empty($this->_socket)) throw new Exception('Failed opening socket connection to '. $this->_host);
+      if ($errno) {
+          throw new Exception('Could not connect to socket '. $this->_host .': '. $errstr);
+      }
+      if (empty($this->_socket)){
+          throw new Exception('Failed opening socket connection to '. $this->_host);
+      }
 
       stream_set_blocking($this->_socket, true);
       stream_set_timeout($this->_socket, 6);
@@ -120,7 +125,9 @@
 
       $buffer = '';
       while (substr($buffer, 3, 1) != ' ') {
-        if (!$buffer = fgets($this->_socket, 256)) throw new Exception('No response from socket');
+        if (!$buffer = fgets($this->_socket, 256)) {
+            throw new Exception('No response from socket');
+        }
         fwrite($this->_log_handle, "< $buffer");
         $response .= $buffer;
       }
