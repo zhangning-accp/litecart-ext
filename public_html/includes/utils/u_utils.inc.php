@@ -201,7 +201,7 @@
          * uid为13位(大写)，示例：7303CE22FA662。
          * 整个长度为27位 示例：0DA8F895A699820181014025824
          */
-        public static function orderNumber()
+        public static function createOrderNumber()
         {
             // 格式： 时间 YYYYMMDDHHmmssuid。 其中uid为13位的长度
             $orderNo = date("YmdHis");
@@ -226,6 +226,24 @@
             }
 
             return $result;
+        }
+
+        /**
+         * 压缩文件，将一个或多个文件压缩位zip文件。改方法不支持目录压缩
+         * @param $zipFilePath zip文件路径
+         * @param array $filePaths 需要压缩的一个或多个文件
+         */
+        public static function zip($zipFilePath, $filePaths = array())
+        {
+            if (empty($filePaths)) {
+                return;
+            }
+            $zip = new ZipArchive();
+            $zip->open($zipFilePath, ZipArchive::CREATE);   //打开压缩包
+            foreach ($filePaths as $file) {
+                $zip->addFile($file, basename($file));   //向压缩包中添加文件
+            }
+            $zip->close();
         }
 
         /**
@@ -260,12 +278,35 @@
             }
         }
 
+        /**
+         * 获取指定目录下的文件名列表。注意，改方法只会获得文件名，如果想获得文件的绝对路径，请使用fileAbsolutePaths方法
+         * @param $folder
+         * @return array
+         */
         public static function files($folder)
         {
             $files = scandir($folder);
             foreach ($files as $key => $value) {
                 if ($value == '.' || $value == '..') {
                     unset($files[$key]);
+                }
+            }
+
+            return $files;
+        }
+
+        /**
+         * @param $folder
+         * @return array
+         */
+        public static function fileAbsolutePaths($folder)
+        {
+            $files = scandir($folder);
+            foreach ($files as $key => $value) {
+                if ($value == '.' || $value == '..') {
+                    unset($files[$key]);
+                } else {
+                    $files[$key] = $folder . "/" . $value;
                 }
             }
 
@@ -291,7 +332,7 @@
                 $tmp = $data[$i];// 获取d当前行的数据一维数组
                 $tmp_size = count($tmp);// 拿到数据的列数
                 // csv里的实际数据行的列有可能小于表头的列，这时为了避免数组越界，所以取最小值。同理，如果数据列数大于表头列，也取最少列值。
-                if($tmp_size < $head_size) {
+                if ($tmp_size < $head_size) {
                     $head_size = $tmp_size;
                 }
                 $key_value_array = array();
@@ -330,7 +371,7 @@
             if ($handle = opendir($directoryPath)) {// 打开目录句柄
                 while (false !== ($item = readdir($handle))) {//从目录句柄中读取条目(改目录下的子文件或目录)
                     if ($item != "." && $item != "..") {
-                        $child = $directoryPath."/".$item;
+                        $child = $directoryPath . "/" . $item;
                         if (is_dir($child)) {//判断当前是否是一个目录,如果是则向下搜索。
                             self::deleteDirectoryAndFile($child);
                         } else {// 否则删除当前的文件
@@ -343,18 +384,77 @@
             }
         }
 
-//    public static function obliterate_directory($directoryPath) {
-//            // 方式二：
-//            $iter = new RecursiveDirectoryIterator($directoryPath);
-//            foreach (new RecursiveIteratorIterator($iter,
-//                RecursiveIteratorIterator::CHILD_FIRST) as $f) {
-//                if($f->isDir()) {
-//                    rmdir($f->getPathname());
-//                } else {
-//                    unlink($f->getPathname());
-//                }
-//
-//            }
-//            rmdir($directoryPath);
-//        }
+        /**
+         * 将文件数据拆分读取后写入到新文件。 如果希望将大文件更简单的拆分成小文件，请使用 splitDataToFile2
+         * @param int $length 读取的数据长度
+         * @param int $start 读取的开始位置
+         * @param $desc_file_path 目标文件路径
+         */
+        public static function splitDataToFile($data = array(), $desc_file_path = '')
+        {
+            $splitFile = new SplFileObject($desc_file_path, 'cb');
+            $splitFile->fseek(0, SEEK_END);
+            foreach ($data as $key => $value) {
+                $splitFile->fputcsv($value);
+            }
+        }
+
+        /**
+         * 将大文件写成多个小文件。函数内部会自增index作为文件名的一部分。规则是 $file_prefix + index.csv 例如： sp_0.csv,sp_1.csv
+         * @param $srcCSVFile 需要读取的原csv文件
+         * @param $split_rows 每个文件拆分的数据行数
+         * @param $read_rows 每次从原csv一次读取的行数
+         * @param string $desc_folder_path 目标文件存放的目录,最后要有一个/
+         * @param $file_prefix 保存的文件前缀。
+         * @param  $isHead 是否每个文件需要表头。这个需要源文件具有表头。否则会将源文件的第1行所有列作为表头添加到每个文件。
+         */
+        public static function splitDataToFile2($srcCSVFile, $splitRows, $readRows, $descFolderPath = '',
+                                                $filePrefix = 'sp_', $isHead = true)
+        {
+            if ($readRows < 1 || $splitRows < 1) {
+                return;
+            }
+            $path = $srcCSVFile;
+            $csv_file = new csvreader($path);
+            $lines = $csv_file->get_lines();
+            if($isHead == true) {
+                $head = $csv_file->get_data(1, 1);// 获取表头数据
+            }
+            $outLoop = 0; // 外层大循环,一个大文件能被拆成几个小文件。
+            if ($lines / $splitRows == 0) {
+                $outLoop = $lines / $splitRows;
+            } else {
+                $outLoop = ($lines / $splitRows) + 1;
+            }
+            $outLoop = intval($outLoop);
+            // 内层循环，一个小文件里有多少数据
+            $innerLoop = 0;
+            if ($splitRows / $readRows == 0) {
+                $innerLoop = $splitRows / $readRows;
+            } else {
+                $innerLoop = ($splitRows / $readRows) + 1;
+            }
+            $innerLoop = intval($innerLoop);
+            $start = 0;
+            for ($index = 0; $index < $outLoop; $index++) {// 开始每个小文件的数据写入
+                $desc = $descFolderPath;
+                for ($i = 0; $i < $innerLoop; $i++) {
+                    if (($start + $readRows) > $lines) {//如果最后的row大于剩下的行数，调整需要读取的行数，处理为有多少读多少。
+                        $readRows = $lines - $start;
+                    }
+                    $data = $csv_file->get_data($readRows, $start);
+                    if($index != 0 && $isHead == true && !empty($data) && count($data) > 1) {// 第一个文件本身就会读取到表头，所以是第一个之后的文件需要表头数据
+                        array_splice($data, 0, 0, $head);// 添加表头到数据
+                        $isHead = false;
+
+                    }
+                    if(!empty($data) && count($data) > 1) {
+                        $start = $start + $readRows;//开始位置
+                        u_utils::splitDataToFile($data, $desc . $filePrefix . $index . ".csv");
+                    }
+
+                }
+                $isHead = true;
+            }
+        }
     }

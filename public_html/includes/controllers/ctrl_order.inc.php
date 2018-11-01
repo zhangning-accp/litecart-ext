@@ -231,7 +231,7 @@
             // Insert/update order 如果没有id，则添加订单数据。
             if (empty($this->data['id'])) {
                 if (empty($this->data['order_number'])) {
-                    $order_number = u_utils::orderNumber();
+                    $order_number = u_utils::createOrderNumber();
                 }
                 $id = u_utils::guid();
                 $date = u_utils::getYMDHISDate();
