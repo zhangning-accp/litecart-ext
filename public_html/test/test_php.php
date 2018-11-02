@@ -10,6 +10,7 @@
     echo 'start...';
     $file = 'C:\\Users\\zn\\Desktop\\import-export-test\\test-case\\litecart_test_csv/litecart_test_csv-50w-1-1.csv';
     $folder = "c:/logs/";
-    u_utils::splitDataToFile2($file,10000,1000,$folder);
+//    u_utils::splitDataToFile2($file,10000,1000,$folder);
+    u_utils::zip("c:/logs/logs.zip",u_utils::fileAbsolutePaths($folder));
     echo 'end...';
     ?>

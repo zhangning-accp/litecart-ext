@@ -1,14 +1,16 @@
 <?php
   if (!function_exists('custom_draw_site_menu_item')) {
     function custom_draw_site_menu_item($item, $indent=0) {
-
-      if (!empty($item['subitems'])) {
+      if (!empty($item['subitems'])) {// 如果一级分类有子分类，则构建菜单样式。一级分类的遍历在本页52行
         $output = '<li class="dropdown" data-type="'. $item['type'] .'" data-id="'. $item['id'] .'">'
                 . '  <a href="'. htmlspecialchars($item['link']) .'" class="dropdown-toggle" data-toggle="dropdown">'. $item['title'] .' <b class="caret"></b></a>'
                 . '  <ul class="dropdown-menu">' . PHP_EOL;
 
-        foreach ($item['subitems'] as $subitem) {
+        foreach ($item['subitems'] as $subitem) {//遍历二级分类
           $output .= custom_draw_site_menu_item($subitem, $indent+1);
+          foreach($subitem['subitems'] as $threeSubItem) {// 遍历三级分类
+              $output .= custom_draw_site_menu_item($threeSubItem, $indent+2);
+          }
         }
 
         $output .= '  </ul>' . PHP_EOL
@@ -46,7 +48,11 @@
           <a href="<?php echo document::ilink(''); ?>" class="navbar-brand"><?php echo functions::draw_fonticon('fa-home'); ?></a>
         </li>
 
-        <?php foreach ($categories as $item) echo custom_draw_site_menu_item($item); ?>
+        <?php
+            foreach ($categories as $item) {// 一级分类
+                $html = custom_draw_site_menu_item($item);
+                echo $html;
+            } ?>
 
         <?php if ($manufacturers) { ?>
         <li class="manufacturers dropdown">

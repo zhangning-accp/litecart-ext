@@ -35,7 +35,8 @@
 
   <?php // 顶部下面的站点部分，包含了搜索框和一级大分类(不是左边的大分类)
       include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_site_menu.inc.php');
-      ?>
+      // TODO: 这里就是左边分类的部分，新的样式需要调整到其它位置。
+//            include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_category_tree.inc.php'); ?>
 
     <?php // 中间商品部分，包含左边的分类菜单，中间部分的幻灯片和下面部分的商品列表
         // 对应的就是public_html/includes/templates/default.catalog/pages/index.inc.php

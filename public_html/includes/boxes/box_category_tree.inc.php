@@ -1,6 +1,7 @@
 <?php
 
   if (!empty($_GET['category_id'])) {
+      // category_path 实际上就是category_id.
     $category_path = array_keys(reference::category($_GET['category_id'])->path);
   } else {
     $category_path = array();
