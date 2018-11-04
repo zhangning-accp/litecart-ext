@@ -332,6 +332,7 @@
         </div>
       </div>
 
+        <!-- customer information -->
       <div id="customer-details" class="panel panel-default">
         <div class="panel-heading">
           <h2 class="panel-title"><?php echo language::translate('title_customer_information', 'Customer Information'); ?></h2>
@@ -339,8 +340,8 @@
 
         <div class="panel-body">
           <div class="row">
-            <div class="col-md-6 customer-details">
-              <h3><?php echo language::translate('title_billing_address', 'Billing Address'); ?></h3>
+            <div class="col-md-6 customer-details"><!--shipping -->
+              <h3><?php echo language::translate('title_shipping_address', 'Shipping Address'); ?></h3>
 
               <div class="form-group">
                 <div class="input-group">
@@ -423,13 +424,13 @@
                   <?php echo functions::form_draw_phone_field('customer[phone]', true); ?>
                 </div>
               </div>
-            </div>
+            </div><!--shipping end -->
 
-            <div class="form-group col-md-6 shipping-address">
-              <h3><?php echo language::translate('title_shipping_address', 'Shipping Address'); ?></h3>
+            <div class="form-group col-md-6 shipping-address"><!--billing --->
+              <h3><?php echo language::translate('title_billing_address', 'Billing Address'); ?></h3>
 
               <div class="form-group">
-                <?php echo functions::form_draw_button('copy_billing_address', language::translate('title_copy_billing_address', 'Copy Billing Address'), 'button', 'class="btn btn-default btn-block"'); ?>
+                <?php echo functions::form_draw_button('copy_billing_address', language::translate('title_copy_shipping_address', 'Copy Shipping Address'), 'button', 'class="btn btn-default btn-block"'); ?>
               </div>
 
               <div class="row">
@@ -493,7 +494,7 @@
                   <?php echo functions::form_draw_phone_field('customer[shipping_address][phone]', true); ?>
                 </div>
               </div>
-            </div>
+            </div><!--billing end -->
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 <?php
     /**
-     * 订单处理。这里做支付，以及支付成功后等操作
+     * //TODO:订单处理。这里做支付，以及支付成功后等操作
      */
   header('X-Robots-Tag: noindex');
   document::$layout = 'checkout';
@@ -74,6 +74,36 @@
           'text' => $_POST['comments'],
         );
       }
+//        /****************************************************************************************
+        //         * 原框架把shipping address和Billing address 信息取反了，这里需要转过来。
+        //         ***************************************************************************************/
+//        $tmp_order_customer = $order->data['customer'];
+//        $tmp_billing_tax_id = $tmp_order_customer['tax_id'];
+//        $tmp_billing_company= $tmp_order_customer['company'];
+//        $tmp_billing_first_name = $tmp_order_customer['firstname'];
+//        $tmp_billing_last_name= $tmp_order_customer['lastname'];
+//        $tmp_billing_address1 = $tmp_order_customer['address1'];
+//        $tmp_billing_address2 = $tmp_order_customer['address2'];
+//        $tmp_billing_postcode = $tmp_order_customer['postcode'];
+//        $tmp_billing_city = $tmp_order_customer['city'];
+//        $tmp_billing_country_code = $tmp_order_customer['country_code'];
+//        $tmp_billing_zone_code = $tmp_order_customer['zone_code'];
+//        $tmp_billing_phone = $tmp_order_customer['phone'];
+//        $tmp_billing_email = $tmp_order_customer['email'];
+//
+//        $tmp_shipping = $tmp_order_customer['shipping_address'];
+//        $tmp_shipping_company = $tmp_shipping['company'];
+//        $tmp_shipping_firstname = $tmp_shipping['firstname'];
+//        $tmp_shipping_lastname = $tmp_shipping['lastname'];
+//        $tmp_shipping_address1 = $tmp_shipping['address1'];
+//        $tmp_shipping_address2 = $tmp_shipping['address2'];
+//        $tmp_shipping_city = $tmp_shipping['city'];
+//        $tmp_shipping_postcode = $tmp_shipping['postcode'];
+//        $tmp_shipping_country_code = $tmp_shipping['country_code'];
+//        $tmp_shipping_zone_code = $tmp_shipping['zone_code'];
+//        $tmp_shipping_phone = $tmp_shipping['phone'];
+
+
       // 获得payment的 transfer返回，如果返回里哟error，则退出，否则根据返回结构进行处理
       if ($gateway = $payment->transfer($order)) {
             //接受网关参数后，发送支付请求？还是应该verify验证后再发？
