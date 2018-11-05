@@ -18,6 +18,7 @@
 
         .products.row .product {
             border: 0px;
+            border-radius: 0px;
         }
 
         .products.row .product .price-wrapper .price {
@@ -31,7 +32,7 @@
     <script type="text/javascript">
         function productMouseEnter(obj,isEnter) {
             if(isEnter) {
-                obj.style = "border:1px solid #A9A9A9;padding:15px 15px";
+                obj.style = "border:1px solid #A9A9A9;padding:5px 5px";
             } else {
                 obj.style = "border:0px; padding:0px 0px";
             }

@@ -31,7 +31,6 @@
         padding-right: 50px;
     }
     a:link{color: #000000;}
-
 </style>
 <aside id="sidebar">
   <?php include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_TEMPLATE . 'views/column_left.inc.php'); ?>
@@ -62,12 +61,12 @@
     <?php if ($_GET['page'] == 1 && trim(strip_tags($description))) { ?>
     <p class="description"><?php echo $description; ?></p>
     <?php } ?>
-
-<!--    --><?php //if ($_GET['page'] == 1 && $subcategories) { ?>
+<!-- 当前分类下的子分类列表 -->
+<?php //if ($_GET['page'] == 1 && $subcategories) { ?>
 <!--    <div class="categories row half-gutter hidden-xs">-->
-<!--      --><?php //foreach ($subcategories as $subcategory) echo functions::draw_listing_category($subcategory); ?>
+<?php //foreach ($subcategories as $subcategory) echo functions::draw_listing_category($subcategory); ?>
 <!--    </div>-->
-<!--    --><?php //} ?>
+<?php //} ?>
 
     <?php if ($products) { ?>
     <div class="products row half-gutter">
@@ -77,6 +76,6 @@
     </div>
     <?php } ?>
 
-    <?php echo $pagination; ?>
+    <?php echo $pagination; //翻页条?>
   </div>
 </main>

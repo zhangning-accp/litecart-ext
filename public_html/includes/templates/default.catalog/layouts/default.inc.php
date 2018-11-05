@@ -13,25 +13,43 @@
 <body>
 
 <div id="page" class="twelve-eighty">
+
     <?php // 页面顶部部分 包含logo，国家地区，购物车 ?>
-  <header id="header" class="row nowrap center">
-<!--      <header id="header" class="banner_content">-->
-    <div class="col-xs-auto">
-      <a class="logotype" href="<?php echo document::href_ilink(''); ?>">
-        <img src="<?php echo WS_DIR_IMAGES; ?>logotype.png" style="max-width: 250px; max-height: 60px;" alt="<?php echo settings::get('store_name'); ?>" title="<?php echo settings::get('store_name'); ?>" />
-      </a>
-    </div><!--logo part-->
+      <header id="header" class="row nowrap center" style="background: #000;margin: 0px">
+        <div class="col-xs-auto">
+          <a class="logotype" href="<?php echo document::href_ilink(''); ?>">
+            <img src="<?php echo WS_DIR_IMAGES; ?>logotype.png" style="max-width: 250px; max-height: 60px;" alt="<?php echo settings::get('store_name'); ?>" title="<?php echo settings::get('store_name'); ?>" />
+          </a>
+        </div><!--logo part-->
+        <div style="height:60px;margin-top:-3px">
+          <?php
+                  //TODO: 这里导入box_cart.inc.php 也就是 首页右上角的 Shopping Cart
+                  include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_cart.inc.php'); ?>
+        </div><!-- Shoping cart part-->
+      </header><?php // 顶部部分结束 ?>
 
-    <div class="col-xs-auto text-center hidden-xs">
-      <?php include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_region.inc.php'); ?>
-    </div><!--region part-->
 
-    <div class="col-xs-auto text-right">
-      <?php
-          //TODO: 这里导入box_cart.inc.php 也就是 首页右上角的 Shopping Cart
-          include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_cart.inc.php'); ?>
-    </div><!-- Shoping cart part -->
-  </header><?php // 顶部部分结束 ?>
+
+
+    <?php // 页面顶部部分 包含logo，国家地区，购物车 ?>
+<!--  <header id="header" class="row nowrap center">-->
+<!--<!--      <header id="header" class="banner_content">-->
+<!--    <div class="col-xs-auto">-->
+<!--      <a class="logotype" href="--><?php //echo document::href_ilink(''); ?><!--">-->
+<!--        <img src="--><?php //echo WS_DIR_IMAGES; ?><!--logotype.png" style="max-width: 250px; max-height: 60px;" alt="--><?php //echo settings::get('store_name'); ?><!--" title="--><?php //echo settings::get('store_name'); ?><!--" />-->
+<!--      </a>-->
+<!--    </div><!--logo part-->
+<!---->
+<!--    <div class="col-xs-auto text-center hidden-xs">-->
+<!--      --><?php //include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_region.inc.php'); ?>
+<!--    </div><!--region part-->
+<!---->
+<!--    <div class="col-xs-auto text-right">-->
+<!--      --><?php
+//          //TODO: 这里导入box_cart.inc.php 也就是 首页右上角的 Shopping Cart
+//          include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_cart.inc.php'); ?>
+<!--    </div><!-- Shoping cart part -->
+<!--  </header>--><?php //// 顶部部分结束 ?>
 
   <?php // 顶部下面的站点部分，包含了搜索框和一级大分类(不是左边的大分类)
       include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_site_menu.inc.php');
