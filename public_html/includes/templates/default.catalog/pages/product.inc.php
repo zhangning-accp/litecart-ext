@@ -1,5 +1,5 @@
 <aside id="sidebar">
-  <?php include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_TEMPLATE . 'views/column_left.inc.php'); ?>
+<?php // 只要aside 就能让左边部分留出空白?>
 </aside>
 
 <main id="content">

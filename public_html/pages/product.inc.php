@@ -331,8 +331,8 @@
           break;
 
         case 'select'://TODO: 这里是产品select 绘制的代码
-
-          $options = array(array('-- '. language::translate('title_select', 'Select') .' --', ''));
+          $options = array();
+//          $options = array(array('-- '. language::translate('title_select', 'Select') .' --', ''));
           foreach ($group['values'] as $value) {
 
             $price_adjust_text = '';
@@ -347,8 +347,11 @@
             $options[] = array($value['name'] . $price_adjust_text, $value['name'], 'data-price-adjust="'. (float)$price_adjust .'" data-tax-adjust="'. (float)$tax_adjust .'"');
           }
 
-          $values .= functions::form_draw_select_field('options['.$group['name'].']', $options, true, false, !empty($group['required']) ? 'required="required"' : '');
-          break;
+//          $values .= functions::form_draw_select_field('options['.$group['name'].']', $options, true, false, !empty($group['required']) ? 'required="required"' : '');
+
+            $values .= functions::form_draw_blocks_select_field('options['.$group['name'].']',
+                    $options, true, false, !empty($group['required']) ? 'required="required"' : '');
+            break;
 
         case 'textarea':
 

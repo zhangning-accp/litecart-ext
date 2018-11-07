@@ -18,7 +18,7 @@
 
     .scroll-down-circle.black {
         background-size: 50% auto;
-        background: #000 url("https://www.champssports.com/ns/common/champssports/images/title-arrows-40x26.png") no-repeat center;
+        background: #000 url('{snippet:home_path}images/footer/title-arrows-40x26.png') no-repeat center;
     }
     .scroll-down-circle {
         position: absolute;
@@ -29,7 +29,7 @@
         margin-left: -23px;
         border-radius: 23px;
         cursor: pointer;
-        background: url("https://www.champssports.com/ns/common/champssports/images/title-arrows-40x26.png") center no-repeat;
+        background: url('{snippet:home_path}images/footer/title-arrows-40x26.png') center no-repeat;
         background-size: 50% auto;
         background-color: #e0e0e0;
     }
@@ -64,7 +64,7 @@
         height: 100%;
         width:110px;
         float: left;
-        background: url("https://www.champssports.com/ns/images/cs-master-sprite.png") no-repeat;
+        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -130px -120px;
     }
     #footer_social ul.social-icons li.facebook {
@@ -72,7 +72,7 @@
         height: 100%;
         width:110px;
         float: left;
-        background: url("https://www.champssports.com/ns/images/cs-master-sprite.png") no-repeat;
+        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -250px -120px;
     }
     #footer_social ul.social-icons li.twitter {
@@ -80,7 +80,7 @@
         height: 100%;
         width:110px;
         float: left;
-        background: url("https://www.champssports.com/ns/images/cs-master-sprite.png") no-repeat;
+        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -10px -120px;
     }
     #footer_social ul.social-icons li.instagram {
@@ -88,7 +88,7 @@
         height: 100%;
         width:110px;
         float: left;
-        background: url("https://www.champssports.com/ns/images/cs-master-sprite.png") no-repeat;
+        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -10px -240px;
     }
     #footer_social ul.social-icons li.youtube {
@@ -96,7 +96,7 @@
         height: 100%;
         width:110px;
         float: left;
-        background: url("https://www.champssports.com/ns/images/cs-master-sprite.png") no-repeat;
+        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -130px -240px;
     }
     #footer_social ul.social-icons li.snapchat {
@@ -104,7 +104,7 @@
         height: 100%;
         width:110px;
         float: left;
-        background-image: url("https://www.champssports.com/ns/common/champssports/images/social-icons/snapchat.svg");
+        background-image: url('{snippet:home_path}images/footer/snapchat.svg');
       }
     #footer_social ul.social-icons li {
         display: none;

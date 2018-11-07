@@ -240,6 +240,13 @@
          . '</div>';
   }
 
+    /**
+     * 绘制隐藏表单
+     * @param $name
+     * @param bool $value
+     * @param string $parameters 其实就是other attribute. 格式： attName="attValue"
+    * @return string
+     */
   function form_draw_hidden_field($name, $value=true, $parameters='') {
     if ($value === true) $value = form_reinsert_value($name);
 
@@ -390,9 +397,21 @@
     return $html;
   }
 
+
+    /**
+     * 绘制 select 组件
+     * @param $name
+     * @param array $options
+     * @param bool $input
+     * @param bool $multiple
+     * @param string $parameters
+     * @return string
+     */
   function form_draw_select_field($name, $options=array(), $input=true, $multiple=false, $parameters='') {
 
-    if (!is_array($options)) $options = array($options);
+    if (!is_array($options)) {
+        $options = array($options);
+    }
 
     $html = '<div class="select-wrapper'. ($multiple ? ' multiple' : '') .'">' . PHP_EOL
           . '  <select '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .' name="'. htmlspecialchars($name) .'"'. (($multiple) ? ' multiple="multiple"' : false) .''. (($parameters) ? ' ' . $parameters : false) .'>' . PHP_EOL;
@@ -411,6 +430,60 @@
 
     return $html;
   }
+
+
+    /**
+     * 绘制select，和form_draw_select_field不同的是，该方法将使用方块来呈现option内容默认的option 以方块的形式呈现。
+     * @param $name html标签的name属性值。option['Color']
+     * @param array $options 选项内容：
+           [["-- Select --",""],
+           ["red","red","data-price-adjust='0' data-tax-adjust='0'"],
+           ["blue","blue","data-price-adjust='0' data-tax-adjust='0'"]]
+     * @param bool $input
+     * @param bool $multiple
+     * @param string $parameters  ： required="required"
+     * @return string
+     */
+    function form_draw_blocks_select_field($name, $options=array(), $input=true, $multiple=false, $parameters='') {
+
+        if (!is_array($options)) $options = array($options);
+        $html = '<span data-info="product_sizes" class="product_sizes">';
+
+//        $html = '<div class="select-wrapper'. ($multiple ? ' multiple' : '') .'">' . PHP_EOL
+//            . '  <select '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .' name="'. htmlspecialchars($name) .'"'. (($multiple) ? ' multiple="multiple"' : false) .''. (($parameters) ? ' ' . $parameters : false) .'>' . PHP_EOL;
+
+        foreach ($options as $option) {
+            if ($input === true) {
+                $option_input = form_reinsert_value($name, isset($option[1]) ? $option[1] : $option[0]);
+            } else {
+                $option_input = $input;
+            }
+//            $value = htmlspecialchars(isset($option[1]) ? $option[1] : $option[0]);
+//            $tmp = "";($option[1] == $option_input) ? ' selected="selected"' : false;
+//            if(isset($option[1])) {
+//                $tmp = ($option[1] == $option_input) ? ' selected="selected"' : false;
+//            } else {
+//                if($option[0] == $option_input) {
+//                    $tmp = ' selected="selected"';
+//                } else {
+//                    $tmp = false;
+//                }
+//            }
+//            $tmp = (isset($option[1]) ? (($option[1] == $option_input) ? ' selected="selected"' : false) : (($option[0] == $option_input) ? ' selected="selected"' : false)) . ((isset($option[2])) ? ' ' . $option[2] : false);
+             //$tmp .= (isset($option[2])) ? ' ' . $option[2] : false;
+             //$html .= '    <option value="'. $value .'"'. $tmp .'>'. $option[0] .'</option>' . PHP_EOL;
+            //option['Color']
+//            $optionName =  str_replace('options','',$name);
+//            $optionName = trim($optionName,"'");
+//            $optionName = trim($optionName,"\[\]");
+            $html .= '<a href="javascript:return;" name="'.$name.'" onclick="clickOption(this,\''.$name.'\');">'.$option[0].'</a>'.PHP_EOL;
+
+        }
+
+        $html .= '  </span>';
+
+        return $html;
+    }
 
   function form_draw_textarea($name, $value=true, $parameters='') {
     if ($value === true) $value = form_reinsert_value($name);

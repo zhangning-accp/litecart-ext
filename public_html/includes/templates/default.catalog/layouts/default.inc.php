@@ -75,7 +75,7 @@
 </a><!-- Back to Top -->
 <!-- Footer -->
 {snippet:foot_tags}
-<script src="{snippet:template_path}js/app.min.js"></script>
+<script src="{snippet:template_path}js/app.js"></script>
 {snippet:javascript}
 
 <style type="text/css">

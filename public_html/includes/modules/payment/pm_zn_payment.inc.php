@@ -88,11 +88,11 @@
             /*-----------------------测试时用----------------------------*/
             $order_status_id = 3;
             $order->data['order_status_id'] = $order_status_id;
-//            $order->save();
-            //cart::clear();// 清空购物车
+            $order->save();
+            cart::clear();// 清空购物车
             //Send email 发送邮件
-            $email = $order->data['customer']['email'];
-            $order->email_order_copy($email);//没有发送成功。
+//            $email = $order->data['customer']['email'];
+//            $order->email_order_copy($email);//没有发送成功。
             /*-----------------------------------------*/
             $return_array = array(
                 'method' => 'API_CALL',

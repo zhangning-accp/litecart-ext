@@ -337,23 +337,26 @@
             }
 
             $row['name'] = array();
+            $tmp = explode(',', $row['combination']);
+            if(!empty($tmp)) {
+                foreach ($tmp as $combination) {
+                    if (!empty($combination)) {
+                        list($group_id, $value_id) = explode('-', $combination);
+                        $options_values_query = database::query(
+                            "select * from " . DB_TABLE_OPTION_VALUES_INFO . "
+                where value_id = '" . (int)$value_id . "'
+                and language_code in ('" . implode("', '", database::input($this->_language_codes)) . "')
+                order by field(language_code, '" . implode("', '", database::input($this->_language_codes)) . "');"
+                        );
 
-            foreach (explode(',', $row['combination']) as $combination) {
-              list($group_id, $value_id) = explode('-', $combination);
-
-              $options_values_query = database::query(
-                "select * from ". DB_TABLE_OPTION_VALUES_INFO ."
-                where value_id = '". (int)$value_id ."'
-                and language_code in ('". implode("', '", database::input($this->_language_codes)) ."')
-                order by field(language_code, '". implode("', '", database::input($this->_language_codes)) ."');"
-              );
-
-              while($option_value_info = database::fetch($options_values_query)) {
-                foreach ($option_value_info as $key => $value) {
-                  if (in_array($key, array('id', 'value_id', 'language_code'))) continue;
-                  if (empty($row[$key][$option_value_info['value_id']])) $row[$key][$option_value_info['value_id']] = $value;
+                        while ($option_value_info = database::fetch($options_values_query)) {
+                            foreach ($option_value_info as $key => $value) {
+                                if (in_array($key, array('id', 'value_id', 'language_code'))) continue;
+                                if (empty($row[$key][$option_value_info['value_id']])) $row[$key][$option_value_info['value_id']] = $value;
+                            }
+                        }
+                    }
                 }
-              }
             }
 
             $row['name'] = implode(',', $row['name']);
