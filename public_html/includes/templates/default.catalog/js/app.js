@@ -122,6 +122,9 @@
         jqXHR.overrideMimeType('text/html;charset=' + $('meta[charset]').attr('charset'));
       },
       error: function(jqXHR, textStatus, errorThrown) {
+          // alert(data);
+          // alert(textStatus);
+          // alert(errorThrown);
         if (data) alert('Error while updating cart');
         console.error('Error while updating cart');
         console.debug(jqXHR.responseText);
