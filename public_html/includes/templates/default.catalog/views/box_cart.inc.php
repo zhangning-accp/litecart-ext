@@ -12,7 +12,6 @@
         width: 22px;
         height: 22px;
         display: inline-block;
-
         vertical-align: middle;
         margin-right: 5px;
         background:url('{snippet:template_path}images/shopping-cart-icon.png') center no-repeat;
@@ -50,7 +49,7 @@
 
     }
 </style>
-<div id="cart" style="background: #b2906a;height:63px">
+<div id="cart" style="background: #b2906a">
     <a href="<?php echo htmlspecialchars($link); ?>">
         <div id="order_summary">
                 <div class="shopping_cart_icon"></div>

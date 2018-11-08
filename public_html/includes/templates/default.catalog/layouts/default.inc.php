@@ -21,7 +21,7 @@
             <img src="<?php echo WS_DIR_IMAGES; ?>logotype.png" style="max-width: 250px; max-height: 60px;" alt="<?php echo settings::get('store_name'); ?>" title="<?php echo settings::get('store_name'); ?>" />
           </a>
         </div><!--logo part-->
-        <div style="height:60px;margin-top:-3px">
+        <div>
           <?php
                   //TODO: 这里导入box_cart.inc.php 也就是 首页右上角的 Shopping Cart
                   include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_cart.inc.php'); ?>

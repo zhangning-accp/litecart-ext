@@ -27,7 +27,7 @@
     }
     #header .main_logo a {
         display: inline-block;
-        background: url({snippet:home_path}/images/logotype.png) center center no-repeat #fff;
+        background: url('{snippet:home_path}/images/logotype.png') center center no-repeat #fff;
         background-size: auto auto;
         background-size: contain;
         height: 53px;
@@ -49,7 +49,7 @@
         height: 52px;
         width: 52px;
         text-align: center;
-        background: url({snippet:home_path}/images/large-search-magnifying.png) no-repeat center #000;
+        background: url('{snippet:home_path}/images/categories/large-search-magnifying.png') no-repeat center #000;
         background-size: auto auto;
         background-size: 50%;
         border-radius: 3px;
@@ -180,20 +180,38 @@
         width: 10px;
         height: 6px;
         margin-top: -1px;
-        background: url({snippet:home_path}/images/nav_arrow_down.png) no-repeat center;
+        background: url('{snippet:home_path}/images/categories/nav_arrow_down.png') no-repeat center;
     }
     .header_nav_item > a{
         color: #000;
         text-decoration: none;
     }
+    .header_nav_item > a::after{
+        color: #b2906a;
+        text-decoration: none;
+        content: "|";
+        padding: 0 10px;
+    }
     .header_login::before {
         content: "Log In/Register";
+    }
+    .header_login a::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: -10px;
+        display: block;
+        width: 25px;
+        height: 22px;
+        margin-top: -9px;
+        background: url('{snippet:home_path}/images/login.png') center no-repeat;
+        background-size: contain;
     }
     #header .selected {
         color: #b2906a;
     }
     .header_nav_item__dropdown.selected::after {
-        background-image: url({snippet:home_path}/images/nav_arrow_up.png);
+        background-image: url('{snippet:home_path}/images/categories/nav_arrow_up.png');
     }
     .header_nav_item.selected {
         background: #f0f0f0;
@@ -247,23 +265,21 @@
     }
     #ex_nav .ex_nav_arrow {
         display: inline;
-        border-bottom: 1px solid #ccc;
+        /*border-bottom: 1px solid #ccc;*/
         content: "";
         position: absolute;
         bottom: 0;
         left: 50%;
         width: 30px;
-        height: 14px;
+        height: 15px;
         padding: 0;
         margin-left: -15px;
-        background: url({snippet:home_path}/images/ex_nav_arrow.jpg) center no-repeat;
+        background: url('{snippet:home_path}/images/categories/ex_nav_arrow.jpg') center no-repeat;
         -webkit-transition: .4s;
         -moz-transition: .4s;
         -o-transition: .4s;
         transition: .4s;
     }
-
-
 
     #ex_nav_2 {
         display:block;
@@ -349,7 +365,7 @@
         position:relative;
         float:right;
         display:inline-block;
-        background:url({snippet:home_path}/images/large-search-magnifying.png) no-repeat center #000;
+        background:url('{snippet:home_path}/images/categories/large-search-magnifying.png') no-repeat center #000;
         background-size:50%;
         height:50px;
         width:50px;
@@ -486,7 +502,7 @@
             <div class="header_nav_item header_nav_item__dropdown" data-nav="categories" title="View Product Categories">
                 <a class="screenreader open_menu" href="javascript:void(0);" title="Open View Product Categories Menu">Open View Product Categories Menu</a>
             </div>
-            <div class="header_nav_item header_nav_item__link">
+            <div class="header_nav_item header_nav_item__link" style="padding-right: 0px">
                 <a href="#footer_big_links" manual_cm_sp="TopNav2-_-Stores-_-findastore" title="Find a Champs Store">HELP</a>
             </div>
             <div id="header_login" class="header_nav_item header_login guest" title="Log In or Register">
