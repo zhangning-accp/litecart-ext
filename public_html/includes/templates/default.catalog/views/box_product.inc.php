@@ -37,7 +37,6 @@
         text-decoration: none;
         border: 1px solid #AFAFAF;
         font-family: Futura,Arial,Sans-Serif;
-        font-size: 16px;
         line-height:40px;
         border-radius: 4px;
     }
@@ -83,6 +82,9 @@
         padding: 10px 10px 10px 10px;
         font: 14px/2 Roboto,Arial,sans-serif;
     }
+    .font_specification {
+        font: 14px/1.5 Roboto,Arial,sans-serif;
+    }
 </style>
 <div id="box-product" class="box" style="max-width: 980px;" data-id="<?php echo $product_id; ?>"
      data-name="<?php echo htmlspecialchars($name); ?>"
@@ -118,7 +120,7 @@
             <?php } ?>
         </div>
 
-        <div class="col-sm-6 col-md-6">
+        <div class="col-sm-6 col-md-6 font_specification">
             <div class="title"><!--product title and descritions-->
             <h1><?php echo $name; ?></h1>
             <?php if ($short_description) { ?>
@@ -264,10 +266,8 @@
                                     element.style.transition = "all .2s ease-in";
                                     element.style.mozTransition = "all .2s ease-in";
                                     element.style.webkitTransition = "all .2s ease-in";
-//
                                 }
                             });
-                            //alert($('input[name='+ hidden_name +']').val());
                         }
                     </script>
                 <?php } ?>
@@ -289,29 +289,6 @@
 
                 <?php echo functions::form_draw_form_end(); ?>
             </div>
-
-<!--            <hr/>-->
-
-<!--            <div class="social-bookmarks text-center">-->
-<!--                <a class="link" href="#">--><?php //echo functions::draw_fonticon('fa-link', 'style="color: #333;"'); ?><!--</a>-->
-<!--                <a class="twitter"-->
-<!--                   href="--><?php //echo document::href_link('http://twitter.com/home/', array('status' => $name . ' - ' . $link)); ?><!--"-->
-<!--                   target="_blank"-->
-<!--                   title="--><?php //echo sprintf(language::translate('text_share_on_s', 'Share on %s'), 'Twitter'); ?><!--">--><?php //echo functions::draw_fonticon('fa-twitter-square fa-lg', 'style="color: #55acee;"'); ?><!--</a>-->
-<!--                <a class="facebook"-->
-<!--                   href="--><?php //echo document::href_link('http://www.facebook.com/sharer.php', array('u' => $link)); ?><!--"-->
-<!--                   target="_blank"-->
-<!--                   title="--><?php //echo sprintf(language::translate('text_share_on_s', 'Share on %s'), 'Facebook'); ?><!--">--><?php //echo functions::draw_fonticon('fa-facebook-square fa-lg', 'style="color: #3b5998;"'); ?><!--</a>-->
-<!--                <a class="googleplus"-->
-<!--                   href="--><?php //echo document::href_link('https://plus.google.com/share', array('url' => $link)); ?><!--"-->
-<!--                   target="_blank"-->
-<!--                   title="--><?php //echo sprintf(language::translate('text_share_on_s', 'Share on %s'), 'Google+'); ?><!--">--><?php //echo functions::draw_fonticon('fa-google-plus-square fa-lg', 'style="color: #dd4b39;"'); ?><!--</a>-->
-<!--                <a class="pinterest"-->
-<!--                   href="--><?php //echo document::href_link('http://pinterest.com/pin/create/button/', array('url' => $link)); ?><!--"-->
-<!--                   target="_blank"-->
-<!--                   title="--><?php //echo sprintf(language::translate('text_share_on_s', 'Share on %s'), 'Pinterest'); ?><!--">--><?php //echo functions::draw_fonticon('fa-pinterest-square fa-lg', 'style="color: #bd081c;"'); ?><!--</a>-->
-<!--            </div>-->
-
         </div>
     </div>
 
