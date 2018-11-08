@@ -509,19 +509,18 @@
                 <a href="#" rel="nofollow" title="Log In or Register"></a>
             </div>
         </div>
+        <!-- Search -->
         <div id="js-search" class="js-pushdown header_search removed">
-            <form name="keywordSearch" action="javascript:void(0);" method="">
-                <input name="module" value="topNav" type="hidden">
-                <input name="search" value="k" type="hidden">
-                <input name="action" value="keywordSearch" type="hidden">
-                <span class="input_wrap">
-                        <input id="reduce_input_text_height" title="Enter Your Search" name="keyword" size="15" maxlength="40" placeholder="SEARCH" autocomplete="off" type="text">
-                    </span>
+
+            <form name="search_form" enctype="application/x-www-form-urlencoded" accept-charset="UTF-8" action="<?php echo document::ilink('search')?>" method="get">
+    <span class="input_wrap">
+            <input id="reduce_input_text_height" title="Enter Your Search" name="query" size="15" maxlength="40" placeholder="SEARCH" autocomplete="off" type="text">
+        </span>
                 <div class="head-search-btn">
-                    <a id="header_search_button" href="#" title="Submit Search" ></a>
+                    <a id="header_search_button" href="#" title="Submit Search"></a>
                 </div>
             </form>
-        </div>
+        </div><!--Search end-->
     </div>
 
     <div id="ex_nav">
@@ -572,9 +571,7 @@
 <!--  <nav class="navbar">-->
 <!---->
 <!--    <div class="navbar-header">-->
-<!--      --><?php //echo functions::form_draw_form_begin('search_form', 'get', document::ilink('search'), false, 'class="navbar-form"'); ?>
-<!--        --><?php //echo functions::form_draw_search_field('query', true, 'placeholder="'. language::translate('text_search_products', 'Search products') .' &hellip;"'); ?>
-<!--      --><?php //echo functions::form_draw_form_end(); ?>
+<!--      -->
 <!---->
 <!--      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#default-menu">-->
 <!--        <span class="icon-bar"></span>-->
