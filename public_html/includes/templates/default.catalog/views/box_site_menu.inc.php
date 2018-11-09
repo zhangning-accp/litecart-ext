@@ -459,7 +459,7 @@
        * @return string
        */
       function create_li($item) {
-          $output = '<li><a id="'.$item['id'].'_li"></a>'.$item['title'].'</li>';
+          $output = '<li><a id="'.$item['id'].'_li" href="'. htmlspecialchars($item['link']) .'">'.$item['title'].'</a></li>';
           return $output;
       }
   }
@@ -571,7 +571,7 @@
 <!--  <nav class="navbar">-->
 <!---->
 <!--    <div class="navbar-header">-->
-<!--      -->
+<!---->
 <!---->
 <!--      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#default-menu">-->
 <!--        <span class="icon-bar"></span>-->
