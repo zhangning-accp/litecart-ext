@@ -372,7 +372,7 @@
         border-radius:0 3px 3px 0;
         cursor:pointer
     }
-    .merch-links > ul{
+    .second-ul {
         box-sizing: content-box;
     }
 </style>
@@ -478,7 +478,7 @@
               $output = '<div id="'. $item['id'] .'_div"><ul class="products">';
               foreach ($item['subitems'] as $subitem) {// 二级分类
                   $output .= create_li($subitem);
-                  $output .= '</ul><div class="merch-links"><ul><h2>'. $subitem['title'] .'</h2>';
+                  $output .= '</ul><div class="merch-links"><ul class="second-ul"><h2>'. $subitem['title'] .'</h2>';
                   foreach ($subitem['subitems'] as $threeSubItem) {
                       $output .= create_li($threeSubItem);
                   }
