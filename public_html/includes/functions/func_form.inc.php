@@ -114,11 +114,12 @@
 
     /**
      * 绘制多选框，
-     * @param $name
-     * @param $value
-     * @param bool $input
-     * @param string $parameters
-     * @return string
+     * @param $name 多选框name
+     * @param $value 多选框value
+     * @param bool $input 是否是input标签。
+     * @param string $parameters 其余的attribut属性。
+     * 如class=''等。如过有多个按照html的标签属性格式写。如 class='' style=''
+     * @return string 返回一个checkbox html字符串
      */
   function form_draw_checkbox($name, $value, $input=true, $parameters='') {
     if ($input === true) $input = form_reinsert_value($name, $value);

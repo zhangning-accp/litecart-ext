@@ -21,8 +21,6 @@
         margin-left: -30%;
         text-align: center;
         list-style: none;
-
-
     }
     .carousel-indicators li {
         text-indent: -999px;

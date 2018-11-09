@@ -271,15 +271,33 @@
                                 padding-left: 3px;
                             }
     /*items*/
-        .Band-content {
-            width: 100%;
-            position: relative;
-            text-align: center;
-            /*font: 16px/1.85 Roboto,Arial,sans-serif;*/
-            font:40px/1.5 Oswald;
-            font-size: 1.875rem;
-        }
+    .Band-content {
+        width: 100%;
+        position: relative;
+        text-align: center;
+        /*font: 16px/1.85 Roboto,Arial,sans-serif;*/
+        font:40px/1.5 Oswald;
+        font-size: 1.875rem;
+    }
 
+    .Band-content>ul {
+        list-style: none;
+    }
+    .Band-content>ul>li a{
+        color:#000000;
+        font:14px/1.2 Roboto,Arial,sans-serif;
+    }
+    .Band-content>ul>li a:hover{
+        color: #866c4e;
+        /*font:14px/1.2 Roboto,Arial,sans-serif;*/
+        text-decoration: none;
+
+    }
+     .ProductBand a:hover,.ProductBand-header:hover {
+        text-decoration: none;
+        color: #866c4e;
+         font-weight: bold;
+    }
 </style>
 <div id="grid-title" class="heading-spacer">
     <div class="scroll-down-circle"></div>
