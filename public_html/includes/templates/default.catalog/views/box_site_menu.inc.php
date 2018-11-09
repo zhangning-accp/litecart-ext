@@ -376,6 +376,10 @@
     .second-ul {
         box-sizing: content-box;
     }
+    #ex_nav_2 .merch-links .second-ul>a:hover{
+        color: #86080b;
+        text-decoration: none;
+    }
 </style>
 <script>
     $(document).ready(function () {
@@ -394,9 +398,8 @@
         })
         //为顶部菜单 SHOP添加点击事件
         $(".header_nav_item:first-child").bind("click",function () {
-            if ($(this).hasClass("selected")) {
+            if ($(this).hasClass("selected")) {//如果已经被选中
                 $(this).removeClass("selected");
-
                 $("#ex_nav").hide();
                 $("#nav_categories").hide();
             } else {
@@ -412,7 +415,9 @@
                 var liWidth = $firstLi.css("width").replace("px","");
                 var newOffest = offest + liWidth/2 + "px";
                 $("#ex_nav > span").css({left:newOffest});
+                //$("#nav_categories li:first-child").click();
             }
+
         });
         //为一级分类添加点击事件
         $("#nav_categories li").bind("click",function () {
@@ -487,17 +492,23 @@
        * @return string
        */
       function create_second_menu($item) {
+
           $output = '';
           if (!empty($item['subitems'])) {
-              $output = '<div id="'. $item['id'] .'_div"><ul class="products">';
+              $output = '<div id="'. $item['id'] .'_div"><div class="merch-links">';
               foreach ($item['subitems'] as $subitem) {// 二级分类
-                  $output .= create_li($subitem);
-                  $output .= '</ul><div class="merch-links"><ul class="second-ul"><h2>'. $subitem['title'] .'</h2>';
+//                  $output .= create_li($subitem);
+                  $output .= '<ul class="second-ul">
+                    <a id="'.$item['id'].'_li" href="'. htmlspecialchars($item['link']) .'"><h2>'. $subitem['title'] .'</h2></a>';
                   foreach ($subitem['subitems'] as $threeSubItem) {
                       $output .= create_li($threeSubItem);
                   }
-                  $output .= '</ul></div></div>';
+                  $output .= '</ul>';
               }
+              $output .="</div></div>";
+          } else {
+              $output = '<div id="'. $item['id'] .'_div"><div class="merch-links">';
+              $output .= "<span style='color: #999;font-size: 14px;font-weight: bold'>We're sorry, we could not find children categories for \"".$item['title']."\" Please try again.</span></div></div>";
           }
           return $output;
       }
@@ -539,7 +550,6 @@
             </form>
         </div><!--Search end-->
     </div>
-
     <div id="ex_nav">
         <span class="ex_nav_arrow" style="left: 200px;display: inline"></span>
         <ul id="nav_categories">
@@ -552,6 +562,17 @@
                 ?>
             </div>
         </ul>
+
+    </div>
+    <div id="ex_nav_2">
+        <?php
+            foreach ($categories as $item) {
+                $html = create_second_menu($item);
+                echo $html;
+            }
+        ?>
+    </div>
+</div>
 <!--        <ul id="nav_login">-->
 <!--            <li class="guest"></li>-->
 <!--            <li class="logged-in" style="display: none;">-->
@@ -573,17 +594,6 @@
 <!--                    <ul>-->
 <!--                        <li><a href="https://www.champssports.com/account/default/action--orderStatus/" title="View My Order Status">My Order Status</a></li>-->
 <!--                    </ul>-->
-    </div>
-
-    <div id="ex_nav_2">
-        <?php
-            foreach ($categories as $item) {
-                $html = create_second_menu($item);
-                echo $html;
-            }
-        ?>
-    </div>
-</div>
 <!--<div id="site-menu">-->
 <!--  <nav class="navbar">-->
 <!---->

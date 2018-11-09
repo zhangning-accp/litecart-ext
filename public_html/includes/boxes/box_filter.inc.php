@@ -51,8 +51,13 @@
     while ($product = database::fetch($products_query)) {
       $sets = explode(',', $product['product_groups']);
       foreach ($sets as $set) {
-        list($group_id, $value_id) = explode('-', $set);
-        $product_groups[(int)$group_id][(int)$value_id] = (int)$value_id;
+          if(!empty($set)) {
+              $key_value = explode('-', $set);
+              if(!empty($key_value) && count($key_value) > 1) {
+                  list($group_id, $value_id) = $key_value;
+              }
+              $product_groups[(int)$group_id][(int)$value_id] = (int)$value_id;
+          }
       }
     }
 
