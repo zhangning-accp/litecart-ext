@@ -526,7 +526,7 @@
                     $simple_groups = preg_split("/:/", $simple_groups);
                     $group_name = $simple_groups[0];
 
-                    $group_values = $simple_groups[1];
+                    $group_values = stripslashes($simple_groups[1]);
                     $group_values = preg_split("/,/", $group_values);
                     $group_values = array_filter($group_values);
                     //查找$group_name 在lc_product_groups_info表里是否存在
@@ -568,15 +568,14 @@
                         //添加group子项到lc_product_groups_values
                         foreach ($diff as $value_name) {
                             $date = u_utils::getYMDHISDate();
-                            $sql = "insert into %s (product_group_id,date_updated,date_created) values(%d,'%s','%s')";
-                            $parameter_values = array(DB_TABLE_PRODUCT_GROUPS_VALUES, $product_group_id, $date, $date);
-
+                            $sql = "insert into ".DB_TABLE_PRODUCT_GROUPS_VALUES." (product_group_id,date_updated,date_created) values(%d,'%s','%s')";
+                            $parameter_values = array($product_group_id, $date, $date);
                             $sql = u_utils::builderSQL($sql,$parameter_values);
                             $result = database::query($sql);
                             $group_value_id = database::insert_id();
                             // 添加group子项lc_product_groups_values_info
                             $sql = "insert into ".DB_TABLE_PRODUCT_GROUPS_VALUES_INFO." (`product_group_value_id`,`language_code`,`name`) values(%d,'en','%s')";
-                            $parameter_values = array($group_value_id, $value_name);
+                            $parameter_values = array($group_value_id, addslashes($value_name));
                             $sql = u_utils::builderSQL($sql,$parameter_values );
                             $result = database::query($sql);
                             $group_value_ids[] = $group_value_id;
@@ -828,14 +827,14 @@
      * @param $product_info
      * @return string
      */
-    function md5Product(&$product_info)
-    {
-        //name,short_description,description,attributes,head_title,meta_description
-        $md5_str = $product_info['name'] . $product_info['short_description'] . $product_info['description']
-            . $product_info['attributes'] . $product_info['head_title'] . $product_info['meta_description'];
-
-        return md5($md5_str);
-    }
+//    function md5Product(&$product_info)
+//    {
+//        //name,short_description,description,attributes,head_title,meta_description
+//        $md5_str = $product_info['name'] . $product_info['short_description'] . $product_info['description']
+//            . $product_info['attributes'] . $product_info['head_title'] . $product_info['meta_description'];
+//
+//        return md5($md5_str);
+//    }
 ?>
 <h1><?php echo $app_icon; ?><?php echo language::translate('title_csv_import_export', 'CSV Import/Export'); ?></h1>
 <!-- import or export csv html content 2018 17:07 zn add annotation in here -->

@@ -12,20 +12,8 @@
 //    $folder = "D:\\zip-test\\litecart_2018-11-01/";
 //    u_utils::splitDataToFile2($file,10000,1000,$folder);
 //    u_utils::zip("c:/logs/logs.zip",u_utils::fileAbsolutePaths($folder));
-    $product_info = array("price"=>"");
-    $prices = $product_info['price'];
-    /*异常情况检测*/
-    if(empty($prices)) {
-        $prices = "0.00|0.00";
-    }
-    if(u_utils::startWith("|",$prices)) {
-        $prices = "0.00".$prices;
-    }
-    if(u_utils::endWith("|",$prices)) {
-        $prices.="0.00";
-    }
-    // 获取[0]原价和[1]销售价
-    $prices = preg_split("/[|]/",$prices);
-    $product_info['prices'] = $prices;
-    var_dump(floatval("d34"));
+    $s1 = "SHOP FOR:Men's|SU'B DEPARTMENT:Limited|COLOR/STYLE:Black";
+    $s2 = "SHOP FOR:Men's|SUB DEPARTMENT:Limited|COLOR/STYLE:Black";
+    $s1 = stripslashes($s1);
+    echo $s1 == $s2;
     ?>
