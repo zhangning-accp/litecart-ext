@@ -372,7 +372,7 @@
         border-radius:0 3px 3px 0;
         cursor:pointer
     }
-    ul{
+    .merch-links > ul{
         box-sizing: content-box;
     }
 </style>
