@@ -372,6 +372,9 @@
         border-radius:0 3px 3px 0;
         cursor:pointer
     }
+    ul{
+        box-sizing: content-box;
+    }
 </style>
 <script>
     $(document).ready(function () {
