@@ -57,7 +57,20 @@
             if ($start_str_tmp === $start_str) {
                 return true;
             }
-
+            return false;
+        }
+        /**
+         * 判断一个字符串是否以$start_str代表的字符串开头。如果是返回true，否则返回false；
+         * @param $start_str ： 开头的字符串
+         * @param $str 要查找的字符串
+         */
+        public static function endWith($end_str, $str)
+        {
+            $start_str_length = strlen($end_str);
+            $start_str_tmp = substr($str, strlen($str)-$start_str_length);
+            if ($start_str_tmp === $end_str) {
+                return true;
+            }
             return false;
         }
 
@@ -401,10 +414,10 @@
 
         /**
          * 将大文件写成多个小文件。函数内部会自增index作为文件名的一部分。规则是 $file_prefix + index.csv 例如： sp_0.csv,sp_1.csv
-         * @param $srcCSVFile 需要读取的原csv文件
-         * @param $split_rows 每个文件拆分的数据行数
+         * @param $srcCSVFile 需要读取的原csv文件 注意，文件路径里不能有非英文内容
+         * @param $split_rows 每个文件保存的数据数
          * @param $read_rows 每次从原csv一次读取的行数
-         * @param string $desc_folder_path 目标文件存放的目录,最后要有一个/
+         * @param string $desc_folder_path 目标文件存放的目录,最后的/可以有可以没有。
          * @param $file_prefix 保存的文件前缀。
          * @param  $isHead 是否每个文件需要表头。这个需要源文件具有表头。否则会将源文件的第1行所有列作为表头添加到每个文件。
          */
@@ -437,7 +450,7 @@
             $innerLoop = intval($innerLoop);
             $start = 0;
             for ($index = 0; $index < $outLoop; $index++) {// 开始每个小文件的数据写入
-                $desc = $descFolderPath;
+                $desc = $descFolderPath."/";
                 for ($i = 0; $i < $innerLoop; $i++) {
                     if (($start + $readRows) > $lines) {//如果最后的row大于剩下的行数，调整需要读取的行数，处理为有多少读多少。
                         $readRows = $lines - $start;

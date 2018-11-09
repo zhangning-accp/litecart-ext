@@ -1,5 +1,6 @@
 <?php
 
+
     echo "CSV Import\r\n" . "----------\r\n";
     set_time_limit(0);//设置脚本执行时间
     // import or export run.
@@ -9,6 +10,7 @@
         //$csv_array = builderExportCSVArray();
         //exportCategoriesAndProducts();
     }
+
     /**
      * 完整导入分类和产品
      */
@@ -84,6 +86,27 @@
         } catch (Exception $e) {
             notices::add('errors', $e->getMessage());
         }
+    }
+
+    /**
+     * 抽取价格
+     * @param $prices xx|xx
+     * @return arry
+     */
+    function extractPrices($prices) {
+        /*异常情况检测*/
+        if(empty($prices)) {
+            $prices = "0.00|0.00";
+        }
+        if(u_utils::startWith("|",$prices)) {
+            $prices = "0.00".$prices;
+        }
+        if(u_utils::endWith("|",$prices)) {
+            $prices.="0.00";
+        }
+        // 获取[0]原价和[1]销售价
+        $prices = preg_split("/[|]/",$prices);
+        return $prices;
     }
     // catalog->CSV Import/Export page and process import/export Categories or Products
     /**
@@ -179,6 +202,10 @@
             //$product_name = $product_info['name'];
             $product_code = $product_info['code'];
             if (!empty($product_code)) {
+                // 价格处理
+                $prices = $product_info['price'];
+                $extr_prices = extractPrices($prices);
+                $product_info['prices'] = $extr_prices;
                 importProduct($product_info, $product_map);
             }
         }
@@ -202,7 +229,6 @@
             $result = database::fetch(database::query($sql));
             $product_id = $result['id'];
             $product_info['id'] = $product_id;
-
             if (empty($product_id)) {//新增
                 // 新增，新增后，将product_id赋值给id
                 $sql = "INSERT INTO " . DB_TABLE_PRODUCTS . " (status,manufacturer_id,supplier_id,delivery_status_id,
@@ -222,7 +248,7 @@
                     $product_code, $product_info['mpn'], $product_info['upc'], $product_info['gtin'], $product_info['taric'],
                     0, $product_info['quantity_unit_id'], $product_info['weight'],
                     $product_info['weight_class'], $product_info['dim_x'], $product_info['dim_y'], $product_info['dim_z'],
-                    $product_info['dim_class'], $product_info['price'], $product_info['purchase_price_currency_code'],
+                    $product_info['dim_class'], 0, $product_info['purchase_price_currency_code'],
                     $product_info['tax_class_id'], $main_image, $product_info['views'], $product_info['purchases'],
                     $product_info['date_valid_from'], $product_info['date_valid_to'], $product_info['date_updated'], $product_info['date_created']);
                 $sql = u_utils::builderSQL($sql, $parameter_values);
@@ -266,7 +292,7 @@
                 }
                 //}
             }// 以上代码测试通过 2018-09-18 14:50
-
+            addCampaigns($product_info, $product_map);
             addImages($product_info, $product_map); //处理图片数据
             addOptionGroup($product_info);
 
@@ -278,6 +304,40 @@
         }
     }
 
+    /**
+     * 添加活动价格
+     * @param $product_info
+     * @param $product_map
+     */
+    function addCampaigns(&$product_info, &$product_map)
+    {
+        $product_code = $product_info['code'];
+        if (!isset($product_map[$product_code])) {// 只有map里没有此数据时才进行更新处理
+            $product_id = $product_info['id'];
+            if (!empty($product_id)) {
+                //如果价格是0或小于0表示没有特价，则删除这个。这里有个bug，这个bug是系统数据底层结构里特价只和商品本身挂钩，
+                //所以没有办法做到同个商品多个规格的特价。需要修改表结构。
+                if ($product_info['prices'][1] <= 0) {
+                    $sql = "delete from " . DB_TABLE_PRODUCTS_CAMPAIGNS . " where product_id = " . $product_id;
+                    $result = database::query($sql);
+                    return;
+                }
+                $sql = "select count(1) as total from " . DB_TABLE_PRODUCTS_CAMPAIGNS . " where product_id = " . $product_id;
+                $result = database::fetch(database::query($sql));
+                if ($result['total'] < 1) {
+                    $sql = "insert into " . DB_TABLE_PRODUCTS_CAMPAIGNS . " (product_id,start_date,end_date,USD,EUR) values (%d,'%s','%s',%d,%d)";
+                    $parameter_values = array($product_id, '1900-01-01', "4900-01-01", $product_info['prices'][1], 0);
+                    $sql = u_utils::builderSQL($sql, $parameter_values);
+                    $result = database::query($sql);
+                } else {
+                    $sql = "update " . DB_TABLE_PRODUCTS_CAMPAIGNS . " set USD=%d where product_id =%d";
+                    $parameter_values = array($product_id, $product_info['prices'][1]);
+                    $sql = u_utils::builderSQL($sql, $parameter_values);
+                    $result = database::query($sql);
+                }
+            }
+        }
+    }
     /**
      * 添加图片，测试多次无异常，放心用
      * @param $product_info 商品信息对象
@@ -471,7 +531,8 @@
                     $group_values = array_filter($group_values);
                     //查找$group_name 在lc_product_groups_info表里是否存在
                     $sql = "select id,product_group_id from %s where name ='%s' limit 1";
-                    $sql = u_utils::builderSQL($sql, array(DB_TABLE_PRODUCT_GROUPS_INFO, $group_name));
+                    $parameter_values = array(DB_TABLE_PRODUCT_GROUPS_INFO, $group_name);
+                    $sql = u_utils::builderSQL($sql, $parameter_values);
                     $result = database::fetch(database::query($sql));
                     $product_group_id = $result['product_group_id'];
                     if (empty($result)) {// group_name数据不存在
@@ -678,7 +739,7 @@
                     $category_head_title, $category_h1_title);
                 $sql = u_utils::builderSQL($sql, $parameter_values);
                 database::query($sql);
-                echo 'Creating new category: ' . $category_name . PHP_EOL;
+                //echo 'Creating new category: ' . $category_name . PHP_EOL;
             } else {
                 if ($isTree == true) {//如果是添加有层级关系的分类，则父类id等于当前找到的id。
                     $parent_id = $category_id;
@@ -690,7 +751,7 @@
                 updateCategoryInfo($category_id, $category_description, $category_short_description,
                     $category_meta_description, $category_head_title, $category_h1_title);
 
-                echo "Updated  category :" . $category_name . " default_category_id:" . $product_info['default_category_id'] . PHP_EOL;
+               // echo "Updated  category :" . $category_name . " default_category_id:" . $product_info['default_category_id'] . PHP_EOL;
             }
             $product_info['default_category_id'] = $category_id;// seting default_category_id for product.
 
@@ -730,7 +791,7 @@
             //查找一下数据是否一致，如果一致，则不做处理，不一致则更新
             $product_groups = $product_info['product_groups'];
             $product_id = $product_info['id'];
-            $price = $product_info['price'];
+            $price = $product_info['prices'][0];
             // 判断$product_groups 是否最后一个是逗号，如果是则截取，不是则不处理。
             $lastIndex = strripos($product_groups, ",");//拿到索引0开始
             $count = strlen($product_groups);//拿到长度,1开始，所以会比index大1.
