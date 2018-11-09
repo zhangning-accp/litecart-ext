@@ -136,7 +136,7 @@
     'attributes' => !empty($product->attributes) ? preg_split('#\r\n|\r|\n#', $product->attributes) : array(),
     'image' => array(
       'original' => $main_original,
-      'thumbnail' => $main_thumbnail,
+      'thumbnail' => $main_thumbnail_2x,
       'thumbnail_2x' => $main_thumbnail_2x,
       'viewport' => array(
         'width' => $width,
