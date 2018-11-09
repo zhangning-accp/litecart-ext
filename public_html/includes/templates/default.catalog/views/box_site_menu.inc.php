@@ -81,6 +81,7 @@
         -moz-box-sizing: border-box;
         overflow: hidden;
         margin-bottom: 10px;
+        display: none;
     }
     .header_search .input_wrap {
         position: absolute;
@@ -380,18 +381,31 @@
     $(document).ready(function () {
         //为搜索按钮添加点击事件
         $(".search_btn > a").bind("click",function () {
-            $(this).toggleClass("selected");
-            $("#js-search").toggle();
-            $("#ex_nav").toggle();
-            $("#nav_categories").toggle();
+            if ($(this).hasClass("selected")) {
+                $(this).removeClass("selected");
+                $("#js-search").show();
+                $("#ex_nav").hide();
+                $("#nav_categories").hide();
+                $(".header_nav_item:first-child").removeClass("selected");
+            } else {
+                $(this).addClass("selected");
+                $("#js-search").hide();
+            }
         })
         //为顶部菜单 SHOP添加点击事件
         $(".header_nav_item:first-child").bind("click",function () {
-            $(this).toggleClass("selected");
-            $(".search_btn > a").toggleClass("selected");
-            $("#js-search").toggle();
-            $("#ex_nav").toggle();
-            $("#nav_categories").toggle();
+            if ($(this).hasClass("selected")) {
+                $(this).removeClass("selected");
+
+                $("#ex_nav").hide();
+                $("#nav_categories").hide();
+            } else {
+                $(this).addClass("selected");
+                $("#js-search").hide();
+                $("#ex_nav").show();
+                $("#nav_categories").show();
+                $(".search_btn > a").addClass("selected");
+            }
             if ($(".header_nav_item:first-child").hasClass("selected")) {
                 var $firstLi = $("#nav_categories li:first-child");
                 var offest = $firstLi.offset().left;
@@ -496,7 +510,7 @@
             <a id="header_logo_button" href="#" title="Champs Sports Home" alt="Champs Sports Home"></a>
         </div>
         <div class="float-left search_btn">
-            <a href="javascript:void(0);" title="Search" class="js-global-nav-link"><span class="champs-sprite"></span></a>
+            <a href="javascript:void(0);" title="Search" class="js-global-nav-link selected"><span class="champs-sprite"></span></a>
         </div>
         <div class="float-left menu_btn">
             <a href="javascript:void(0);" title="menu" class="js-global-nav-link"><span></span></a>
