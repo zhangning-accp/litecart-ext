@@ -98,6 +98,9 @@
         if(empty($prices)) {
             $prices = "0.00|0.00";
         }
+        if(!u_utils::startWith("|",$prices) && !u_utils::endWith("|",$prices)) {
+            $prices .= "|";
+        }
         if(u_utils::startWith("|",$prices)) {
             $prices = "0.00".$prices;
         }
@@ -526,7 +529,7 @@
                     $simple_groups = preg_split("/:/", $simple_groups);
                     $group_name = $simple_groups[0];
 
-                    $group_values = stripslashes($simple_groups[1]);
+                    $group_values = $simple_groups[1];
                     $group_values = preg_split("/,/", $group_values);
                     $group_values = array_filter($group_values);
                     //查找$group_name 在lc_product_groups_info表里是否存在
@@ -551,20 +554,29 @@
                         $result = database::query($sql);
                     }
                     //2. 查找子项是否存在，如果不存在则添加. // 改为全部查，然后做对比。
-                    $sql = "SELECT product_group_value_id,`name` FROM " . DB_TABLE_PRODUCT_GROUPS_VALUES_INFO . " 
-                INNER JOIN " . DB_TABLE_PRODUCT_GROUPS_VALUES . " 
-	            ON product_group_value_id = " . DB_TABLE_PRODUCT_GROUPS_VALUES . ".id AND product_group_id = " . $product_group_id;
+                    $sql = "SELECT product_group_value_id,`name` FROM ".DB_TABLE_PRODUCT_GROUPS_VALUES_INFO." WHERE NAME IN(";
+                    $in = "";
+                    $in = "'" . JOIN("','", array_values($group_values)) . "'";
+                    $in .= ")";
+                    $sql .= $in." AND product_group_value_id IN(SELECT product_group_value_id FROM ".DB_TABLE_PRODUCT_GROUPS_VALUES_INFO .
+                        " INNER JOIN ". DB_TABLE_PRODUCT_GROUPS_VALUES." as dpgv ON product_group_value_id = dpgv.id AND product_group_id = ". $product_group_id . ")";
+//                $result = database::query($sql);
+//                $result = database::fetch_full($result);
+
+//                    $sql = "SELECT product_group_value_id,`name` FROM " . DB_TABLE_PRODUCT_GROUPS_VALUES_INFO . "
+//                INNER JOIN " . DB_TABLE_PRODUCT_GROUPS_VALUES . "
+//	            ON product_group_value_id = " . DB_TABLE_PRODUCT_GROUPS_VALUES . ".id AND product_group_id = " . $product_group_id;
                     $result = database::fetch_full(database::query($sql));
                     $group_value_ids = array();//$result['product_group_value_id'];
                     $value_names = array();//$result['name'];
                     foreach ($result as $row) {
                         $group_value_ids [] = $row['product_group_value_id'];
-                        $value_names [] = $row['name'];
+                        $value_names [] = addslashes($row['name']);
                     }
+                    // 找到 $group_values有 但$value_names没有的数据
                     $diff = array_diff($group_values, $value_names);//寻找差值，如果result里没有，则添加
-                    // 得到的是一个有一个元素，但元素为空的数组，过滤一下
-                    $diff = array_filter($diff);
-                    if (!empty($diff)) {// 这里 如果没有不同的，
+                    $diff = array_filter($diff);//把空元素过滤掉
+                    if (!empty($diff)) {// 如果找到数据库没有的product group
                         //添加group子项到lc_product_groups_values
                         foreach ($diff as $value_name) {
                             $date = u_utils::getYMDHISDate();
@@ -575,7 +587,7 @@
                             $group_value_id = database::insert_id();
                             // 添加group子项lc_product_groups_values_info
                             $sql = "insert into ".DB_TABLE_PRODUCT_GROUPS_VALUES_INFO." (`product_group_value_id`,`language_code`,`name`) values(%d,'en','%s')";
-                            $parameter_values = array($group_value_id, addslashes($value_name));
+                            $parameter_values = array($group_value_id, $value_name);
                             $sql = u_utils::builderSQL($sql,$parameter_values );
                             $result = database::query($sql);
                             $group_value_ids[] = $group_value_id;

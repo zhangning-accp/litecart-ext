@@ -84,22 +84,22 @@
          * 参看 public_html/pages/order_process.inc.php  66 line进行理解
          */
         public function transfer(&$order) {
-//           return payment($order);
+           return payment($order);
             /*-----------------------测试时用----------------------------*/
-            $order_status_id = 3;
-            $order->data['order_status_id'] = $order_status_id;
-            $order->save();
-            cart::clear();// 清空购物车
+//            $order_status_id = 3;
+//            $order->data['order_status_id'] = $order_status_id;
+//            $order->save();
+//            cart::clear();// 清空购物车
             //Send email 发送邮件
 //            $email = $order->data['customer']['email'];
 //            $order->email_order_copy($email);//没有发送成功。
             /*-----------------------------------------*/
-            $return_array = array(
-                'method' => 'API_CALL',
-                "status"=>1,
-                "msg"=>"Payment successed."
-            );
-            return $return_array;
+//            $return_array = array(
+//                'method' => 'API_CALL',
+//                "status"=>1,
+//                "msg"=>"Payment successed."
+//            );
+//            return $return_array;
 
             //echo  $post_str;
 //            $order_success_ilink = document::link(WS_DIR_TEST.'payment_test.php');

@@ -393,7 +393,7 @@
                 $(".header_nav_item:first-child").removeClass("selected");
             } else {
                 $(this).addClass("selected");
-                $("#js-search").hide();
+                $("#js-search").hide(300);
             }
         })
         //为顶部菜单 SHOP添加点击事件
@@ -401,13 +401,15 @@
             if ($(this).hasClass("selected")) {//如果已经被选中
                 $(this).removeClass("selected");
                 $("#ex_nav").hide();
-                $("#nav_categories").hide();
+                $("#nav_categories").hide();//隐藏一级分类菜单
+                $("#ex_nav_2 > div").hide(300);// 隐藏二级分类菜单
             } else {
                 $(this).addClass("selected");
                 $("#js-search").hide();
                 $("#ex_nav").show();
                 $("#nav_categories").show();
                 $(".search_btn > a").addClass("selected");
+                $("#nav_categories li:first-child").click();
             }
             if ($(".header_nav_item:first-child").hasClass("selected")) {
                 var $firstLi = $("#nav_categories li:first-child");
@@ -415,9 +417,7 @@
                 var liWidth = $firstLi.css("width").replace("px","");
                 var newOffest = offest + liWidth/2 + "px";
                 $("#ex_nav > span").css({left:newOffest});
-                //$("#nav_categories li:first-child").click();
             }
-
         });
         //为一级分类添加点击事件
         $("#nav_categories li").bind("click",function () {
@@ -425,13 +425,13 @@
             var divOffest = $("#ex_nav").offset().left;
             var offest = liOffest - divOffest;
             var liWidth = $(this).css("width").replace("px","");
-            $("#nav_categories li").removeClass("selected");
-            $(this).addClass("selected");
+            $("#nav_categories li").removeClass("selected");// 移除所有一级分类的选中状态
+            $(this).addClass("selected");//给当前一级分类添加选中状态
             var newOffest = offest + liWidth/2 + "px";
             $("#ex_nav > span").animate({left:newOffest});
             var id = $(this).attr("id");
-            $("#ex_nav_2 > div").hide();
-            $("#" + id + "_div").show();
+            $("#ex_nav_2 > div").hide();// 隐藏二级类
+            $("#" + id + "_div").show(300);// 显示二级分类
         })
     });
 
