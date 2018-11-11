@@ -4,18 +4,6 @@
      */
 ?>
     <style type="text/css">
-        .name {
-            text-transform: uppercase;
-            color: #000;
-            font-size: 14px;
-            font-weight: 700;
-            line-height: 18px;
-            text-transform: uppercase;
-            width: auto;
-            margin: 10px 5% 0 5%;
-            /*display: block;*/
-        }
-
         .products.row .product {
             border: 0px;
             border-radius: 0px;
@@ -23,11 +11,56 @@
 
         .products.row .product .price-wrapper .price {
             color: #707070;
-            /*font-weight: 400;*/
             font-size: 16px !important;
             font-family: Futura,arial,sans-serif !important;
         }
+        .c-product-search-results .product-container {
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-flex: 0;
+            -ms-flex: 0 0 48.5%;
+            flex: 0 0 48.5%;
+            margin: 0 1.5% 1.5% 0;
+        }
+        /*@media (max-width: 320px) {*/
+            /*.product-container {*/
+                /*-webkit-box-flex: 0;*/
+                /*-ms-flex: 0 0 100%;*/
+                /*margin: 10px 0;*/
+            /*}*/
 
+        /*}*/
+        /*@media (min-width: 120em) {*/
+            /*.c-product-search-results .product-container {*/
+                /*-webkit-box-flex: 0;*/
+                /*-ms-flex: 0 0 31.333%;*/
+                /*flex: 0 0 31.333%;*/
+                /*margin: 0 1% 2%;*/
+                /*margin-bottom: 16px;*/
+            /*}*/
+            /*.name {*/
+                /*font: 14px/1 Roboto,Arial,sans-serif;*/
+                /*padding: 5px 25px;*/
+                /*height: 100%;*/
+            /*}*/
+        /*}*/
+        .products.row .product .name {
+            display: flex;
+            justify-content: center;
+            align-content: center;
+            flex-direction: column;
+            padding: 0 3.75px;
+            height: 100%;
+        }
+        .name {
+            font: 16px/1.5 Roboto,Arial,sans-serif;
+            padding: 5px 25px;
+
+        }
+        .image,.img-responsive{
+            padding: 34px 25px 25px;
+        }
     </style>
     <script type="text/javascript">
         function productMouseEnter(obj,isEnter) {
@@ -53,7 +86,7 @@
                 </div>
 
                 <div class="name"><?php echo $name; ?></div>
-                <div style="font-size: 5em;"></div>
+
                 <div class="price-wrapper">
                     <?php if ($campaign_price) { ?>
                         <s class="regular-price"><?php echo currency::format($regular_price); ?></s> <strong

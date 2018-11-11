@@ -470,4 +470,18 @@
                 $isHead = true;
             }
         }
+
+        /**
+         * 用来替代系统的count函数，做了类型判断
+         * @param $array_or_countable
+         * @param int $mode
+         * @return int
+         */
+        public static function count($array_or_countable,$mode = COUNT_NORMAL){
+            if(is_array($array_or_countable) || is_object($array_or_countable)){
+                return count($array_or_countable, $mode);
+            }else{
+                return 0;
+            }
+        }
     }

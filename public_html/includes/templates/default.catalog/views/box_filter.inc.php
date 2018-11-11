@@ -51,6 +51,7 @@
     }
 </style>
 <div id="box-filter">
+
   <?php echo functions::form_draw_form_begin('filter_form', 'get'); ?>
 <!--  --><?php //if ($manufacturers) { ?>
 <!--  <div class="box manufacturers">-->
@@ -86,4 +87,14 @@
   $('form[name="filter_form"] input[name="product_groups[]"]').click(function(){
     $(this).closest('form').submit();
   });
+//  $(window).resize(function () {          //当浏览器大小变化时
+//      var windowHeight = $(window).height();//浏览器时下窗口可视区域高度
+//      var documentHeight = $(document).height();//浏览器时下窗口文档的高度
+//      var bodyHeight = $(document.body).height(); //浏览器时下窗口文档body的高度
+//      var bodyOuteHeight = $(document.body).outerHeight(true);//浏览器时下窗口文档body的总高度 包括border padding margin
+//      alert("浏览器下窗口可视区域高度:" + windowHeight);
+//      alert("浏览器时下窗口文档的高度:" + documentHeight);
+//      alert("浏览器时下窗口文档body的高度:" + bodyHeight);
+//      alert("浏览器时下窗口文档body的总高度:" + bodyOuteHeight);
+//  });
 </script>

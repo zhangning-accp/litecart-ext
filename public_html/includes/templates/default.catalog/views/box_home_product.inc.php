@@ -152,152 +152,162 @@
             list-style: none;
         }
 
-        /*adv style*/
-        @media (min-width: 1200px)
+        /*adv style @media的顺序不能变*/
+        @media (min-width: 48em) {
+            .Bands-item.col {
+                margin: 0 0 1rem;
+            }
+            .row {
+                margin: 0px;
+            }
+            .col {
+                flex: 1;
+            }
+        }
+        @media (min-width: 600px) {
+            .Bands--6up, .Bands--productList {
+                -ms-flex-wrap: wrap;
+                flex-wrap: wrap;
+                -webkit-box-orient: horizontal;
+                -webkit-box-direction: normal;
+                -ms-flex-direction: row;
+                flex-direction: row;
+                margin: 1rem 0;
+            }
+
+            .Bands--6up .Bands-item, .Bands--productList .Bands-item {
+                margin: 1rem 0;
+                -webkit-box-flex: 1;
+                -ms-flex: 1 1 33.33333%;
+                flex: 1 1 33.33333%;
+            }
+        }
+
+        @media (min-width: 1200px) {
             .Bands--6up, .Bands--productList {
                 -ms-flex-wrap: nowrap;
                 flex-wrap: nowrap;
             }
+        }
 
-            @media (min-width: 600px)
-                .Bands--6up, .Bands--productList {
-                    -ms-flex-wrap: wrap;
-                    flex-wrap: wrap;
-                    -webkit-box-orient: horizontal;
-                    -webkit-box-direction: normal;
-                    -ms-flex-direction: row;
-                    flex-direction: row;
-                    margin: 1rem 0;
-                }
+        .ProductBand-link {
+            height: 100%;
+            padding-bottom: 1rem;
+            text-decoration: none;
+        }
 
-                .row {
-                    margin: 0px;
-                }
 
-                @media (min-width: 600px)
-                    .Bands--6up .Bands-item, .Bands--productList .Bands-item {
-                        margin: 1rem 0;
-                        -webkit-box-flex: 1;
-                        -ms-flex: 1 1 33.33333%;
-                        flex: 1 1 33.33333%;
-                    }
 
-                    @media (min-width: 48.0625em)
+        .ProductBand {
+            text-align: center;
+        }
 
-                        .Bands-item.col {
-                            margin: 0 0 1rem;
-                        }
+        /*img*/
+        .Band-image, .Bands-item img, .Bands-item picture {
+            width: 100%;
+        }
 
-                        .col {
-                            flex: 1;
-                        }
+        /*band header*/
+        .ProductBand-header {
+            margin-top: .5rem;
+            display: -webkit-box;
+            display: -ms-flexbox;
+            display: flex;
+            -webkit-box-orient: vertical;
+            -webkit-box-direction: normal;
+            -ms-flex-direction: column;
+            flex-direction: column;
+            color: #000;
+        }
 
-                        .ProductBand {
-                            text-align: center;
-                        }
+        .ProductBand-header .brand {
+            font: 12px/1.33333 Roboto, Arial, sans-serif;
+        }
 
-                        /*img*/
-                        .Band-image, .Bands-item img, .Bands-item picture {
-                            width: 100%;
-                        }
+        .ProductBand-header .name {
+            font: 16px/1.5 Roboto, Arial, sans-serif;
 
-                        /*band header*/
-                        .ProductBand-header {
-                            margin-top: .5rem;
-                            display: -webkit-box;
-                            display: -ms-flexbox;
-                            display: flex;
-                            -webkit-box-orient: vertical;
-                            -webkit-box-direction: normal;
-                            -ms-flex-direction: column;
-                            flex-direction: column;
-                            color: #000;
-                        }
+        }
 
-                        .ProductBand-header .brand {
-                            font: 12px/1.33333 Roboto, Arial, sans-serif;
-                        }
+        @media (min-width: 900px)
+            .ProductBand-header, .ProductBand .c-btn {
+                margin: 0 2rem;
+            }
 
-                        .ProductBand-header .name {
-                            font: 16px/1.5 Roboto, Arial, sans-serif;
+            .ProductBand-header .brand, .ProductBand-header .name {
+                -webkit-text-decoration: underline transparent;
+                text-decoration: underline transparent;
+                -webkit-transition: -webkit-text-decoration .25s;
+                transition: -webkit-text-decoration .25s;
+                transition: text-decoration .25s;
+                transition: text-decoration .25s, -webkit-text-decoration .25s;
+            }
 
-                        }
+            .ProductBand-header .brand, .ProductBand-header .name {
+                -webkit-text-decoration: underline transparent;
+                text-decoration: underline transparent;
+                -webkit-transition: -webkit-text-decoration .25s;
+                transition: -webkit-text-decoration .25s;
+                transition: text-decoration .25s;
+                transition: text-decoration .25s, -webkit-text-decoration .25s;
+            }
 
-                        @media (min-width: 900px)
-                            .ProductBand-header, .ProductBand .c-btn {
-                                margin: 0 2rem;
-                            }
+            .ProductBand-header .c-icon {
+                position: relative;
+                top: -1px;
+            }
 
-                            .ProductBand-header .brand, .ProductBand-header .name {
-                                -webkit-text-decoration: underline transparent;
-                                text-decoration: underline transparent;
-                                -webkit-transition: -webkit-text-decoration .25s;
-                                transition: -webkit-text-decoration .25s;
-                                transition: text-decoration .25s;
-                                transition: text-decoration .25s, -webkit-text-decoration .25s;
-                            }
+            .c-icon {
+                display: inline-block;
+                width: 14px;
+                height: 14px;
+                fill: #383838;
+                -webkit-transform-origin: 50% 50%;
+                transform-origin: 50% 50%;
+                -webkit-transition: -webkit-transform .2s;
+                transition: -webkit-transform .2s;
+                transition: transform .2s;
+                transition: transform .2s, -webkit-transform .2s;
+            }
 
-                            .ProductBand-header .brand, .ProductBand-header .name {
-                                -webkit-text-decoration: underline transparent;
-                                text-decoration: underline transparent;
-                                -webkit-transition: -webkit-text-decoration .25s;
-                                transition: -webkit-text-decoration .25s;
-                                transition: text-decoration .25s;
-                                transition: text-decoration .25s, -webkit-text-decoration .25s;
-                            }
+            .c-icon svg {
+                fill: inherit;
+                float: left;
+                margin-top: 3px;
+                padding-left: 3px;
+            }
 
-                            .ProductBand-header .c-icon {
-                                position: relative;
-                                top: -1px;
-                            }
+            /*items*/
+            .Band-content {
+                width: 100%;
+                position: relative;
+                text-align: center;
+                /*font: 16px/1.85 Roboto,Arial,sans-serif;*/
+                font: 40px/1.5 Oswald;
+                font-size: 1.875rem;
+            }
 
-                            .c-icon {
-                                display: inline-block;
-                                width: 14px;
-                                height: 14px;
-                                fill: #383838;
-                                -webkit-transform-origin: 50% 50%;
-                                transform-origin: 50% 50%;
-                                -webkit-transition: -webkit-transform .2s;
-                                transition: -webkit-transform .2s;
-                                transition: transform .2s;
-                                transition: transform .2s, -webkit-transform .2s;
-                            }
+            .Band-content > ul {
+                list-style: none;
+            }
 
-                            .c-icon svg {
-                                fill: inherit;
-                                float: left;
-                                margin-top: 3px;
-                                padding-left: 3px;
-                            }
-    /*items*/
-    .Band-content {
-        width: 100%;
-        position: relative;
-        text-align: center;
-        /*font: 16px/1.85 Roboto,Arial,sans-serif;*/
-        font:40px/1.5 Oswald;
-        font-size: 1.875rem;
-    }
+            .Band-content > ul > li a {
+                color: #000000;
+                font: 14px/1.2 Roboto, Arial, sans-serif;
+            }
 
-    .Band-content>ul {
-        list-style: none;
-    }
-    .Band-content>ul>li a{
-        color:#000000;
-        font:14px/1.2 Roboto,Arial,sans-serif;
-    }
-    .Band-content>ul>li a:hover{
-        color: #866c4e;
-        /*font:14px/1.2 Roboto,Arial,sans-serif;*/
-        text-decoration: none;
+            .Band-content > ul > li a:hover {
+                color: #866c4e;
+                /*font:14px/1.2 Roboto,Arial,sans-serif;*/
+                text-decoration: none;
 
-    }
-     .ProductBand a:hover,.ProductBand-header:hover {
-        text-decoration: none;
-        color: #866c4e;
-         font-weight: bold;
-    }
+            }
+
+            .ProductBand a:hover, .ProductBand-header:hover {
+                text-decoration: none;
+                color: #866c4e;
+                font-weight: bold;
+            }
 </style>
 <div id="grid-title" class="heading-spacer">
     <div class="scroll-down-circle"></div>
