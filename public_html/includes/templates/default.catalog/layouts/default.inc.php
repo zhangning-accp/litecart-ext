@@ -8,6 +8,7 @@
 {snippet:head_tags}
 <link rel="stylesheet" href="{snippet:template_path}css/framework.min.css" />
 <link rel="stylesheet" href="{snippet:template_path}css/app.min.css" />
+<link rel="stylesheet" href="{snippet:template_path}css/listing_product.css"/>
 {snippet:style}<?php // 还未找到在哪里做设置，也可能是任意位置?>
 </head>
 <body>
@@ -18,7 +19,7 @@
       <header id="header" class="row nowrap center" style="background: #000;margin: 0px">
         <div class="col-xs-auto">
           <a class="logotype" href="<?php echo document::href_ilink(''); ?>">
-            <img src="<?php echo WS_DIR_IMAGES; ?>logotype.png" style="max-width: 250px; max-height: 60px;" alt="<?php echo settings::get('store_name'); ?>" title="<?php echo settings::get('store_name'); ?>" />
+            <img src="<?php echo WS_DIR_IMAGES; ?>logotype.png" style="max-width: 250px; max-height: 45px;" alt="<?php echo settings::get('store_name'); ?>" title="<?php echo settings::get('store_name'); ?>" />
           </a>
         </div><!--logo part-->
         <div>
@@ -80,10 +81,13 @@
 
 <style type="text/css">
     #page {
-        padding: 1px;
+        padding: 0 0px 0 0px;
     }
     #header{
         margin-bottom: 1px;
+    }
+    .row {
+        margin: 0px;
     }
 </style>
 </body>

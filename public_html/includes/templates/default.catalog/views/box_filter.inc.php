@@ -59,7 +59,7 @@
             position: fixed;
             bottom: 50px;
             width: 100%;
-            z-index: 10;
+            z-index: 100;
             background-color: #FFFFFF;
             overflow:scroll;
             height: 100%;
@@ -110,7 +110,7 @@
 <!--  --><?php //} ?>
   <?php if ($product_groups) { ?>
   <?php foreach ($product_groups as $group) { ?>
-  <div class="box product-group" data-id="<?php echo $group['id']; ?>">
+  <div class="box product-group" data-id="<?php echo $group['id']; ?>" style="padding-top:60px">
     <h2 class="title"><?php echo $group['name']; ?></h2>
     <div class="form-control">
       <ul class="list-unstyled">

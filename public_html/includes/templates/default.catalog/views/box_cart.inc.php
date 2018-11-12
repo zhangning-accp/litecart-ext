@@ -4,6 +4,7 @@
      * 2018-11-5 20:57 完成样式模仿
      */
 ?>
+<!--<link rel="stylesheet" href="{snippet:template_path}css/cart.css"/>-->
 <style type="text/css">
     #order_summary {
         15px 0px 15px 10px
@@ -45,7 +46,7 @@
     #cart{
         float: right;
         margin: 0px;
-        padding: 10px 15px;
+        /*padding: 10px 15px;*/
 
     }
 </style>

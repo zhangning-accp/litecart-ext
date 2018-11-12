@@ -17,24 +17,24 @@
         margin: 53px auto 0 auto;
     }
 
-    .scroll-down-circle.black {
-        background-size: 50% auto;
-        background: #000 url('{snippet:home_path}images/footer/title-arrows-40x26.png') no-repeat center;
-    }
+    /*.scroll-down-circle.black {*/
+        /*background-size: 50% auto;*/
+        /*background: #000 url('{snippet:home_path}images/footer/title-arrows-40x26.png') no-repeat center;*/
+    /*}*/
 
-    .scroll-down-circle {
-        position: absolute;
-        top: -23px;
-        left: 50%;
-        width: 46px;
-        height: 46px;
-        margin-left: -23px;
-        border-radius: 23px;
-        cursor: pointer;
-        background: url('{snippet:home_path}images/footer/title-arrows-40x26.png') center no-repeat;
-        background-size: 50% auto;
-        background-color: #e0e0e0;
-    }
+    /*.scroll-down-circle {*/
+        /*position: absolute;*/
+        /*top: -23px;*/
+        /*left: 50%;*/
+        /*width: 46px;*/
+        /*height: 46px;*/
+        /*margin-left: -23px;*/
+        /*border-radius: 23px;*/
+        /*cursor: pointer;*/
+        /*background: url('{snippet:home_path}images/footer/title-arrows-40x26.png') center no-repeat;*/
+        /*background-size: 50% auto;*/
+        /*background-color: #e0e0e0;*/
+    /*}*/
 
     #footer_social h1 {
         margin: 0 0 50px 0;
@@ -189,7 +189,7 @@
 
 <div id="footer_wrapper">
 
-    <div class="scroll-down-circle black"></div>
+<!--    <div class="scroll-down-circle black"></div>-->
     <div id="footer_social">
         <h1>Stay Connected</h1>
         <div>
