@@ -61,6 +61,7 @@
         .image,.img-responsive{
             padding: 34px 25px 25px;
         }
+
     </style>
     <script type="text/javascript">
         function productMouseEnter(obj,isEnter) {

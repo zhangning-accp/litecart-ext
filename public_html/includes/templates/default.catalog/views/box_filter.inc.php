@@ -49,9 +49,54 @@
     #box-filter {
         padding-left: 25px;
     }
-</style>
-<div id="box-filter">
+    .filter_btn {/*Filter button style*/
+        display: none;
+    }
+    @media screen and (max-width: 420px){
+        .filter_pop {
+            opacity: 1.0;
+            left: 0;
+            position: fixed;
+            bottom: 50px;
+            width: 100%;
+            z-index: 10;
+            background-color: #FFFFFF;
+            overflow:scroll;
+            height: 100%;
+            width: 100%;
+            display: none;
+        }
+        .filter_btn {
+            display: block;
+            position:fixed;
+            bottom:0;
+            height: 50px;
+            width: 100%;
+            background-color: #b2906a;
+            color: #FFFFFF;
+            font-family: Roboto, Arial, sans-serif;
+            text-align: center;
+            cursor: pointer;
+            z-index: 10;
+            line-height: 50px;
+        }
+    }
 
+
+</style>
+<script>
+    function filterButtonClick(obj) {
+        if(obj.innerHTML == "Fliter") {
+            obj.innerHTML = "Done";
+            $("#box-filter").css("display","block");
+        } else {
+            obj.innerHTML = "Fliter";
+            $("#box-filter").css("display","none");
+        }
+    }
+</script>
+<div class="filter_btn" onclick="filterButtonClick(this)">Fliter</div>
+<div id="box-filter" class="filter_pop">
   <?php echo functions::form_draw_form_begin('filter_form', 'get'); ?>
 <!--  --><?php //if ($manufacturers) { ?>
 <!--  <div class="box manufacturers">-->
@@ -78,7 +123,6 @@
 
   <?php echo functions::form_draw_form_end(); ?>
 </div>
-
 <script>
   $('form[name="filter_form"] input[name="manufacturers[]"]').click(function(){
     $(this).closest('form').submit();
