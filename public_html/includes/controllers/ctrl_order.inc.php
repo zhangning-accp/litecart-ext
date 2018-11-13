@@ -787,10 +787,11 @@
             $message = strtr(language::translate('email_order_confirmation', $message, $language_code), $aliases);
 
             $email = new email();
-            $email->add_recipient($recipient)   // 收件人
-                ->set_subject($subject)         // 主题
-                ->add_body($message)            // 邮件内容
-                ->send();
+            $email->sendEmail($recipient,$subject,$message);
+//            $email->add_recipient($recipient)   // 收件人
+//                ->set_subject($subject)         // 主题
+//                ->add_body($message)            // 邮件内容
+//                ->send();
         }
 
         /**

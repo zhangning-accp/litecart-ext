@@ -48,7 +48,7 @@
         border-bottom: 1px solid #b0b0b0;
     }
 
-    @media only screen and (min-width: 950px)
+    /*@media only screen and (min-width: 950px)*/
         #grid-tabs-ver {
             display: block;
         }
