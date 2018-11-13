@@ -84,7 +84,7 @@
          * 参看 public_html/pages/order_process.inc.php  66 line进行理解
          */
         public function transfer(&$order) {
-           //return payment($order);
+           //return $this->payment($order);
             /*-----------------------测试时用----------------------------*/
               return $this->simulationPayment($order);
             /**--------------------------------------------------------*/
