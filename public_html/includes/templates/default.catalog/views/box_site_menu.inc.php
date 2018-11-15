@@ -468,6 +468,9 @@
         text-align: left;
         padding: 1rem 1.5rem;
         color: #1e1e1e;
+        background-color: transparent;
+        border: 0;
+        cursor: pointer;
     }
     .c-header-navigation-drawer-panel__menu-item .c-icon {
         margin-top: 2px;
