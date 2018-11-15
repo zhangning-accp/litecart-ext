@@ -433,6 +433,14 @@
     }
     .app-login {
         padding: 10px 15px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        background-color: transparent;
+        border: 0;
+        color: #133d8d;
+        margin-bottom: 16px;
+        cursor: pointer;
     }
     .c-header-navigation-drawer__track {
         display: -webkit-box;
@@ -488,6 +496,10 @@
     }
     #app-categories{
         display: none;
+    }
+    #app-submit {
+        position: absolute;
+        clip: rect(0,0,0,0);
     }
 </style>
 <script>
@@ -557,6 +569,9 @@
                 $("#app-categories").hide();
             }
         });
+        $(".app-head-search-btn").bind("click",function () {
+            $("#app-submit").click();
+        })
     });
     var categories = <?php echo json_encode($categories)?>;
     /**
@@ -608,12 +623,16 @@
         var html = '<li id="app_li_' + categoriesId + "_" + item['id'] + '" class="c-header-navigation-drawer-panel__menu-item" ';
         if (!isEmpty(item['subitems'])) {
             html += 'onclick = "show_child(this,' + (number + 1) + ')"';
+            html += '><button class="Link col">' + item["title"];
+        } else {
+            html += '><a class="Link col" href="'+ item["link"] + '">' + item["title"] + '</a> </li>'
         }
-        html += '><button class="Link col">' + item["title"];
+
         if (!isEmpty(item['subitems'])) {
             html += '<i class="fa fa-chevron-right"></i>';
+            html += '</button></li>';
         }
-        html += '</button></li>';
+
         return html;
     }
     function hide_child(element,number) {
@@ -713,13 +732,15 @@
       function create_app_li($item) {
           $output = '<li id="app_li_'.$item['id'].'" class="c-header-navigation-drawer-panel__menu-item" ' ;
           if (!empty($item['subitems'])) {
-            $output .= 'onclick = "show_child(this,1)"';
+             $output .= 'onclick = "show_child(this,1)"';
+             $output .= '><button class="Link col">' . $item["title"];
+          } else {
+             $output .= '><a class="Link col" href="' . $item["link"] . '">' . $item["title"] . '</a></li>';
           }
-            $output .= '><button class="Link col">' . $item["title"];
+
           if (!empty($item['subitems'])) {
-              $output .= '<i class="fa fa-chevron-right"></i>';
+              $output .= '<i class="fa fa-chevron-right"></i></button></li>';
           };
-          $output .= '</button></li>';
           return $output;
       }
   }
@@ -794,8 +815,9 @@
             <div class="app-head-search-btn">
                 <a id="header_search_button" href="#" title="Submit Search"></a>
                 <i class="fa fa-search fa-2x"></i>
-            </div>
 
+            </div>
+            <input type="submit" id="app-submit">
         </form>
     </div>
     <div id="ul-list"><i class="fa fa-list-ul fa-2x"></i></div>
