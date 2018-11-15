@@ -1,5 +1,5 @@
 <style>
-    #header .top_header_container{
+    #headers .top_header_container{
         position: relative;
         width: 100%;
         max-width: 960px;
@@ -7,11 +7,11 @@
         overflow: hidden;
         text-align: left;
     }
-    #header {
+    #headers {
         font-size: 0;
         color: #000;
     }
-    #header .main_logo{
+    #headers .main_logo{
         display: inline-block;
         width: 15%;
         padding: 10px;
@@ -41,6 +41,7 @@
         -moz-transition: .4s;
         -o-transition: .4s;
         transition: .4s;
+        margin-top: 12px;
     }
     .search_btn a {
         position: relative;
@@ -71,7 +72,7 @@
         -o-transition: .4s;
         transition: .4s;
     }
-    #header .header_search {
+    #headers .header_search {
         position: relative;
         display: block;
         height: 50px;
@@ -113,7 +114,7 @@
         -o-transition: .4s;
         transition: .4s;
     }
-    #header #header_nav {
+    #headers #header_nav {
         display: inline-block !important;
         vertical-align: middle;
         position: relative;
@@ -208,7 +209,7 @@
         background: url('{snippet:home_path}/images/login.png') center no-repeat;
         background-size: contain;
     }
-    #header .selected {
+    #headers .selected {
         color: #b2906a;
     }
     .header_nav_item__dropdown.selected::after {
@@ -380,8 +381,114 @@
         color: #86080b;
         text-decoration: none;
     }
+    /*以下是手机端样式*/
+    #app{
+        overflow: scroll;
+        font: 16px/1.5 Roboto,Arial,sans-serif
+    }
+    .app-input {
+        background: #fff;
+        color: #0e1111;
+        width: 100%;
+        height: 46px;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #0e1111;
+        border-radius: 0;
+    }
+    #app-search{
+        position: relative;
+        width: calc(100% - 44px);
+        display: inline-block;
+    }
+    .app-head-search-btn{
+        position:absolute;
+        float:right;
+        display:inline-block;
+        height:40px;
+        width:40px;
+        cursor:pointer;
+        right: 0;
+        bottom: 0;
+    }
+    #ul-list{
+        float: right;
+        margin: 12px 5px 0;
+    }
+    @media (max-width:700px){
+        .headers {
+            display: none;
+        }
+        #app {
+            display: block;
+        }
+    }
+    @media (min-width:700px){
+        .headers {
+            display: block;
+        }
+        #app {
+            display: none;
+        }
+    }
+    .app-login {
+        padding: 10px 15px;
+    }
+    .c-header-navigation-drawer__track {
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: flex;
+        position: absolute;
+        -webkit-transition: left .2s ease-in-out;
+        transition: left .2s ease-in-out;
+        z-index: 10000;
+    }
+    .c-header-navigation-drawer-panel {
+        display: inline-block;
+        width: 100vw;
+        margin-bottom: 250px;
+    }
+    .c-header-navigation-drawer-panel__menu-item:not(.link-item):first-child {
+        border-top: 1px solid #ddd;
+    }
+    .c-header-navigation-drawer-panel__menu-item:not(.link-item) {
+        border-bottom: 1px solid #ddd;
+    }
+    .c-header-navigation-drawer{
+        position: relative;
+    }
+    .c-header-navigation-drawer-panel ul{
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+    .c-header-navigation-drawer-panel__menu-item .Link, .c-header-navigation-drawer-panel__menu-item a {
+        display: inline-block;
+        width: 100%;
+        text-align: left;
+        padding: 1rem 1.5rem;
+        color: #1e1e1e;
+    }
+    .c-header-navigation-drawer-panel__menu-item .c-icon {
+        margin-top: 2px;
+        height: 100%;
+        float: right;
+        fill: #1e1e1e;
+    }
+    .col i{
+        float: right;
+        margin-top: 4px;
+    }
+    .float-left{
+        float: left!important;
+        margin-right: 10px;
+    }
+    #app-categories{
+        display: none;
+    }
 </style>
 <script>
+
     $(document).ready(function () {
         //为搜索按钮添加点击事件
         $(".search_btn > a").bind("click",function () {
@@ -432,9 +539,95 @@
             var id = $(this).attr("id");
             $("#ex_nav_2 > div").hide();// 隐藏二级类
             $("#" + id + "_div").show(300);// 显示二级分类
-        })
-    });
+        });
 
+        /*以下是手机端相关js*/
+        $("#ul-list").bind("click",function () {
+            var fontIcon = $("#ul-list i");
+            if (fontIcon.hasClass("fa-list-ul")) {
+                fontIcon.removeClass("fa-list-ul").addClass("fa-remove");
+                $("#app").css({height:"100vh"});
+                $("#app-categories").show();
+            } else {
+                fontIcon.removeClass("fa-remove").addClass("fa-list-ul");
+                $("#app").css({height:"auto"});
+                $("#app-categories").hide();
+            }
+        });
+    });
+    var categories = <?php echo json_encode($categories)?>;
+    /**
+     *
+     * @param element 当前触发点击事件的html元素
+     * @param number  表示第几层菜单 以1，2，3等数字来区分
+     */
+    function show_child(element,number) {
+        var categoriesId = $(element).attr("id").replace("app_li_","");
+        //此时的categoriesId由2部分构成  一级分类id_二级分类id
+        // 截取id字符串为数组idArray,因此 idArray[0]为1级菜单，idArray[1]为2级菜单
+        var idArray = categoriesId.split("_");
+        if (number == 1) {
+            //获取2级菜单
+            var childCategories = categories[idArray[0]]["subitems"];
+        } else if (number == 2) {
+            //获取3级菜单数组
+            var childCategories = categories[idArray[0]]["subitems"][idArray[1]]["subitems"];
+        }
+
+        create_app_categories(childCategories,idArray,number);
+    }
+    function create_app_categories(childCategories,idArray,number) {
+        var categoriesTitle ;
+        var categoriesId;
+        if (number == 1) {
+            //获取1级菜单title
+            categoriesTitle = categories[idArray[0]]["title"];
+            categoriesId = idArray[0]
+        } else if (number == 2) {
+            //获取2级菜单title
+            categoriesTitle = categories[idArray[0]]["subitems"][idArray[1]]["title"];
+            categoriesId = idArray[1];
+        }
+        var html = '<div class="c-header-navigation-drawer-panel" aria-hidden="false"> <nav aria-label="Category"> <ul>';
+        html += '<li class="c-header-navigation-drawer-panel__menu-item" onclick="hide_child(this,'+ number +')">' +
+            '<button class="Link col"><i class="fa fa-chevron-left float-left"></i>'+ categoriesTitle +'</button></li>';
+        for (var item in childCategories) {
+            html += create_child_menu_li(childCategories[item],categoriesId,number);
+        }
+        html += '</ul></nav></div>';
+        $("#app-menu").append(html);
+        //计算菜单的宽度及偏移量，此处以100为基数
+        var width = (number + 1) * 100 ;
+        var left = 100 - width
+        $("#app-menu").css({width:width + "vw",left:left + "vw"});
+    }
+    function create_child_menu_li(item,categoriesId,number) {
+        var html = '<li id="app_li_' + categoriesId + "_" + item['id'] + '" class="c-header-navigation-drawer-panel__menu-item" ';
+        if (!isEmpty(item['subitems'])) {
+            html += 'onclick = "show_child(this,' + (number + 1) + ')"';
+        }
+        html += '><button class="Link col">' + item["title"];
+        if (!isEmpty(item['subitems'])) {
+            html += '<i class="fa fa-chevron-right"></i>';
+        }
+        html += '</button></li>';
+        return html;
+    }
+    function hide_child(element,number) {
+        $(element).parent().parent().parent().remove();
+        //计算菜单的宽度及偏移量，此处以100为基数
+        var width = number * 100 ;
+        var left = 100 - width
+        $("#app-menu").css({width:width + "vw",left:left + "vw"});
+    }
+    function isEmpty(object) {
+        var empty = true;
+        for (var key in object) {
+            empty = false;
+            break;
+        }
+        return empty;
+    }
 </script>
 <?php
   if (!function_exists('custom_draw_site_menu_item')) {
@@ -513,9 +706,23 @@
           return $output;
       }
   }
+  if (!function_exists("create_app_li")) {
+      function create_app_li($item) {
+          $output = '<li id="app_li_'.$item['id'].'" class="c-header-navigation-drawer-panel__menu-item" ' ;
+          if (!empty($item['subitems'])) {
+            $output .= 'onclick = "show_child(this,1)"';
+          }
+            $output .= '><button class="Link col">' . $item["title"];
+          if (!empty($item['subitems'])) {
+              $output .= '<i class="fa fa-chevron-right"></i>';
+          };
+          $output .= '</button></li>';
+          return $output;
+      }
+  }
 ?>
 
-<div id="header">
+<div id="headers" class="headers">
     <div class="top_header_container">
         <div class="main_logo">
             <a id="header_logo_button" href="#" title="Champs Sports Home" alt="Champs Sports Home"></a>
@@ -572,6 +779,47 @@
             }
         ?>
     </div>
+</div>
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+<div id="app">
+    <div id="app-search" class="js-pushdown app_search removed">
+
+        <form name="search_form" enctype="application/x-www-form-urlencoded" accept-charset="UTF-8" action="<?php echo document::ilink('search')?>" method="get">
+    <span class="input_wrap">
+            <input id="reduce_input_text_height" class="app-input" title="Enter Your Search" name="query" size="15" maxlength="40" placeholder="SEARCH" autocomplete="off" type="text">
+        </span>
+            <div class="app-head-search-btn">
+                <a id="header_search_button" href="#" title="Submit Search"></a>
+                <i class="fa fa-search fa-2x"></i>
+            </div>
+
+        </form>
+    </div>
+    <div id="ul-list"><i class="fa fa-list-ul fa-2x"></i></div>
+    <div id="app-categories">
+        <div>
+            <button class="app-login">Sign In / VIP</button>
+        </div>
+        <div class="c-header-navigation-drawer">
+            <div class="c-header-navigation-drawer__track" id="app-menu" style="width: 100vw; left: 0vw;">
+                <div class="c-header-navigation-drawer-panel" aria-hidden="false">
+                    <nav aria-label="Category">
+                        <ul>
+                            <?php
+                            foreach ($categories as $item) {
+                                $html = create_app_li($item);
+                                echo $html;
+                            }
+                            ?>
+                        </ul>
+                    </nav>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
 </div>
 <!--        <ul id="nav_login">-->
 <!--            <li class="guest"></li>-->
