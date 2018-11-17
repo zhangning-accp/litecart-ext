@@ -194,16 +194,24 @@
 
     if ($pages < 2) return false;
 
-    if (empty($_GET['page']) || !is_numeric($_GET['page']) || $_GET['page'] < 1) $_GET['page'] = 1;
+    if (empty($_GET['page']) || !is_numeric($_GET['page']) || $_GET['page'] < 1) {
+        $_GET['page'] = 1;
+    }
 
-    if ($_GET['page'] > 1) document::$snippets['head_tags']['prev'] = '<link rel="prev" href="'. document::href_ilink(null, array('page' => $_GET['page']-1), true) .'" />';
-    if ($_GET['page'] < $pages) document::$snippets['head_tags']['next'] = '<link rel="next" href="'. document::href_ilink(null, array('page' => $_GET['page']+1), true) .'" />';
-    if ($_GET['page'] < $pages) document::$snippets['head_tags']['prerender'] = '<link rel="prerender" href="'. document::href_ilink(null, array('page' => $_GET['page']+1), true) .'" />';
+    if ($_GET['page'] > 1) {
+        document::$snippets['head_tags']['prev'] = '<link rel="prev" href="'. document::href_ilink(null, array('page' => $_GET['page']-1), true) .'" />';
+    }
+    if ($_GET['page'] < $pages) {
+        document::$snippets['head_tags']['next'] = '<link rel="next" href="'. document::href_ilink(null, array('page' => $_GET['page']+1), true) .'" />';
+    }
+    if ($_GET['page'] < $pages) {
+        document::$snippets['head_tags']['prerender'] = '<link rel="prerender" href="'. document::href_ilink(null, array('page' => $_GET['page']+1), true) .'" />';
+    }
 
     $pagination = new view();
 
     $pagination->snippets['items'][] = array(
-      'title' => language::translate('title_previous', 'Previous'),
+      'title' => language::translate('title_<', '<'),
       'link' => document::ilink(null, array('page' => $_GET['page']-1), true),
       'disabled' => ($_GET['page'] <= 1) ? true : false,
       'active' => false,
@@ -247,7 +255,7 @@
     }
 
     $pagination->snippets['items'][] = array(
-      'title' => language::translate('title_next', 'Next'),
+      'title' => language::translate('title_>', '>'),
       'link' => document::ilink(null, array('page' => $_GET['page']+1), true),
       'disabled' => ($_GET['page'] >= $pages) ? true : false,
       'active' => false,

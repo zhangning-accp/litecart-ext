@@ -371,7 +371,7 @@
      */
     function addOptionGroup(&$product_info)
     {
-        // 这个每次都要检测并更新或添加。这里添加的时规格。
+        // 这个每次都要检测并更新或添加。这里添加的时规格。这里有个问题，实际上一个产品可能具有多个规则。所以要支持多规格。这里只支持单规格。
         //option_groups  数据格式:   group_name(选项组名):option_name(选项名)
         $product_id = $product_info['id'];
         $option_groups_str = $product_info['option_groups'];
@@ -528,7 +528,6 @@
                 foreach ($multiple_groups as $simple_groups) {
                     $simple_groups = preg_split("/:/", $simple_groups);
                     $group_name = $simple_groups[0];
-
                     $group_values = $simple_groups[1];
                     $group_values = preg_split("/,/", $group_values);
                     $group_values = array_filter($group_values);

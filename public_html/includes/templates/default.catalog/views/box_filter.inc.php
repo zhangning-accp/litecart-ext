@@ -57,8 +57,8 @@
             opacity: 1.0;
             left: 0;
             position: fixed;
+            right: 0;
             bottom: 50px;
-            width: 100%;
             z-index: 100;
             background-color: #FFFFFF;
             overflow:scroll;
@@ -69,6 +69,7 @@
         .filter_btn {
             display: block;
             position:fixed;
+            right: 0;
             bottom:0;
             height: 50px;
             width: 100%;

@@ -8,6 +8,10 @@
      */
     class u_utils
     {
+        private static $fliterWords = array(
+            '`','·','~','!','！','@','#','$','￥','%','^','……','&','*','(',')','（',
+            '）','-','_','——','+','=','|','\\','[',']','【','】','{','}',';','；',':','：','\'','"','“',
+            ',','，','<','>','《','》','.','。','/','、','?','？');
         /**
          * 该方法将占位符sql 处理为有具体值的字符串。
          * @param $format_sql 带格式化的sql
@@ -483,5 +487,124 @@
             }else{
                 return 0;
             }
+        }
+
+        /**
+         * 该方法会将$srcStr里的一些我们认为是非法的字符用""替换.如果想自己指定替换的符号，请使用fliterWordsTo
+         * @param $srcStr 需要过滤的字符串
+         * @return 返回替换后的字符串
+         */
+        public static function fliterWords($srcStr) {
+            $srcStr = str_replace(self::$fliterWords,"",$srcStr);
+            return $srcStr;
+        }
+
+        public static function fliterWordsTo(&$srcStr,$replace="") {
+            $srcStr = str_replace(self::$fliterWords,$replace,$srcStr);
+           return $srcStr;
+        }
+
+        /**
+         * 对preg_split的一个封装。
+         * @param $src
+         * @param string $patternr 不用书写/xxx/界定符。函数会在首位加上。举例： [|]. 实际会变成 /[|]/
+         * @return array
+         */
+        public static function split($src,$pattern="") {
+            return preg_split("/".$pattern."/",$src);
+        }
+
+        /**
+         * 解析$optionGroups 字符串为一个数组
+         * @param $optionGroups 格式 style:1,2,3,4,5-links：1,2,3,4,5|size:x,xl-links：|color:dddf-links
+         * @return array
+         * 举例：    $s1 = "style:XL,XXL,S,M,SL-links:XL.jpg,XXL.jpg,S.jpg|size:x,xl-links:|color:#FF9900,#3e5r6t-links:FF9900.jpg,#3e5r6t.jpg";
+         * 结果：
+         * {
+            "style": {
+                "XL": "XL.jpg",
+                "XXL": "XXL.jpg",
+                "S": "S.jpg",
+                "M": "",
+                "SL": ""
+                },
+            "size": {
+                "x": "",
+                "xl": ""
+                },
+            "color": {
+                "#FF9900": "FF9900.jpg",
+                "#3e5r6t": "#3e5r6t.jpg"
+                }
+            }
+         * 测试用例以下用例都能正确得到结果：
+        //    $s1 = "style:XL,XXL,S,M,SL-links:XL.jpg,XXL.jpg,S.jpg|size:x,xl-links:x.jpg|color:#FF9900,#3e5r6t-links:FF9900.jpg,#3e5r6t.jpg";
+        //    $s1 = "style:XL,XXL,S,M,SL-links:XL.jpg,XXL.jpg,S.jpg|size:x,xl-links:|color:#FF9900,#3e5r6t-links:FF9900.jpg,#3e5r6t.jpg";
+        //    $s1 = "style:XL,XXL,S,M,SL-links:XL.jpg,XXL.jpg,S.jpg|size:x,xl-:|color:#FF9900,#3e5r6t-links:FF9900.jpg,#3e5r6t.jpg";
+        //    $s1 = "style:XL,XXL,S,M,SL-links:XL.jpg,XXL.jpg,S.jpg|size:x,xl-j:|color:#FF9900,#3e5r6t-links:FF9900.jpg,#3e5r6t.jpg";
+        //    $s1 = "style:XL,XXL,S,M,SL-links:XL.jpg,XXL.jpg,S.jpg|size:x,xl:|color:#FF9900,#3e5r6t-links:FF9900.jpg,#3e5r6t.jpg";
+        //    $s1 = "style:XL,XXL,S,M,SL:1";
+        //    $s1 = "style:XL,XXL,S,M,SL-links:XL.jpg,XXL.jpg,S.jpg|size:x,xl:1-:|color:#FF9900,#3e5r6t-links:FF9900.jpg,#3e5r6t.jpg";
+         */
+        public static function parseOptionGroup($optionGroups) {
+            // 0="style":[xl:common/1.jpg]
+            // 1="color":[#ssss:1.jpg]
+            // 格式：style:1,2,3,4,5-links：1,2,3,4,5|size:x,xl-links：|color:dddf-links
+            // 如果是上传的文件里包含的图片links可以不用写。如果要引用已经存在的图片，使用http，或https，公共文件夹的只需要书写common即可。
+            $optionGroupData = array();
+            $Optioins = self::split($optionGroups,"[|]");
+            foreach ($Optioins as $option) {
+                $childerns = self::split($option,"-");
+                $values = array();
+                $specification = array();
+                $links = array();
+                if(count($childerns) > 0) {
+                    $specification = self::split($childerns[0],":");
+                    $specification = array_filter($specification);
+                    // 以下代码是为了应对一些特殊情况
+                    if(count($specification) == 2) {
+                        $specification[1] = explode(",", $specification[1]);
+                    } else if(count($specification) > 2) {
+                        unset($specification[count($specification) - 1]);
+                        $specification[1] = explode(",", $specification[1]);
+                    } else {
+                        $specification[1] = "";
+                    }
+
+                    $specification[$specification[0]] = $specification[1];
+                    unset($specification[0]);
+                    unset($specification[1]);
+                }
+                if(count($childerns) > 1) {
+                    $links = self::split($childerns[1],":");
+                    if(count($links) == 2) {
+                        $links[1] = explode(",", $links[1]);
+                    } else {
+                        $links[1] = "";
+                    }
+                    $links['links'] = $links[1];
+                    unset($links[0]);
+                    unset($links[1]);
+                } else {
+                    $links['links'] = array();
+                }
+                foreach ($specification as $key=>$specification_values) {
+                    $link_values = $links['links'];
+                    $specification_count = count($specification_values);
+                    $links_count = count($link_values);
+                    $loop = $specification_count > $links_count ? $specification_count : $links_count;
+                    for($i = 0; $i<$loop; $i++) {
+                        $value = $specification_values[$i];
+                        unset($specification_values[$i]);
+                        if($i >= count($link_values)) {
+                            $specification_values[$value] = "";
+                        } else {
+                            $specification_values[$value] = $link_values[$i];
+                        }
+                    }
+                    $optionGroupData[$key] = $specification_values;
+                }
+            }
+            return $optionGroupData;
         }
     }

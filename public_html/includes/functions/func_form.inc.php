@@ -132,7 +132,7 @@
   }
 
     /**
-     * 绘制颜色域
+     * 绘制html的颜色域，如果需要绘制的是颜色块，请使用function_draw_color_lump
      * @param $name
      * @param bool $value
      * @param string $parameters
@@ -147,6 +147,42 @@
         '" data-type="color" '. (($parameters) ? ' '.$parameters : false) .' />';
   }
 
+    /**
+     * 绘制颜色块
+     * @param $name
+     * @param string $colorHexValue
+     * @param string $parameters
+     * @return string
+     */
+    function from_draw_color_lump($name,$colorHexValue="",$parameters="") {
+
+        if (!is_array($options)) $options = array($options);
+        $html = '<span data-info="product_sizes" class="product_sizes">';
+
+        foreach ($options as $option) {
+            if ($input === true) {
+                $option_input = form_reinsert_value($name, isset($option[1]) ? $option[1] : $option[0]);
+            } else {
+                $option_input = $input;
+            }
+            $html .= '<a href="javascript:return;" name="'.$name.'" onclick="clickOption(this,\''.$name.'\');">'.$option[0].'</a>'.PHP_EOL;
+
+        }
+
+        $html .= '  </span>';
+
+        return $html;
+        if ($colorHexValue === true) $colorHexValue = form_reinsert_value($name);
+//           $html = '<div class="select-wrapper'. ($multiple ? ' multiple' : '') .'">' . PHP_EOL
+//               . '  <select '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .' name="'. htmlspecialchars($name) .'"'. (($multiple) ? ' multiple="multiple"' : false) .''. (($parameters) ? ' ' . $parameters : false) .'>' . PHP_EOL;
+
+        $html = "<label class='color-label' style='background-color:'".$colorHexValue."' ".
+        "title='Szary (melanż)'><input name='color_id' value='18' required='required' type='radio' ".
+        "data-id='18' data-color='szary-melanz' data-title='Szary (melanż)' data-price='44.90' ".
+        "data-background='".$colorHexValue."' style=''></label>";
+
+        return $html;
+    }
     /**
      * 绘制货币域
      * @param $currency_code
@@ -450,33 +486,12 @@
         if (!is_array($options)) $options = array($options);
         $html = '<span data-info="product_sizes" class="product_sizes">';
 
-//        $html = '<div class="select-wrapper'. ($multiple ? ' multiple' : '') .'">' . PHP_EOL
-//            . '  <select '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .' name="'. htmlspecialchars($name) .'"'. (($multiple) ? ' multiple="multiple"' : false) .''. (($parameters) ? ' ' . $parameters : false) .'>' . PHP_EOL;
-
         foreach ($options as $option) {
             if ($input === true) {
                 $option_input = form_reinsert_value($name, isset($option[1]) ? $option[1] : $option[0]);
             } else {
                 $option_input = $input;
             }
-//            $value = htmlspecialchars(isset($option[1]) ? $option[1] : $option[0]);
-//            $tmp = "";($option[1] == $option_input) ? ' selected="selected"' : false;
-//            if(isset($option[1])) {
-//                $tmp = ($option[1] == $option_input) ? ' selected="selected"' : false;
-//            } else {
-//                if($option[0] == $option_input) {
-//                    $tmp = ' selected="selected"';
-//                } else {
-//                    $tmp = false;
-//                }
-//            }
-//            $tmp = (isset($option[1]) ? (($option[1] == $option_input) ? ' selected="selected"' : false) : (($option[0] == $option_input) ? ' selected="selected"' : false)) . ((isset($option[2])) ? ' ' . $option[2] : false);
-             //$tmp .= (isset($option[2])) ? ' ' . $option[2] : false;
-             //$html .= '    <option value="'. $value .'"'. $tmp .'>'. $option[0] .'</option>' . PHP_EOL;
-            //option['Color']
-//            $optionName =  str_replace('options','',$name);
-//            $optionName = trim($optionName,"'");
-//            $optionName = trim($optionName,"\[\]");
             $html .= '<a href="javascript:return;" name="'.$name.'" onclick="clickOption(this,\''.$name.'\');">'.$option[0].'</a>'.PHP_EOL;
 
         }
@@ -485,6 +500,7 @@
 
         return $html;
     }
+
 
   function form_draw_textarea($name, $value=true, $parameters='') {
     if ($value === true) $value = form_reinsert_value($name);
