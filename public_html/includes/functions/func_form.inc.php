@@ -148,42 +148,6 @@
   }
 
     /**
-     * 绘制颜色块
-     * @param $name
-     * @param string $colorHexValue
-     * @param string $parameters
-     * @return string
-     */
-    function from_draw_color_lump($name,$colorHexValue="",$parameters="") {
-
-        if (!is_array($options)) $options = array($options);
-        $html = '<span data-info="product_sizes" class="product_sizes">';
-
-        foreach ($options as $option) {
-            if ($input === true) {
-                $option_input = form_reinsert_value($name, isset($option[1]) ? $option[1] : $option[0]);
-            } else {
-                $option_input = $input;
-            }
-            $html .= '<a href="javascript:return;" name="'.$name.'" onclick="clickOption(this,\''.$name.'\');">'.$option[0].'</a>'.PHP_EOL;
-
-        }
-
-        $html .= '  </span>';
-
-        return $html;
-        if ($colorHexValue === true) $colorHexValue = form_reinsert_value($name);
-//           $html = '<div class="select-wrapper'. ($multiple ? ' multiple' : '') .'">' . PHP_EOL
-//               . '  <select '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .' name="'. htmlspecialchars($name) .'"'. (($multiple) ? ' multiple="multiple"' : false) .''. (($parameters) ? ' ' . $parameters : false) .'>' . PHP_EOL;
-
-        $html = "<label class='color-label' style='background-color:'".$colorHexValue."' ".
-        "title='Szary (melanż)'><input name='color_id' value='18' required='required' type='radio' ".
-        "data-id='18' data-color='szary-melanz' data-title='Szary (melanż)' data-price='44.90' ".
-        "data-background='".$colorHexValue."' style=''></label>";
-
-        return $html;
-    }
-    /**
      * 绘制货币域
      * @param $currency_code
      * @param $name
@@ -500,7 +464,79 @@
 
         return $html;
     }
+    // 绘制带图片的select
+    function form_draw_picture_select_field($name, $options=array(), $input=true, $multiple=false, $parameters='') {
 
+        if (!is_array($options)) $options = array($options);
+        $html = '<span data-info="product_sizes" class="product_sizes">';
+
+        foreach ($options as $option) {
+            if ($input === true) {
+                $option_input = form_reinsert_value($name, isset($option[1]) ? $option[1] : $option[0]);
+            } else {
+                $option_input = $input;
+            }
+            // 需要知道style的id，product_id,options已经有valueid
+
+            $productId = $option[3];
+            $groupId = $option[4];
+            $valueId = $option[5];//
+            $groupName = $option[6];
+            $idInfo = $productId."_".$groupId."_".$valueId;
+
+            $link = str_replace(" ","%20",WS_DIR_IMAGES.$option[2]);
+//            "<div style='background-image: ".$option[2].";width: 50px;height: 60px;'> </div>";
+//            $html .= '<a href="javascript:return;" name="'.$name.'" onclick="clickOption(this,\''.$name.'\');">'.$option[0].'</a>'.PHP_EOL;
+            $html .=  "<div id_info='".$idInfo."' group_name='".$groupName."' title='".$option[1]."'";
+            $html .="style='backgroun-color:#ededed;background-image: url(".$link.");width: 50px;height: 60px;float: left;margin: 1px 3px 0px 0px;'";
+            $html.=' onclick="clickStyle(this,\''.$name.'\');"></div>'.PHP_EOL;
+        }
+
+        $html .= '  </span>';
+
+        return $html;
+    }
+    /**
+     * 绘制带有点击预览能力的颜色块
+     * @param $name
+     * @param string $colorHexValue
+     * @param string $parameters
+     * @return string
+     */
+    function form_draw_link_color_lump($name, $options=array(), $input=true,$multiple=false,$parameters="") {
+
+        if (!is_array($options)) $options = array($options);
+        $html = '<span data-info="product_color" class="product_sizes">';
+
+        foreach ($options as $option) {
+            if ($input === true) {
+                $option_input = form_reinsert_value($name, isset($option[1]) ? $option[1] : $option[0]);
+            } else {
+                $option_input = $input;
+            }
+            $link = $option[2];
+            $value_id = $option[3];
+            $style = "style='border-radius: 25px;width: 50px;height: 50px;background-color:".$option[0].";border:0px;'";
+            $html .= '<a href="javascript:return;" class="product_color" '.$style.' pic_link= "'.WS_DIR_IMAGES.$link.'" name="'.$name.'"';
+            $html.=' onclick="clickLinksOption(this,\'color_img\');"></a>'.PHP_EOL;
+
+//            $s = 'onclick=clickLinksOption(this,"color_img");></a>';
+        }
+
+        $html .= '  </span>';
+
+//        return $html;
+//        if ($colorHexValue === true) $colorHexValue = form_reinsert_value($name);
+//           $html = '<div class="select-wrapper'. ($multiple ? ' multiple' : '') .'">' . PHP_EOL
+//               . '  <select '. (!preg_match('#class="([^"]+)?"#', $parameters) ? 'class="form-control"' : '') .' name="'. htmlspecialchars($name) .'"'. (($multiple) ? ' multiple="multiple"' : false) .''. (($parameters) ? ' ' . $parameters : false) .'>' . PHP_EOL;
+
+//        $html = "<label class='color-label' style='background-color:'".$colorHexValue."' ".
+//            "title='Szary (melanż)'><input name='color_id' value='18' required='required' type='radio' ".
+//            "data-id='18' data-color='szary-melanz' data-title='Szary (melanż)' data-price='44.90' ".
+//            "data-background='".$colorHexValue."' style=''></label>";
+
+        return $html;
+    }
 
   function form_draw_textarea($name, $value=true, $parameters='') {
     if ($value === true) $value = form_reinsert_value($name);

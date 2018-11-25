@@ -175,11 +175,8 @@
         case 'images':
 
           $this->_data['images'] = array();
-
           $query = database::query(
-            "select * from ". DB_TABLE_PRODUCTS_IMAGES."
-            where product_id = ". (int)$this->_id ."
-            order by priority asc, id asc;"
+            "select * from ". DB_TABLE_PRODUCTS_IMAGES." where product_id = ". (int)$this->_id ." order by priority asc, id asc;"
           );
           while ($row = database::fetch($query)) {
             $this->_data['images'][$row['id']] = $row['filename'];
@@ -197,111 +194,121 @@
 
           break;
 
-        case 'options':
+        case 'options': {// find product options info
 
-          $this->_data['options'] = array();
+            $this->_data['options'] = array();
 
-          $products_options_query = database::query(
-            "select * from ". DB_TABLE_PRODUCTS_OPTIONS ."
-            where product_id = ". (int)$this->_id ."
-            order by priority;"
-          );
+            // 先查询商品有哪些options. 这里还是要做区别，否则拿到的数据不对
+            $sql = "select * from " . DB_TABLE_PRODUCTS_OPTIONS . " where product_id = " . (int)$this->_id . " order by priority;";
+            $products_options_query = database::query($sql);
 
-          while ($product_option = database::fetch($products_options_query)) {
-
-          // Group
-            if (!isset($this->_data['options'][$product_option['group_id']]['id'])) {
-              $option_group_query = database::query(
-                "select * from ". DB_TABLE_OPTION_GROUPS ."
-                where id = '". (int)$product_option['group_id'] ."'
-                limit 1;"
-              );
-              $option_group = database::fetch($option_group_query);
-              foreach (array('id', 'function', 'required') as $key) {
-                $this->_data['options'][$product_option['group_id']][$key] = $option_group[$key];
-              }
-            }
-
-            if (!isset($this->_data['options'][$product_option['group_id']]['name'])) {
-              $option_group_info_query = database::query(
-                "select * from ". DB_TABLE_OPTION_GROUPS_INFO ." pcgi
-                where group_id = '". (int)$product_option['group_id'] ."'
-                and language_code in ('". implode("', '", database::input($this->_language_codes)) ."')
-                order by field(language_code, '". implode("', '", database::input($this->_language_codes)) ."');"
-              );
-              while ($option_group_info = database::fetch($option_group_info_query)) {
-                foreach ($option_group_info as $key => $value) {
-                  if (in_array($key, array('id', 'group_id', 'language_code'))) continue;
-                  if (empty($this->_data['options'][$product_option['group_id']][$key])) $this->_data['options'][$product_option['group_id']][$key] = $value;
+            while ($product_option = database::fetch($products_options_query)) {// 遍历每一条记录
+                // Group
+                if (!isset($this->_data['options'][$product_option['group_id']]['id'])) {
+                    // 查询这些规格属于哪个group
+                  $sql = "select * from " . DB_TABLE_OPTION_GROUPS . " where id = '" . (int)$product_option['group_id'] . "' limit 1;";
+                  $option_group_query = database::query($sql);
+                  $option_group = database::fetch($option_group_query);
+                  foreach (array('id', 'function', 'required') as $key) {
+                      // 将'id', 'function', 'required'放到对应的group_id 下
+                    $this->_data['options'][$product_option['group_id']][$key] = $option_group[$key];
+                  }
                 }
-              }
-            }
 
-          // Values
-            if (!isset($this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']]['id'])) {
-              $option_value_query = database::query(
-                "select * from ". DB_TABLE_OPTION_VALUES ."
-                where id = '". (int)$product_option['value_id'] ."'
-                limit 1;"
-              );
-              $option_value = database::fetch($option_value_query);
-              foreach (array('id', 'value') as $key) {
-                $this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']][$key] = $option_value[$key];
-              }
-            }
-
-            if (!isset($this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']]['name'])) {
-              $option_values_info_query = database::query(
-                "select * from ". DB_TABLE_OPTION_VALUES_INFO ." pcvi
-                where value_id = '". (int)$product_option['value_id'] ."'
-                and language_code in ('". implode("', '", database::input($this->_language_codes)) ."')
-                order by field(language_code, '". implode("', '", database::input($this->_language_codes)) ."');"
-              );
-              while ($option_value_info = database::fetch($option_values_info_query)) {
-                foreach ($option_value_info as $key => $value) {
-                  if (in_array($key, array('id', 'value_id', 'language_code'))) continue;
-                  if (empty($this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']][$key])) $this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']][$key] = $value;
+                if (!isset($this->_data['options'][$product_option['group_id']]['name'])) {
+                    // 查询组的name信息
+                    $sql = "select * from " . DB_TABLE_OPTION_GROUPS_INFO . " as pcgi
+                where group_id = '" . (int)$product_option['group_id'] . "'
+                and language_code in ('" . implode("', '", database::input($this->_language_codes)) . "')
+                order by field(language_code, '" . implode("', '", database::input($this->_language_codes)) . "');";
+                    $option_group_info_query = database::query($sql);
+                    while ($option_group_info = database::fetch($option_group_info_query)) {
+                        foreach ($option_group_info as $key => $value) {
+                            if (in_array($key, array('id', 'group_id', 'language_code'))) {
+                                // 不添加id,group_id,language_code 到 group_id 下
+                                continue;
+                            }
+                            if (empty($this->_data['options'][$product_option['group_id']][$key])) {
+                                $this->_data['options'][$product_option['group_id']][$key] = $value;
+                            }
+                        }
+                    }
                 }
-              }
-            }
 
-          // Price Adjust
-            $product_option['price_adjust'] = 0;
-
-            if ((isset($product_option[$this->_currency_code]) && $product_option[$this->_currency_code] != 0) || (isset($product_option[settings::get('store_currency_code')]) && $product_option[settings::get('store_currency_code')] != 0)) {
-
-              switch ($product_option['price_operator']) {
-                case '+':
-                  if ($product_option[$this->_currency_code] != 0) {
-                    $product_option['price_adjust'] = currency::convert($product_option[$this->_currency_code], $this->_currency_code, settings::get('store_currency_code'));
-                  } else {
-                    $product_option['price_adjust'] = $product_option[settings::get('store_currency_code')];
+                // Values
+                if (!isset($this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']]['id'])) {
+                    // 查询具体的option value
+                  $sql = "select * from " . DB_TABLE_OPTION_VALUES . " where id = '" . (int)$product_option['value_id'] . "' limit 1;";
+                  $option_value_query = database::query($sql);
+                  $option_value = database::fetch($option_value_query);
+                  foreach (array('id', 'value') as $key) {
+                    $this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']][$key] = $option_value[$key];
                   }
-                  break;
-                case '%':
-                  if ($product_option[$this->_currency_code] != 0) {
-                    $product_option['price_adjust'] = $this->price * ((float)$product_option[$this->_currency_code] / 100);
-                  } else {
-                    $product_option['price_adjust'] = $this->price * $product_option[settings::get('store_currency_code')] / 100;
-                  }
-                  break;
-                case '*':
-                  if ($product_option[$this->_currency_code] != 0) {
-                    $product_option['price_adjust'] = $this->price * $product_option[$this->_currency_code];
-                  } else {
-                    $product_option['price_adjust'] = $this->price * $product_option[settings::get('store_currency_code')];
-                  }
-                  break;
-                default:
-                  trigger_error('Unknown price operator for option', E_USER_WARNING);
-                  break;
-              }
-            }
+                }
 
-            $this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']]['price_adjust'] = $product_option['price_adjust'];
-          }
+                if (!isset($this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']]['name'])) {
+                    // 查询value_id对应的name
+                    $sql = "select * from " . DB_TABLE_OPTION_VALUES_INFO . " as pcvi
+                    where value_id = '" . (int)$product_option['value_id'] . "'
+                    and language_code in ('" . implode("', '", database::input($this->_language_codes)) . "')
+                    order by field(language_code, '" . implode("', '", database::input($this->_language_codes)) . "');";
+                    $option_values_info_query = database::query($sql);
+                    while ($option_value_info = database::fetch($option_values_info_query)) {
+                        foreach ($option_value_info as $key => $value) {
+                            if (in_array($key, array('id', 'value_id', 'language_code'))) {
+                                // 排除'id', 'value_id', 'language_code'字段数据
+                                continue;
+                            }
+                            // _data=>options=>{group_id=>{values=>{id=>{}}}}
+                            if (empty($this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']][$key])) {
+                                $this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']][$key] = $value;
+                            }
+                        }
+                    }
+                    // 为 具体的规格添加links数据
+                    // 查tree表，如果有，则使用该表里的links
+                    $this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']]['links'] = $product_option['links'];
+                }
 
-          break;
+                // Price Adjust
+                $product_option['price_adjust'] = 0;
+
+                if ((isset($product_option[$this->_currency_code]) && $product_option[$this->_currency_code] != 0) || (isset($product_option[settings::get('store_currency_code')]) && $product_option[settings::get('store_currency_code')] != 0)) {
+
+                    switch ($product_option['price_operator']) {
+                        case '+':
+                            if ($product_option[$this->_currency_code] != 0) {
+                                $product_option['price_adjust'] = currency::convert($product_option[$this->_currency_code], $this->_currency_code, settings::get('store_currency_code'));
+                            } else {
+                                $product_option['price_adjust'] = $product_option[settings::get('store_currency_code')];
+                            }
+                            break;
+                        case '%':
+                            if ($product_option[$this->_currency_code] != 0) {
+                                $product_option['price_adjust'] = $this->price * ((float)$product_option[$this->_currency_code] / 100);
+                            } else {
+                                $product_option['price_adjust'] = $this->price * $product_option[settings::get('store_currency_code')] / 100;
+                            }
+                            break;
+                        case '*':
+                            if ($product_option[$this->_currency_code] != 0) {
+                                $product_option['price_adjust'] = $this->price * $product_option[$this->_currency_code];
+                            } else {
+                                $product_option['price_adjust'] = $this->price * $product_option[settings::get('store_currency_code')];
+                            }
+                            break;
+                        default:
+                            trigger_error('Unknown price operator for option', E_USER_WARNING);
+                            break;
+                    }
+                }
+
+                $this->_data['options'][$product_option['group_id']]['values'][$product_option['value_id']]['price_adjust'] = $product_option['price_adjust'];
+
+            }// while end ....
+
+            break;
+        }
 
         case 'options_stock':
 

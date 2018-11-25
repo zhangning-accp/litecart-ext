@@ -55,7 +55,7 @@
                                data-val-regex="The format you entered is incorrect"
                                data-val-regex-pattern="[\d]{12,19}"
                                data-val-required="This field is required" id="CreditCardNumber"
-                               name="CardPAN" type="text"
+                               name="CardPAN" type="text" required="required"
                                onkeyup="changeCreditCard(this);" />
                         <img  style="height:19px" src="<?php echo  $pc_url.'Visa.png'?>" alt="Visa" />
                         <img  src="<?php echo  $pc_url.'MasterCard.png'?>" alt="MasterCard" />
@@ -113,7 +113,7 @@
                                data-val-regex="The format you entered is incorrect"
                                data-val-regex-pattern="[\d]{3,4}"
                                data-val-required="This field is required" id="SecurityCode"
-                               name="CVV2" type="password" onkeyup="this.value=this.value.replace(/\D/g,'')" />
+                               name="CVV2" type="password"  required="required" onkeyup="this.value=this.value.replace(/\D/g,'')" />
 
                         <span class="help">
 <!--                            (<a href="javascript:" id="cvvhelp">What's this?</a>)-->
@@ -206,11 +206,5 @@
         }
     };
 
-    /**
-     * 显示
-     */
-    function showCVVImage() {
-
-    }
 </script>
 

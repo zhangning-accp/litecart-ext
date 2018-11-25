@@ -1,7 +1,12 @@
 <?php
-
-
-    echo "CSV Import\r\n" . "----------\r\n";
+    define("FILE_TYPE",$_FILES['file']['type']);//上传的文件类型
+    define("TMP_FILE",$_FILES['file']['tmp_name']);//临时文件路径
+    define("TMP_DIR",dirname(TMP_FILE));// 临时存放文件的目录
+    define("UNZIP_DIR",TMP_DIR . "/" .u_utils::guid()."/");// zip解压目录路径
+    global $dataInfo;
+    $dataInfo = array(
+            "is_option_tree"=>false
+    );
     set_time_limit(0);//设置脚本执行时间
     // import or export run.
     if (isset($_POST['import_products'])) {
@@ -16,12 +21,13 @@
      */
     function importCategoriesAndProducts()
     {
+//        global $fileInfo;
         try {
             //$file_name = $_FILES['file']['name'];//上传的文件名
-            $file_type = $_FILES['file']['type'];//上传的文件类型
-            $tmp_file = $_FILES['file']['tmp_name'];//临时文件路径
-            $tmp_folder = dirname($tmp_file);// 得到临时存放文件的目录
-            if (!isset($tmp_file) || !is_uploaded_file($tmp_file)) {
+//            $file_type = $_FILES['file']['type'];//上传的文件类型
+//            $tmp_file = $_FILES['file']['tmp_name'];//临时文件路径
+//            $tmp_folder = dirname($tmp_file);// 得到临时存放文件的目录
+            if (empty(TMP_FILE) || !is_uploaded_file(TMP_FILE)) {
                 throw new Exception(language::translate('error_must_select_file_to_upload', 'You must select a file to upload'));
             }
 
@@ -29,22 +35,37 @@
 
             header('Content-Type: text/plain; charset=' . language::$selected['charset']);
             // 判断是不是csv文件，如果是直接读取，如果是zip解压后读取。
-            if ($file_type === 'application/vnd.ms-excel') {
-                $csv = file_get_contents($_FILES['file']['tmp_name']);
+            if (FILE_TYPE === 'application/vnd.ms-excel') {
+                $csv = file_get_contents(TMP_FILE);
                 $csv = functions::csv_decode($csv, $_POST['delimiter'], $_POST['enclosure'], $_POST['escapechar'], $_POST['charset']);
                 importProducts($csv);
-            } else if ($file_type === 'application/x-zip-compressed') {
-                $un_zip_folder = u_utils::guid();// 生成临时解压目录
-                $un_zip_folder = $tmp_folder . "/" . $un_zip_folder;//完整的解压目录
-                u_utils::mkdirs($un_zip_folder);//创建解压目录
+            } else if (FILE_TYPE === 'application/x-zip-compressed') {
+                //$un_zip_folder = u_utils::guid();// 生成临时解压目录
+                //$un_zip_folder = $TMP_DIR . "/" . $un_zip_folder;//完整的解压目录
+                //UN_ZIP_FOLDER = $un_zip_folder;
+                if(!u_utils::exists(UNZIP_DIR)) {
+                    u_utils::mkdirs(UNZIP_DIR);//创建解压目录
+                }
                 // 解压zip，到临时目录
-                $is_unzip = u_utils::unZip($tmp_file, $un_zip_folder);
+                $is_unzip = u_utils::unZip(TMP_FILE, UNZIP_DIR);
+
+                $files = u_utils::files(UNZIP_DIR);
+
+                foreach ($files as $file) {
+                    if(!u_utils::endWith("csv",$file)){
+                        global $dataInfo;
+                        $dataInfo['is_option_tree'] = true;
+                        break;
+                    }
+                }
+
                 if ($is_unzip === true) {//如果解压成功
                     // 1. 获取解压目录下的文件列表
-                    $files = u_utils::files($un_zip_folder);
+                    $files = u_utils::files(UNZIP_DIR);
                     foreach ($files as $key => $file) {//遍历解压目录下的文件
+                        if(u_utils::endWith("csv",$file)) {
                         $csv_head = array();// 导入的csv数据头。每次分片读取的数据都需要和头做整合。便于后期处理
-                        $file = $un_zip_folder . "/" . $file;// 拼接需要读取的csv文件文件路径
+                        $file = UNZIP_DIR . "/" . $file;// 拼接需要读取的csv文件文件路径
                         // 循环读取，每10w一次。
                         $rows = 200;//默认一次读取的数据行数
                         $csvFile = new csvreader($file);//创建csv文件对象
@@ -61,7 +82,7 @@
                         $loop = intval($loop);//处理为int型
                         for ($i = 0; $i < $loop; $i++) {//循环读取文件数据
                             $start = ($i * $rows) + 1;//开始位置
-                            if(($start + $rows) > $lineNumber) {//如果最后的row大于剩下的行数，调整需要读取的行数，处理为有多少读多少。
+                            if (($start + $rows) > $lineNumber) {//如果最后的row大于剩下的行数，调整需要读取的行数，处理为有多少读多少。
                                 $rows = $lineNumber - $start;
                             }
                             //trigger_error($i.' csv befor:'.var_dump(memory_get_usage()).'\r\n');
@@ -69,18 +90,19 @@
                             $csv = u_utils::disposalData($csv_head, $csv);//将数据和表头进行整合，成为key=>value
                             //trigger_error($i.' csv after and insert products befor :'.var_dump(memory_get_usage()).'\r\n');
                             importProducts($csv);//数据入库
-                           // trigger_error($i.' insert products end :'.var_dump(memory_get_usage()).'\r\n');
+                            // trigger_error($i.' insert products end :'.var_dump(memory_get_usage()).'\r\n');
                             unset($csv);//释放$csv
                             $csv = null;
                             //trigger_error($i.' unset csv:'.var_dump(memory_get_usage()).'\r\n');
                         }// loop read simple csv data file end ...
                     }// read csv file end ..
+                }
 
                 } else {
                     notices::add('errors', "Upload file failure");
                 }
                 // 删除临时解压目录下的所有数据
-                u_utils::deleteDirectoryAndFile($un_zip_folder);
+                u_utils::deleteDirectoryAndFile(UNZIP_DIR);
             }
             exit;
         } catch (Exception $e) {
@@ -145,6 +167,7 @@
     function importProducts(&$csv)
     {
         $product_map = array();
+
         foreach ($csv as $row) {//遍历csv文件
             $date = u_utils::getYMDHISDate();
             //构建商品所需数据
@@ -196,11 +219,13 @@
                 "category_head_titles" => "",
                 "option_groups" => "",
                 "md5" => "",
-                "price" => 0
+                "price" => 0,
+                "option_groups_array" =>array()
             );
             foreach ($row as $key => $value) {
                 $product_info[$key] = addslashes(trim($value));// 对数据做转义处理
             }
+
             // -------------- 商品数据构建完毕 ---------------
             //$product_name = $product_info['name'];
             $product_code = $product_info['code'];
@@ -209,16 +234,30 @@
                 $prices = $product_info['price'];
                 $extr_prices = extractPrices($prices);
                 $product_info['prices'] = $extr_prices;
+                // 处理option group
+                $option_groups_str = $product_info['option_groups'];
+                $option_groups_array = u_utils::parseOptionGroup($option_groups_str);
+                $product_info['option_groups_array'] = $option_groups_array;
+
+
+                // 添加数据到数据库
                 importProduct($product_info, $product_map);
+                addCampaigns($product_info, $product_map);
+                addImages($product_info, $product_map); //处理图片数据
+                addOptionGroup($product_info);
+                addProductGroup($product_info, $product_map);
+                addCategories($product_info, $product_map);
+                updateProductOther($product_info, $product_map);
+                $product_map[$product_code] = true;
             }
         }
         // 跳转回导入界面，同时给出消息通知。
     }
 
+
     function importProduct(&$product_info, &$product_map)
     {
         //------------ 添加商品信息 -----------------
-
         $product_code = $product_info['code'];
         //1. 拆分image字符串$product_map
         $product_info['image'] = array_filter(preg_split("/\|/", $product_info['image']));
@@ -293,17 +332,7 @@
                     $sql = u_utils::builderSQL($sql, $parameter_values);
                     $result = database::query($sql);
                 }
-                //}
             }// 以上代码测试通过 2018-09-18 14:50
-            addCampaigns($product_info, $product_map);
-            addImages($product_info, $product_map); //处理图片数据
-            addOptionGroup($product_info);
-
-            addProductGroup($product_info, $product_map);
-
-            addCategories($product_info, $product_map);
-            updateProductOther($product_info, $product_map);
-            $product_map[$product_code] = true;
         }
     }
 
@@ -367,148 +396,318 @@
     }
 
     /**
+     * 处理资源情况
+     * @param $product_info
+     */
+    function processSource(&$product_info) {
+        //$DEFAULT_FOLDER = "D:/zip-test";
+        $TMP_FOLDER = UNZIP_DIR;// 最后的解压目录
+        $WEB_SITE_FOLDER = FS_DIR_HTTP_ROOT.WS_DIR_IMAGES."products/";
+        $WEB_SITE_COMMON_FOLDER = $WEB_SITE_FOLDER."common/";
+
+        // 检查解压目录下是否还有别的文件，如果有，默认认为是T-shirts 数据
+
+        $product_code = $product_info['code'];
+        $ws_links_dir = "products/".$product_code."/";
+        $product_web_folder = $WEB_SITE_FOLDER.$product_code."/";
+        if(!u_utils::exists($product_web_folder,false)) {// 如果网站目录下没有对应产品的图片目录，则创建该目录
+            u_utils::mkdirs($product_web_folder);
+        }
+        $option_group_str = $product_info['option_groups'];
+        $option_group_array = u_utils::parseOptionGroup($option_group_str);
+        $product_info["option_groups_array"] = $option_group_array;
+        foreach ($option_group_array as $option_group_name => $values) {
+            foreach($values as $value=>$link) {
+                if(!empty($link)) { //1. 判断是否有links
+//                  是否是common开头
+                    $isCommon = u_utils::startWith("common",$link);
+                    if($isCommon) {
+                        echo $link."是common文件";
+                        $tmp_link = UNZIP_DIR.$link;
+                        if(u_utils::exists($tmp_link)) {// 检查解压目录里是否有该文件
+                            // 存在，复制到网站common目录
+                            if(!u_utils::exists($WEB_SITE_COMMON_FOLDER,false)) {
+                                u_utils::mkdirs($WEB_SITE_COMMON_FOLDER);
+                            }
+                            // 拷贝之前应该检查目标目录是否有该文件，如果有，则不进行io操作。
+                            if(!u_utils::exists($WEB_SITE_COMMON_FOLDER . basename($link))) {
+                                $isCopy = copy($tmp_link, $WEB_SITE_COMMON_FOLDER . basename($link));
+                            }
+                            // 这里的link要修改路径，因为拷贝过去后，就是系统里的link了。products/{code}/{link}格式
+                            $product_info["option_groups_array"][$option_group_name][$value] = "products/".$link;
+//                            echo $tmp_link."存在解压目录common里</br>";
+                        } else {// 解压目录没有此图片，到网站默认的common路径去找是否存在此图片
+                            $link = $WEB_SITE_FOLDER.$link;
+                            if(u_utils::exists($link)) {
+//                                echo $link."存在系统common里</br>";
+                                // 存在
+                                $product_info["option_groups_array"][$option_group_name][$value] = "products/".$link;
+                            } else {
+                                //不处理
+//                                echo $link."不存在在系统common里</br>";
+                            }
+                        }
+                    } else {// 非common资源
+                        echo $link."是非common资源</br>";
+//                        $unzip_folder = $product_folder;
+                        $tmp_link = UNZIP_DIR.$link;
+//                        $web_site_product = $WEB_SITE_FOLDER.$product_code."/";
+                        $link_parent = dirname($link,1);// 构建目录层级结构
+                        if($link_parent !== "\\" && $link_parent !== "." && $link_parent !== ".." ) {
+                            $tmp_product_web_folder = $product_web_folder.$link_parent."/";
+                        }
+
+                        // 到解压目录下去找该文件
+                        if(u_utils::exists($tmp_link)) {
+                            // 拷贝到网站目录下。目录名是 product_code.
+                            if(!u_utils::exists($tmp_product_web_folder,false)) {
+                                u_utils::mkdirs($tmp_product_web_folder);// 创建目录
+                            }
+                            if(!u_utils::exists($tmp_product_web_folder.basename($tmp_link))) {
+                                $isCopy = copy($tmp_link,$tmp_product_web_folder.basename($tmp_link));
+                            }
+                            $product_info["option_groups_array"][$option_group_name][$value] = $ws_links_dir.$link;
+//                            echo $link."解压目录里存在，并拷贝到".$tmp_product_web_folder.basename($tmp_link)."/</br>";
+                        } else {
+                            // 不处理 如果没找到，到对应的网站目录下去找，
+                            if(u_utils::exists($tmp_product_web_folder.basename($tmp_link))) {
+                                $product_info["option_groups_array"][$option_group_name][$value] = $ws_links_dir.$link;
+//                                echo $link."解压目录里不存在，在".$tmp_product_web_folder."里找到了</br>";
+                            } else {
+//                                echo $link."解压目录里不存在，".$WEB_SITE_FOLDER.$product_code." 里也没有</br>";
+                            }
+                        }
+                    }
+                } else {//没有links 第一版不处理没有links的情况
+//                    echo "links is null</br>";
+                }
+            }
+        }
+//        var_dump($product_info);
+    }
+    /**
      * @param $product_info
      */
     function addOptionGroup(&$product_info)
     {
+        // 处理资源并修改$product_info信息
+        processSource($product_info);
+
         // 这个每次都要检测并更新或添加。这里添加的时规格。这里有个问题，实际上一个产品可能具有多个规则。所以要支持多规格。这里只支持单规格。
-        //option_groups  数据格式:   group_name(选项组名):option_name(选项名)
+        //option_groups
+        //  数据格式:   style:S,M,XL,SL,5-links：1,2,3,4,5|size:x,xl-links：|color:dddf-links
+        // links： option
+        /*
+         * {
+                "Style": {
+                    "Classic": "products\/common\/Classic.jpg"
+                },
+                "Color": {
+                    "#FFF": "products\/48da8abf437a492eb24d4b3d2121ea49\/Classic\/WhiteTshirt.png",
+                    "#efce1f": "products\/48da8abf437a492eb24d4b3d2121ea49\/Classic\/DaisyTshirt.png",
+                    "#d5ab47": "products\/48da8abf437a492eb24d4b3d2121ea49\/Classic\/GoldTshirt.png",
+                    "#50af72": "products\/48da8abf437a492eb24d4b3d2121ea49\/Classic\/IrishGreenTshirt.png"
+                },
+                "Size": {
+                    "X SM (Youth)": "","SM (Youth)": "","MED (Youth)": "",
+                    "SM": "","MED": "","LG": "","XL": "","2XL": "",
+                    "3XL": "","4XL": "","5XL": "","6XL": ""
+                }
+            }
+         这是一个只有一层的树结构。最顶层的是就是第一个元素，其它的元素都是兄弟关系
+         * */
+        $option_groups_array = $product_info['option_groups_array'];
+//        $option_groups_array = u_utils::parseOptionGroup($option_groups_str);
+//        if (!empty($option_groups_str)) {
+
+        if(!empty($option_groups_array)) {
+            reset($option_groups_array);
+            $rootOptinName = key($option_groups_array);// 拿到 Style
+            $rootOptionValue = key($option_groups_array[$rootOptinName]); // 拿到Style
+            foreach ($option_groups_array as $option_name=>$option_values) {
+                $option_values = $option_groups_array[$option_name];
+                foreach ($option_values as $option_value=>$link_value) {
+                    addSimpleOptionGroup($option_name, $option_value,$link_value,$rootOptinName,$rootOptionValue,$product_info);
+                }
+            }
+        }
+    }
+
+
+    /**
+     * 添加单个的option groups
+     * @param string $gourp_name 实际就是option_name
+     * @param string $option_name 实际就是option_value
+     * @param $link_value 当前规格对应的link值
+     * @param $product_info
+     */
+    function addSimpleOptionGroup($group_name='',$option_name='',$link_value="",$parentName,$parentValue,&$product_info)
+    {
+
+//        $option_groups = preg_split("/:/", $option_groups_str);
+//        $group_name = $option_groups[0];
+//        $option_name = $option_groups[1];
+        // 查找是否存在该数据选项，如果不存在，则添加，存在则不做处理
+        //1. 需要查找lc_option_groups_info和lc_option_values_info。
+        //类型是textarea和input的选项数据是放在lc_option_values表里。暂时不考虑这两种类型
+        // 其它类型的选项数据是放在lc_option_values_info表里
         $product_id = $product_info['id'];
-        $option_groups_str = $product_info['option_groups'];
         $date = u_utils::getYMDHISDate();
         $combination = "";
         $value_id = "";
-        if (!empty($option_groups_str)) {
-            $option_groups = preg_split("/:/", $option_groups_str);
-            $group_name = $option_groups[0];
-            $option_name = $option_groups[1];
-            // 查找是否存在该数据选项，如果不存在，则添加，存在则不做处理
-            //1. 需要查找lc_option_groups_info和lc_option_values_info。
-            //类型是textarea和input的选项数据是放在lc_option_values表里。暂时不考虑这两种类型
-            // 其它类型的选项数据是放在lc_option_values_info表里
+        // 查找group_name 是否在 option_groups_info 表里，如果不存在就添加。
+        $sql = "select id,group_id from " . DB_TABLE_OPTION_GROUPS_INFO . " where name = '%s'";
+        $parameter_values = array($group_name);
+        $sql = u_utils::builderSQL($sql, $parameter_values);
+        $result = database::fetch(database::query($sql));
+        $group_id = $result['group_id'];
+        if (empty($result)) {
+            // 添加一个group_name 需要在两张表里添加数据，`lc_option_groups` 和 lc_option_groups_info`.
+            //添加 如下数据到对应表：
+            //1. `lc_option_groups`
+            $sql = "insert into " . DB_TABLE_OPTION_GROUPS . " (function,required,sort,date_created) VALUES ('%s',1,'%s','%s')";
+            $parameter_values = array('select', 'priority', $date);
 
-            // 查找group_name 是否在 option_groups_info 表里，如果不存在就添加。
-            $sql = "select id,group_id from " . DB_TABLE_OPTION_GROUPS_INFO . " where name = '%s'";
-            $parameter_values = array($group_name);
             $sql = u_utils::builderSQL($sql, $parameter_values);
-            $result = database::fetch(database::query($sql));
-            $group_id = $result['group_id'];
-            if (empty($result)) {
-                // 添加一个group_name 需要在两张表里添加数据，`lc_option_groups` 和 lc_option_groups_info`.
-                //添加 如下数据到对应表：
-                //1. `lc_option_groups`
-                $sql = "insert into " . DB_TABLE_OPTION_GROUPS . " (function,required,sort,date_created) VALUES ('%s',1,'%s','%s')";
-                $parameter_values = array('select', 'priority', $product_info['date_created']);
+            $result = database::query($sql);//拿到id值
+            $group_id = database::insert_id();
+            //`lc_option_groups_info`
+            $sql = "insert into %s (group_id,language_code,name,description) VALUES (%d,'en','%s','')";
+            $parameter_values = array(DB_TABLE_OPTION_GROUPS_INFO, $group_id, $group_name);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
+            $result = database::query($sql);
+            // 添加$option_name 数据结束
+        }
 
-                $sql = u_utils::builderSQL($sql,$parameter_values);
-                $result = database::query($sql);//拿到id值
-                $group_id = database::insert_id();
-                //`lc_option_groups_info`
-                $sql = "insert into %s (group_id,language_code,name,description) VALUES (%d,'en','%s','')";
-                $parameter_values = array(DB_TABLE_OPTION_GROUPS_INFO, $group_id, $group_name);
-                $sql = u_utils::builderSQL($sql, $parameter_values);
-                $result = database::query($sql);
-                // 添加$option_name 数据结束
-            }
-
-            // 先查询$option_value在表lc_option_values_info是否存在，如果不存在，则添加，如果存在则忽略
-            /*
-             * SELECT `litecart`.`lc_option_values`.id as value_id,`litecart`.`lc_option_values`.group_id
-             * FROM `litecart`.`lc_option_values_info` INNER JOIN `litecart`.`lc_option_values`
-             *  ON value_id = `litecart`.`lc_option_values`.id
-                AND `litecart`.`lc_option_values`.group_id = 115 AND `litecart`.`lc_option_values_info`.name = 'M'
-             */
-            //查找$option_value是否存在，查询时涉及两张表lc_option_values和lc_option_values_info。只有在info表里才有具体的值。
-            $sql = "SELECT %s.id as value_id,%s.group_id FROM %s INNER JOIN %s ON value_id = %s.id 
+        // 先查询$option_value在表lc_option_values_info是否存在，如果不存在，则添加，如果存在则忽略
+        /*
+         * SELECT `litecart`.`lc_option_values`.id as value_id,`litecart`.`lc_option_values`.group_id
+         * FROM `litecart`.`lc_option_values_info` INNER JOIN `litecart`.`lc_option_values`
+         *  ON value_id = `litecart`.`lc_option_values`.id
+            AND `litecart`.`lc_option_values`.group_id = 115 AND `litecart`.`lc_option_values_info`.name = 'M'
+         */
+        //查找$option_value是否存在，查询时涉及两张表lc_option_values和lc_option_values_info。只有在info表里才有具体的值。
+        $sql = "SELECT %s.id as value_id,%s.group_id FROM %s INNER JOIN %s ON value_id = %s.id 
                 AND %s.group_id = %d AND %s.name = '%s'";
-            $parameter_values = array(
-                DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
-                DB_TABLE_OPTION_VALUES_INFO, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
-                $group_id, DB_TABLE_OPTION_VALUES_INFO, $option_name);
+        $parameter_values = array(
+            DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
+            DB_TABLE_OPTION_VALUES_INFO, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES, DB_TABLE_OPTION_VALUES,
+            $group_id, DB_TABLE_OPTION_VALUES_INFO, $option_name);
+        $sql = u_utils::builderSQL($sql, $parameter_values);
+        $result = database::fetch(database::query($sql));
+        if (empty($result)) {//如果$option_value不存在。则添加，如果存在则更新。
+            // 添加 option_values 也涉及两张表lc_option_values和lc_option_values_info
+            $sql = "insert into " . DB_TABLE_OPTION_VALUES . " (group_id,value,priority) VALUES (%d,'',1)";
+            $parameter_values = array($group_id);
             $sql = u_utils::builderSQL($sql, $parameter_values);
-            $result = database::fetch(database::query($sql));
-            if (empty($result)) {//如果$option_value不存在。则添加，如果存在则更新。
-                // 添加 option_values 也涉及两张表lc_option_values和lc_option_values_info
-                $sql = "insert into " . DB_TABLE_OPTION_VALUES . " (group_id,value,priority) VALUES (%d,'',1)";
-                $parameter_values = array($group_id);
-                $sql = u_utils::builderSQL($sql, $parameter_values);
-                $result = database::query($sql);
-                $value_id = database::insert_id();
-                //添加到`lc_option_values_info`
-                $sql = "insert into " . DB_TABLE_OPTION_VALUES_INFO . " (value_id,language_code,name) VALUES (%d,'en','%s')";
-                $parameter_values = array($value_id, $option_name);
-                $sql = u_utils::builderSQL($sql, $parameter_values);
-                $result = database::query($sql);
-                // --------- value_info 添加结束 -------------------
-                // ---------------------------以上操作测试无误。 ---------------------------
-            } else {//存在 选项值
-                // 如果已经存在 option_value,则赋值value_id.
-                $value_id = $result['value_id'];
-            }
-            // ------------ 关联商品操作 lc_products_options这样页面上购买商品是才有可选项。 ---------
-            //1. 查找在product_optioins 表里有没有product_id,group_id,value_id 一一对应的记录，如果没有，则需要添加
-            $sql = "SELECT product_id FROM " . DB_TABLE_PRODUCTS_OPTIONS . " 
+            $result = database::query($sql);
+            $value_id = database::insert_id();
+            //添加到`lc_option_values_info`
+            $sql = "insert into " . DB_TABLE_OPTION_VALUES_INFO . " (value_id,language_code,name) VALUES (%d,'en','%s')";
+            $parameter_values = array($value_id, $option_name);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
+            $result = database::query($sql);
+            // --------- value_info 添加结束 -------------------
+            // ---------------------------以上操作测试无误。 ---------------------------
+        } else {//存在 选项值
+            // 如果已经存在 option_value,则赋值value_id.
+            $value_id = $result['value_id'];
+        }
+        // ------------ 关联商品操作 lc_products_options这样页面上购买商品是才有可选项。 ---------
+        //1. 查找在product_optioins 表里有没有product_id,group_id,value_id 一一对应的记录，如果没有，则需要添加
+        $sql = "SELECT product_id FROM " . DB_TABLE_PRODUCTS_OPTIONS . " 
                     WHERE product_id=%d AND group_id=%d AND value_id=%d";
-            $parameter_values = array($product_id, $group_id, $value_id);
+        $parameter_values = array($product_id, $group_id, $value_id);
 
+        $sql = u_utils::builderSQL($sql, $parameter_values);
+        $result = database::fetch(database::query($sql));
+        if (empty($result)) {// 导入是应该不会存在更新问题，所以此处忽略 // TODO:操作上有个潜在的逻辑问题，如果是更新了option数据，那么怎么办？比如说links或exsitesion
+            $sql = "insert into" . DB_TABLE_PRODUCTS_OPTIONS . " (product_id,group_id,value_id,price_operator,USD,EUR,
+                                        priority,links,date_updated,date_created) 
+                        VALUES (%d,%d,%d,'+',0.000,0.000,1,'%s','%s','%s')";
+            $parameter_values = array($product_id, $group_id, $value_id, $link_value, $date, $date);
             $sql = u_utils::builderSQL($sql, $parameter_values);
-            $result = database::fetch(database::query($sql));
-            if (empty($result)) {// 导入是应该不会存在更新问题，所以此处忽略
-                $sql = "insert into" . DB_TABLE_PRODUCTS_OPTIONS . " (product_id,group_id,value_id,price_operator,USD,
-                                        priority,date_updated,date_created) 
-                        VALUES (%d,%d,%d,'+',0.000,1,'%s','%s')";
-                $parameter_values = array($product_id, $group_id, $value_id, $date, $date);
-                $sql = u_utils::builderSQL($sql, $parameter_values);
-                $result = database::query($sql);
-            }
-            // ---------------------------- 处理库存  这里有数据问题 ------------------------------------------------
-            $combination = $group_id . "-" . $value_id;
-            // 关联 lc_products_options_stock，首先检查是否有对应的stock记录，如果有，则更新，如果没有则添加
-            $sql = "SELECT product_id,combination FROM " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " WHERE product_id=%d AND combination ='%s'";
-            $parameter_values = array($product_id, $combination);
-            $sql = u_utils::builderSQL($sql, $parameter_values);
-            $result = database::fetch_full(database::query($sql));
-            if (empty($result)) {
-                $sql = "INSERT INTO " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " (product_id,combination,sku,weight,
+            $result = database::query($sql);
+        } else {// 做更新操作，主要是更新links
+//            $sql = "update " . DB_TABLE_PRODUCTS_OPTIONS . " set links='%s',date_updated='%s' where id = %d";
+//            $parameter_values = array($link_value,$date, $id);
+//            $sql = u_utils::builderSQL($sql, $parameter_values);
+//            $result = database::query($sql);
+
+        }
+        // ---------------------------- 处理库存  这里有数据问题 ------------------------------------------------
+        $combination = $group_id . "-" . $value_id;
+        // 关联 lc_products_options_stock，首先检查是否有对应的stock记录，如果有，则更新，如果没有则添加
+        $sql = "SELECT product_id,combination FROM " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " WHERE product_id=%d AND combination ='%s'";
+        $parameter_values = array($product_id, $combination);
+        $sql = u_utils::builderSQL($sql, $parameter_values);
+        $result = database::fetch_full(database::query($sql));
+        if (empty($result)) {
+            $sql = "INSERT INTO " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " (product_id,combination,sku,weight,
                                                 weight_class,dim_x,dim_y,dim_z,dim_class,quantity,
                                                 priority,date_updated,date_created)
                                         VALUES(%d,'%s',UUID(),%d,'%s',
                                               '%s',%.4f,%.4f,%.4f,'%s',%d,'%s','%s')";
-                $parameter_values = array($product_id, $combination, $product_info['weight'],
-                    $product_info['weight_class'], $product_info['dim_x'], $product_info['dim_y'], $product_info['dim_z'], $product_info['dim_class'], $product_info['quantity'],
-                    1, $date, $date);
-                $sql = u_utils::builderSQL($sql, $parameter_values);
-                database::query($sql);
-                // 修改商品表里的总数, 新增的时候直接加，只有修改的时候需要计算差值。因为可能库存数量会比原来的减少。
-//                $sql = "update " . DB_TABLE_PRODUCTS . " set quantity = quantity+%d,date_updated='%s' where id = %d";
-//                $sql = u_utils::builderSQL($sql, array($product_info['quantity'], $date, $product_id));
-//                $result = database::query($sql);
-//                echo $result;
-            } else {
-                $current_quantity = $product_info['quantity'];
-                //1. 查询stock 表里选项对应的value_id和group_id 的 quantity 值，因为可能更新时会有所减少
-//                $sql = "select quantity from " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " where combination='" . $combination . "' and product_id=" . $product_id;
-//                $result = database::fetch(database::query($sql));
-//                $old_quantity = $result['quantity'];
-                // 更新库存
-                $sql = "update " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " set quantity = %.4f,date_updated='%s' 
+            $parameter_values = array($product_id, $combination, $product_info['weight'],
+                $product_info['weight_class'], $product_info['dim_x'], $product_info['dim_y'], $product_info['dim_z'], $product_info['dim_class'], $product_info['quantity'],
+                1, $date, $date);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
+            database::query($sql);
+        } else {
+            $current_quantity = $product_info['quantity'];
+            // 更新库存
+            $sql = "update " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " set quantity = %.4f,date_updated='%s' 
                                                                         where product_id=%d and combination='%s'";
 
-                $parameter_values = array($current_quantity, $date, $product_id, $combination);
-                $sql = u_utils::builderSQL($sql, $parameter_values);
-                database::query($sql);
+            $parameter_values = array($current_quantity, $date, $product_id, $combination);
+            $sql = u_utils::builderSQL($sql, $parameter_values);
+            database::query($sql);
+        }
+        // 统计总数，统一更新库存
+        $sql = "select sum(quantity) as quantity from " . DB_TABLE_PRODUCTS_OPTIONS_STOCK . " where product_id = " . $product_id;
+        $result = database::fetch(database::query($sql));
+        // 计算差值
+        $quantity = $result['quantity'];
+        $sql = "update " . DB_TABLE_PRODUCTS . " set quantity = quantity + " . $quantity . " where id=" . $product_id;
+        $result = database::query($sql);
+
+        //----------------------  添加 T-shirts 到 表 product_option_trees 里
+        global $dataInfo;
+        $isOptionTree = $dataInfo['is_option_tree'];
+        if ($isOptionTree === true) {
+            // 另外一种添加方式，需要将数据添加到 product_option_trees 表
+            //1. product_id group_id value_id parent_id parent_group_value_id links.
+//            $product_id,$value_id,$group_id,$link_value. 怎么获取到parent_id.
+            // 根据product_id,$value_id,$group_id和$parentName得到 父亲的id。如果parentName和当前传入的grop_name 一样，则id为0
+            // 还要根据
+            if($group_name !== $parentName && !empty($parentName)) {
+                //1. 根据product_id,$value_id,$group_id和$parentName得到 父亲的id。如果parentName和当前传入的grop_name 一样，则id为0
+                $sql = "select group_id from " . DB_TABLE_OPTION_GROUPS_INFO . " where name = '" . $parentName . "' limit 1";
+                $result = database::fetch(database::query($sql));
+                $parentId = $result['group_id'];
+                //2. 根据parent_group_id 和 parent_group_value  拿到 对应的parent_value_id.
+                $sql = "SELECT ov.id FROM ".DB_TABLE_OPTION_VALUES." AS ov INNER JOIN ".DB_TABLE_OPTION_VALUES_INFO.
+                                        " AS ovi  ON ovi.value_id = ov.id AND ovi.name = '%s' AND ov.group_id  = %d";
+                $parameter_values = array($parentValue,$parentId);
+                $sql = u_utils::builderSQL($sql,$parameter_values);
+                $result = database::fetch(database::query($sql));
+                $parentValueId = $result['id'];
+            } else {
+                $parentId = 0;
             }
-            // 统计总数，统一更新库存
-            $sql = "select sum(quantity) as quantity from ".DB_TABLE_PRODUCTS_OPTIONS_STOCK ." where product_id = ".$product_id;
-            $result = database::fetch(database::query($sql));
-            // 计算差值
-            $quantity = $result['quantity'];
-            $sql = "update " . DB_TABLE_PRODUCTS . " set quantity = quantity + " . $quantity . " where id=" . $product_id;
+            $date = u_utils::getYMDHISDate();
+            // update
+            $sql = "select count(1) as ";
+            // Insert 插入之前还是应该判断一下是否存在相同的id数据，如果存在则更新，否则会有很多重复数据
+            $sql = "insert into ".DB_TABLE_PRODUCT_OPTION_TREES . "(`product_id`,`group_id`,`value_id`,
+                `parent_group_id`, `parent_value_id`,`links`, `date_update`, `date_created` ) VALUES (
+                %d,%d,%d,%d,%d,'%s','%s','%s');";
+            $parameter_values = array($product_id,$group_id,$value_id,$parentId,$parentValueId,$link_value,$date,$date);
+            $sql = u_utils::builderSQL($sql,$parameter_values);
             $result = database::query($sql);
-            /**------------------------------------------*/
+
         }
     }
-
     /**
      * @param $product_info
      */

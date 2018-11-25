@@ -54,7 +54,7 @@
          * @param $start_str ： 开头的字符串
          * @param $str 要查找的字符串
          */
-        public static function startWith($start_str, $str)
+        public static function startWith($start_str, $str="")
         {
             $start_str_length = strlen($start_str);
             $start_str_tmp = substr($str, 0, $start_str_length);
@@ -290,7 +290,7 @@
          */
         public static function mkdirs($dirPath)
         {
-            if (!file_exists($dirPath)) {
+            if (!is_dir($dirPath)) {
                 return mkdir($dirPath, 0777, true);
             }
         }
@@ -308,7 +308,6 @@
                     unset($files[$key]);
                 }
             }
-
             return $files;
         }
 
@@ -476,6 +475,20 @@
         }
 
         /**
+         * 检查文件或目录是否存在
+         * @param string $filePath
+         * @param bool $isFile 如果监测的是目录是否存在，该值为false
+         * @return bool
+         */
+        public static function exists($filePath="",$checkFile=true) {
+            if($checkFile) {
+                return is_file($filePath);
+            } else {
+                return is_dir($filePath);
+            }
+        }
+
+        /**
          * 用来替代系统的count函数，做了类型判断
          * @param $array_or_countable
          * @param int $mode
@@ -546,15 +559,15 @@
         //    $s1 = "style:XL,XXL,S,M,SL:1";
         //    $s1 = "style:XL,XXL,S,M,SL-links:XL.jpg,XXL.jpg,S.jpg|size:x,xl:1-:|color:#FF9900,#3e5r6t-links:FF9900.jpg,#3e5r6t.jpg";
          */
-        public static function parseOptionGroup($optionGroups) {
+        public static function parseOptionGroup($optionGroupStr) {
             // 0="style":[xl:common/1.jpg]
             // 1="color":[#ssss:1.jpg]
             // 格式：style:1,2,3,4,5-links：1,2,3,4,5|size:x,xl-links：|color:dddf-links
             // 如果是上传的文件里包含的图片links可以不用写。如果要引用已经存在的图片，使用http，或https，公共文件夹的只需要书写common即可。
             $optionGroupData = array();
-            $Optioins = self::split($optionGroups,"[|]");
+            $Optioins = self::split($optionGroupStr,"[|]");// 拆分各个规格数据
             foreach ($Optioins as $option) {
-                $childerns = self::split($option,"-");
+                $childerns = self::split($option,"-");// 拆分规格和对应的links数据
                 $values = array();
                 $specification = array();
                 $links = array();
@@ -588,6 +601,7 @@
                 } else {
                     $links['links'] = array();
                 }
+                // 将规格和links 数据进行合并，合并为诸如这种格式： XL=xx.jpg,以规格为主。
                 foreach ($specification as $key=>$specification_values) {
                     $link_values = $links['links'];
                     $specification_count = count($specification_values);
@@ -606,5 +620,49 @@
                 }
             }
             return $optionGroupData;
+        }
+
+        /**
+         * @param $file 该方法获得一个文件名：默认包括后缀.
+         */
+        public static function haveFileName($file) {
+            return basename($file);
+        }
+
+        /**
+         * 找到上一个元素的名字。用于key-value的数组
+         * @param $currentKey
+         * @param $array
+         * @return mixed|string
+         */
+        public static function findArrayPrev($currentKey,&$array) {
+            if(empty($array)) {
+                return "";
+            }
+            $tmpArray = array();
+            $prevName = "";
+            foreach ($array as $key=>$value) {
+                $tmpArray[] = $key;
+            }
+            for ($i = 0; $i < self::count($tmpArray); $i ++) {
+                $tmp = $tmpArray[$i];
+                if($tmp === $currentKey && $i > 0) {
+                    $prevName = $tmpArray[$i - 1];
+                    break;
+                }
+            }
+            return $prevName;
+        }
+        public static function findArrayNext($currentKey,&$array) {
+            $next = 0;
+            reset($array);
+            do {
+                $tmp_key = key($array);
+                $res = next($array);
+            } while ( ($tmp_key != $currentKey) && $res );
+            if( $res ) {
+                $next = key($array);
+            }
+            return $next;
         }
     }

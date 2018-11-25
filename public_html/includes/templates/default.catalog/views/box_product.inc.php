@@ -40,17 +40,18 @@
         line-height:40px;
         border-radius: 4px;
     }
-    .product_sizes a:hover {
-        background: #b2906a !important;
-        border-radius: 2px !important;
-        border: 1px solid #b2906a !important;
-        font-weight:bold !important;
-        color: #ffffff !important;
-        font-family: Futura,Arial,Sans-Serif !important;
-        transition:all .2s ease-in !important;
-        mozTransition:all .2s ease-in !important;
-        webkitTransition:all .2s ease-in !important;
-    }
+    /*.product_sizes a:hover {*/
+        /*!*background: #b2906a !important;*!*/
+        /*!*border-radius: 20px !important;*!*/
+        /*!*border: 1px solid #b2906a !important;*!*/
+        /*font-weight:bold !important;*/
+        /*!*color: #ffffff !important;*!*/
+        /*font-family: Futura,Arial,Sans-Serif !important;*/
+        /*transition:all .2s ease-in !important;*/
+        /*mozTransition:all .2s ease-in !important;*/
+        /*webkitTransition:all .2s ease-in !important;*/
+        /*border: 2px #000000 solid;*/
+    /*}*/
     .add_to_cart{
         background: #b2906a;
         text-transform: uppercase;
@@ -85,6 +86,10 @@
     .font_specification {
         font: 14px/1.5 Roboto,Arial,sans-serif;
     }
+    /*Style css*/
+    .product_sizes div{
+        cursor: pointer;
+    }
 </style>
 <div id="box-product" class="box" style="max-width: 980px;" data-id="<?php echo $product_id; ?>"
      data-name="<?php echo htmlspecialchars($name); ?>"
@@ -93,12 +98,13 @@
         <div class="col-sm-6 col-md-6">
             <div class="image-wrapper">
                 <a href="<?php echo htmlspecialchars($image['original']); ?>" data-toggle="lightbox"
-                   data-gallery="product">
+                   data-gallery="product" <?php if($this->snippets['isTwoImg']) echo "style=\"position: absolute;\""?>>
                     <img class="img-responsive" src="<?php echo htmlspecialchars($image['thumbnail']); ?>"
                          srcset="<?php echo htmlspecialchars($image['thumbnail']); ?> 1x, <?php echo htmlspecialchars($image['thumbnail_2x']); ?> 2x"
-                         alt="" title="<?php echo htmlspecialchars($name); ?>"/>
+                         alt="" title="<?php echo htmlspecialchars($name); ?>" id="product_img"/>
                     <?php echo $sticker; ?>
                 </a>
+                <?php if($this->snippets['isTwoImg']) echo "<img src='' id='color_img'>"?>
             </div>
 
             <?php if ($extra_images) { ?>
@@ -232,7 +238,7 @@
 
                 <?php if ($options) { ?>
                     <?php foreach ($options as $option) { ?>
-                        <div class="form-group">
+                        <div class="form-group" id="<?php echo $option['name']; ?>">
                             <label style="text-transform: uppercase;font-weight: bold;float:left"><?php echo $option['name']; ?>:</label>
                             <?php echo functions::form_draw_input('options['.$option['name'].']',"","text","style='border:0px;width:auto;height:20px;float:right;color:#b2906a;font-weight:bold;float:left;' required='required'");?>
                             <div class="product_sizes_content" style="display: block;">
@@ -242,34 +248,6 @@
                         </div>
                     <?php } // 以下的js函数在public_html/includes/functions/func_form.inc.php
                         // 里的form_draw_blocks_select_field函数里生成的a标签上调用。?>
-                    <script type="text/javascript">
-                        function clickOption(obj,hidden_name) {
-                            obj.style.background="#b2906a";
-                            obj.style.color = "#ffffff";
-                            obj.style.border = "1px solid #b2906a";
-                            obj.style.transition = "all .2s ease-in";
-                            obj.style.mozTransition = "all .2s ease-in";
-                            obj.style.webkitTransition = " all .2s ease-in";
-                            var optionValue = obj.innerHTML;
-                            var hidden = $('input[name="'+ hidden_name +'"]');
-                            hidden.val(optionValue);
-//                            alert(hidden.prop("outerHTML"));
-                            // 之前的要全部消除
-                            // 找到当前元素的父亲
-                            var parent = $(obj).parent();
-                            var childer = parent.children('a');
-                            childer.each(function(index, element){
-                                if(element!= obj) {
-                                    element.style.background="#FFFFFF";
-                                    element.style.color = "#000000";
-                                    element.style.border = "1px solid #AFAFAF";
-                                    element.style.transition = "all .2s ease-in";
-                                    element.style.mozTransition = "all .2s ease-in";
-                                    element.style.webkitTransition = "all .2s ease-in";
-                                }
-                            });
-                        }
-                    </script>
                 <?php } ?>
 
                 <?php if (!$catalog_only_mode) { ?>
@@ -397,4 +375,6 @@
         e.preventDefault();
         prompt("<?php echo language::translate('text_link_to_this_product', 'Link to this product'); ?>", '<?php echo $link; ?>');
     });
+    // Click first Style option and first-color.
+    $("#Style div span div").first().click();
 </script>

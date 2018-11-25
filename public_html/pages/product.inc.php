@@ -270,8 +270,10 @@
       }
     }
   }
-// Options
+// Options 商品规格
   if (count($product->options) > 0) {
+      $isTowImg = false;
+
     foreach ($product->options as $group) {
       $values = '';
       switch ($group['function']) {
@@ -330,28 +332,51 @@
           }
           break;
 
-        case 'select'://TODO: 这里是产品select 绘制的代码
-          $options = array();
+        case 'select': {//TODO: 这里是产品select 绘制的代码
+
+            // 1. 如果是平级结构，交给box_same_option 展示
+
+//            include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_TEMPLATE . 'views/box_product.inc.php');
+            // 2. 如果是层级结构，交给box_tree_option 展示
+            $options = array();
+            $groupName = $group['name'];
 //          $options = array(array('-- '. language::translate('title_select', 'Select') .' --', ''));
-          foreach ($group['values'] as $value) {
+            foreach ($group['values'] as $value) {
+                if($isTowImg === false && !empty($value['links'])) {
+                    $isTowImg = true;
+                }
+                $price_adjust_text = '';
+                $price_adjust = currency::format_raw(tax::get_price($value['price_adjust'], $product->tax_class_id));
+                $tax_adjust = currency::format(tax::get_tax($value['price_adjust'], $product->tax_class_id));
 
-            $price_adjust_text = '';
-            $price_adjust = currency::format_raw(tax::get_price($value['price_adjust'], $product->tax_class_id));
-            $tax_adjust = currency::format(tax::get_tax($value['price_adjust'], $product->tax_class_id));
+                if ($value['price_adjust']) {
+                    $price_adjust_text = currency::format(tax::get_price($value['price_adjust'], $product->tax_class_id));
+                    if ($value['price_adjust'] > 0) $price_adjust_text = ' +' . $price_adjust_text;
+                }
 
-            if ($value['price_adjust']) {
-              $price_adjust_text = currency::format(tax::get_price($value['price_adjust'], $product->tax_class_id));
-              if ($value['price_adjust'] > 0) $price_adjust_text = ' +'.$price_adjust_text;
+                $options[] = array($value['name'] . $price_adjust_text,
+                    $value['name'],$value['links'],$product->id,$group['id'],$value['id'],$groupName,
+                    'data-price-adjust="' . (float)$price_adjust . '" data-tax-adjust="' . (float)$tax_adjust . '"');
             }
 
-            $options[] = array($value['name'] . $price_adjust_text, $value['name'], 'data-price-adjust="'. (float)$price_adjust .'" data-tax-adjust="'. (float)$tax_adjust .'"');
-          }
 
 //          $values .= functions::form_draw_select_field('options['.$group['name'].']', $options, true, false, !empty($group['required']) ? 'required="required"' : '');
-
-            $values .= functions::form_draw_blocks_select_field('options['.$group['name'].']',
+            // 前期默认只对款式和颜色做处理，因为这两个有show view pic 需求，后期看修改select标记如select-pic通过这种来区分不同的交互需求
+            if (strtolower($groupName) === "style") {// 款式
+                // 拿到links，默认就要在页面款式缩略图
+                $values .= functions::form_draw_picture_select_field('options[' . $group['name'] . ']',
                     $options, true, false, !empty($group['required']) ? 'required="required"' : '');
+            } else if (strtolower($groupName) === "color") {// 颜色
+                // 拿到颜色值和links，点击后显示具体的颜色款式图
+                $values .= functions::form_draw_link_color_lump('options[' . $group['name'] . ']',
+                    $options, true, false, !empty($group['required']) ? 'required="required"' : '');
+            } else {
+                $values .= functions::form_draw_blocks_select_field('options[' . $group['name'] . ']',
+                    $options, true, false, !empty($group['required']) ? 'required="required"' : '');
+            }
+
             break;
+        }
 
         case 'textarea':
 
@@ -379,6 +404,12 @@
         'values' => $values,
       );
     }
+      // 这个标记是用来在页面判断是否要显示两个img。 用在style+color这种需要预览的商品上。原框架只有一个img没法实现叠加效果。为了简便
+      // 碰到这种情况，使用两个img通过定位来叠加，就需要这个标记。如果option不需要预览，则页面按照原来的方式布局和现实，不会出现另外一个img
+    $_page->snippets['isTwoImg'] = $isTowImg;
+//      $view = new view();
+//      $optionHtml = $view->stitch("views/box_product_info_option");
+//      $_page->snippets['option_html'] = $optionHtml;
   }
 
   document::$snippets['head_tags']['schema_json'] = '<script type="application/ld+json">'. json_encode($schema_json) .'</script>';
