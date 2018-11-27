@@ -198,7 +198,7 @@
 
             $this->_data['options'] = array();
 
-            // 先查询商品有哪些options. 这里还是要做区别，否则拿到的数据不对
+            // 先查询商品有哪些options. 这里还是要做区别，否则拿到的数据不对。这里确实需要重新组织数据
             $sql = "select * from " . DB_TABLE_PRODUCTS_OPTIONS . " where product_id = " . (int)$this->_id . " order by priority;";
             $products_options_query = database::query($sql);
 

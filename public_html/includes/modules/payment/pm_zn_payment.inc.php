@@ -178,7 +178,7 @@
                 $order->save();
                 // Send email 发送邮件
                 $email = $order->data['customer']['email'];
-                $order->email_order_copy($email);//没有发送成功。
+                $order->email_order_copy($email);
                 // Clear Shopping Cart 清空购物车等。
                 cart::clear();// 清空购物车
             }else if($post_str['status'] !== '0000') {// 表示失败
@@ -190,14 +190,15 @@
             }
             return $return_array;
         }
+        // 模拟支付成功并发邮件
         private function simulationPayment($order) {
-//            $order_status_id = 3;
-//            $order->data['order_status_id'] = $order_status_id;
-//            $order->save();
-//            cart::clear();// 清空购物车
+            $order_status_id = 3;
+            $order->data['order_status_id'] = $order_status_id;
+            $order->save();
+            cart::clear();// 清空购物车
             //Send email 发送邮件
             $email = $order->data['customer']['email'];
-            $order->email_order_copy($email);//没有发送成功。
+            $order->email_order_copy($email);
             /*-----------------------------------------*/
             $return_array = array(
                 'method' => 'API_CALL',

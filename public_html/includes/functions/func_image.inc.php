@@ -20,8 +20,9 @@
 
   function image_process($source, $options) {
 
-    if (!is_file($source)) $source = FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . 'no_image.png';
-
+    if (!is_file($source)) {
+        $source = FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . 'no_image.png';
+    }
     $options = array(
       'destination' => !empty($options['destination']) ? $options['destination'] : FS_DIR_HTTP_ROOT . WS_DIR_CACHE,
       'width' => !empty($options['width']) ? $options['width'] : 0,
@@ -87,7 +88,9 @@
       }
     }
 
-    if (!$image = new ctrl_image($source)) return;
+    if (!$image = new ctrl_image($source)) {
+        return;
+    }
 
     if (empty($options['extension'])) {
       $options['extension'] = $image->type();
@@ -98,7 +101,9 @@
     }
 
     if ($options['width'] != 0 || $options['height'] != 0) {
-      if (!$image->resample($options['width'], $options['height'], strtoupper($options['clipping']))) return;
+      if (!$image->resample($options['width'], $options['height'], strtoupper($options['clipping']))) {
+          return;
+      }
     }
 
     if (!empty($options['watermark'])) {

@@ -50,7 +50,9 @@
 
     public static function get($key, $default=null) {
 
-      if (isset(self::$_cache[$key])) return self::$_cache[$key];
+      if (isset(self::$_cache[$key])) {
+          return self::$_cache[$key];
+      }
 
       $settings_query = database::query(
         "select * from ". DB_TABLE_SETTINGS ."

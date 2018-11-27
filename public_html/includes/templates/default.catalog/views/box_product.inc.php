@@ -40,18 +40,17 @@
         line-height:40px;
         border-radius: 4px;
     }
-    /*.product_sizes a:hover {*/
-        /*!*background: #b2906a !important;*!*/
-        /*!*border-radius: 20px !important;*!*/
-        /*!*border: 1px solid #b2906a !important;*!*/
-        /*font-weight:bold !important;*/
-        /*!*color: #ffffff !important;*!*/
-        /*font-family: Futura,Arial,Sans-Serif !important;*/
-        /*transition:all .2s ease-in !important;*/
-        /*mozTransition:all .2s ease-in !important;*/
-        /*webkitTransition:all .2s ease-in !important;*/
-        /*border: 2px #000000 solid;*/
-    /*}*/
+    .product_color {
+        border:3px solid #86797d;
+    }
+
+    #product_img {
+        <?php //  普通商品不需要讲主图进行缩减。
+        if($this->snippets['isTwoImg']) {
+            echo "max-width: 55%;margin-top: 15%;";
+        }?>
+
+    }
     .add_to_cart{
         background: #b2906a;
         text-transform: uppercase;

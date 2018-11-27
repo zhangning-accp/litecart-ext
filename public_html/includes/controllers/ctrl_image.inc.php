@@ -140,7 +140,9 @@
 
     public function resample($width=1024, $height=1024, $clipping='FIT_ONLY_BIGGER') {
 
-      if ($width == 0 && $height == 0) return;
+      if ($width == 0 && $height == 0) {
+          return;
+      }
 
       if ($this->width() == 0 || $this->height() == 0) {
         trigger_error('Error getting source image dimensions ('. $this->_src .').', E_USER_WARNING);
@@ -148,15 +150,23 @@
       }
 
     // Convert percentage dimensions to pixels
-      if (strpos($width, '%')) $width = $this->width() * str_replace('%', '', $width) / 100;
-      if (strpos($height, '%')) $height = $this->height() * str_replace('%', '', $height) / 100;
+      if (strpos($width, '%')) {
+          $width = $this->width() * str_replace('%', '', $width) / 100;
+      }
+      if (strpos($height, '%')) {
+          $height = $this->height() * str_replace('%', '', $height) / 100;
+      }
 
     // Calculate source proportion
       $source_ratio = $this->width() / $this->height();
 
     // Complete missing target dimensions
-      if ($width == 0) $width = round($height * $source_ratio);
-      if ($height == 0) $height = round($width / $source_ratio);
+      if ($width == 0) {
+          $width = round($height * $source_ratio);
+      }
+      if ($height == 0) {
+          $height = round($width / $source_ratio);
+      }
 
       switch($this->_library) {
 
@@ -223,7 +233,9 @@
 
         case 'gd':
 
-          if (!is_resource($this->_image)) $this->load();
+          if (!is_resource($this->_image)) {
+              $this->load();
+          }
 
           if (!is_resource($this->_image)) {
             trigger_error('Not a valid image resource', E_USER_WARNING);
@@ -697,7 +709,9 @@
         return false;
       }
 
-      if (empty($type)) $type = pathinfo($destination, PATHINFO_EXTENSION);
+      if (empty($type)) {
+          $type = pathinfo($destination, PATHINFO_EXTENSION);
+      }
 
       if (!in_array(strtolower($type), array('gif', 'jpg', 'png'))) {
         trigger_error('Unknown output format.', E_USER_WARNING);
@@ -708,7 +722,9 @@
 
         case 'imagick':
 
-          if (empty($this->_image)) $this->load();
+          if (empty($this->_image)) {
+              $this->load();
+          }
 
           if (empty($this->_image)) {
             trigger_error('Not a valid image object', E_USER_WARNING);
@@ -726,20 +742,26 @@
 
           $this->_image->setImageCompressionQuality($quality);
 
-          if ($interlaced) $this->_image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+          if ($interlaced) {
+              $this->_image->setInterlaceScheme(Imagick::INTERLACE_PLANE);
+          }
 
           return $this->_image->writeImage($type.':'.$destination);
 
         case 'gd':
 
-          if (!is_resource($this->_image)) $this->load();
+          if (!is_resource($this->_image)) {
+              $this->load();
+          }
 
           if (!is_resource($this->_image)) {
             trigger_error('Not a valid image resource', E_USER_WARNING);
             return false;
           }
 
-          if ($interlaced) ImageInterlace($this->_image, true);
+          if ($interlaced) {
+              ImageInterlace($this->_image, true);
+          }
 
           switch(strtolower($type)) {
             case 'gif':
@@ -785,7 +807,9 @@
       switch($this->_library) {
         case 'imagick':
 
-          if (empty($this->_image)) $this->load();
+          if (empty($this->_image)) {
+              $this->load();
+          }
 
           if (empty($this->_image)) {
             trigger_error('Not a valid image object', E_USER_WARNING);
@@ -803,7 +827,9 @@
 
         case 'gd':
 
-          if (!is_resource($this->_image)) $this->load();
+          if (!is_resource($this->_image)) {
+              $this->load();
+          }
 
           if (!is_resource($this->_image)) {
             trigger_error('Not a valid image resource', E_USER_WARNING);
@@ -851,7 +877,9 @@
 
     public function width() {
 
-      if (!empty($this->_width)) return $this->_width;
+      if (!empty($this->_width)) {
+          return $this->_width;
+      }
 
       if (empty($this->_image) && extension_loaded('gd')) {
         list($this->_width, $this->_height) = getimagesize($this->_src);
@@ -878,7 +906,9 @@
 
         case 'gd':
 
-          if (!is_resource($this->_image)) $this->load();
+          if (!is_resource($this->_image)) {
+              $this->load();
+          }
 
           if (!is_resource($this->_image)) {
             trigger_error('Not a valid image resource', E_USER_WARNING);
@@ -893,7 +923,9 @@
 
     public function height() {
 
-      if (!empty($this->_height)) return $this->_height;
+      if (!empty($this->_height)) {
+          return $this->_height;
+      }
 
       if (empty($this->_image) && extension_loaded('gd')) {
         list($this->_width, $this->_height) = getimagesize($this->_src);
@@ -919,7 +951,9 @@
 
         case 'gd':
 
-          if (!is_resource($this->_image)) $this->load();
+          if (!is_resource($this->_image)) {
+              $this->load();
+          }
 
           if (!is_resource($this->_image)) {
             trigger_error('Not a valid image resource', E_USER_WARNING);
@@ -932,7 +966,9 @@
 
     public function type() {
 
-      if (!empty($this->_type)) return $this->_type;
+      if (!empty($this->_type)) {
+          return $this->_type;
+      }
 
       if (empty($this->_image)) {
         if (function_exists('exif_imagetype')) {
@@ -960,7 +996,9 @@
 
         case 'imagick':
 
-          if (empty($this->_image)) $this->load();
+          if (empty($this->_image)) {
+              $this->load();
+          }
 
           if (empty($this->_image)) {
             trigger_error('Not a valid image object', E_USER_WARNING);

@@ -71,7 +71,9 @@
     <?php if ($products) { ?>
     <div class="products row half-gutter">
       <?php // 这里拿到数据通过draw_listing_product 最后还是到views/listing_product。进行呈现。
-          foreach ($products as $product) echo functions::draw_listing_product($product, $product['listing_type']);
+          foreach ($products as $product) {
+              echo functions::draw_listing_product($product, $product['listing_type']);
+          }
           ?>
     </div>
     <?php } ?>

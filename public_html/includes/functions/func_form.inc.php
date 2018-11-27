@@ -516,7 +516,7 @@
             }
             $link = $option[2];
             $value_id = $option[3];
-            $style = "style='border-radius: 25px;width: 50px;height: 50px;background-color:".$option[0].";border:0px;'";
+            $style = "style='border-radius: 25px;width: 50px;height: 50px;background-color:".$option[0].";border:3px solid #86797d;'";
             $html .= '<a href="javascript:return;" class="product_color" '.$style.' pic_link= "'.WS_DIR_IMAGES.$link.'" name="'.$name.'"';
             $html.=' onclick="clickLinksOption(this,\'color_img\');"></a>'.PHP_EOL;
 

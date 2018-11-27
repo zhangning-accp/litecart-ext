@@ -79,9 +79,14 @@
           $main_thumbnail = $main_original;
           $main_thumbnail_2x = $main_original;
       } else {
-          $main_original = WS_DIR_IMAGES . $main_image;
-          $main_thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $main_image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
-          $main_thumbnail_2x = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $main_image, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+          // 这里如果后期是通过框架提供的上传，那么需要修改上传的逻辑，加上code才能正确显示，系统默认商品图是放在images目录下，
+          //但导入数据时是在images的目录下创建了一个product目录，同时用每个商品的code作为图片目录存放。
+//          $main_original = WS_DIR_IMAGES . $main_image;
+//          $main_thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $main_image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+//          $main_thumbnail_2x = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $main_image, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+          $main_original = WS_DIR_IMAGES."products/".$product['code']."/" . $main_image;
+          $main_thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT.$main_original, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+          $main_thumbnail_2x = functions::image_thumbnail(FS_DIR_HTTP_ROOT.$main_original, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim'));
       }
     $listing_product->snippets = array(
       'listing_type' => $listing_type,
@@ -192,7 +197,9 @@
 
     $pages = ceil($pages);
 
-    if ($pages < 2) return false;
+    if ($pages < 2) {
+        return false;
+    }
 
     if (empty($_GET['page']) || !is_numeric($_GET['page']) || $_GET['page'] < 1) {
         $_GET['page'] = 1;

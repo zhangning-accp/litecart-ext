@@ -378,6 +378,7 @@
     {
         //---------------------对于lc_products_images表，先删后增。这个不太合理，当有上百万的数据时，操作太平凡，同样采用product的方式---------------------
         $product_code = $product_info['code'];
+        processProductLocalImage($product_info);
         if (!isset($product_map[$product_code])) {// 只有map里没有此数据时才进行更新处理
             $product_id = $product_info['id'];
             if (!empty($product_info['image']) && !empty($product_id)) {
@@ -396,6 +397,52 @@
     }
 
     /**
+     * 处理本地上传的图片，凡是不是以http开始的路径，我们都视为是本地图片，这些图片需要放到压缩包里上传到服务器
+     * @param $product_info
+     */
+    function processProductLocalImage(&$product_info) {
+        //$DEFAULT_FOLDER = "D:/zip-test";
+        $TMP_FOLDER = UNZIP_DIR;// 最后的解压目录
+        $WEB_SITE_FOLDER = FS_DIR_HTTP_ROOT.WS_DIR_IMAGES."products/";
+        $WEB_SITE_COMMON_FOLDER = $WEB_SITE_FOLDER."common/";
+        $product_code = $product_info['code'];
+        $ws_links_dir = "products/".$product_code."/";
+        $product_web_folder = $WEB_SITE_FOLDER.$product_code."/";
+        if(!u_utils::exists($product_web_folder,false)) {// 如果网站目录下没有对应产品的图片目录，则创建该目录
+            u_utils::mkdirs($product_web_folder);
+        }
+        $images = $product_info['image'];
+        unset($product_info['image']);
+        foreach ($images as $image => $link) {
+            if(u_utils::startWith("http")) {
+                $product_info['image'][] = $link;
+            } else {
+                if (!empty($link)) { //1. 判断是否有link
+                    $tmp_link = UNZIP_DIR . $link;
+                    $link_parent = dirname($link, 1);// 构建目录层级结构
+                    $tmp_product_web_folder = $product_web_folder;
+                    if ($link_parent !== "\\" && $link_parent !== "." && $link_parent !== "..") {
+                        $tmp_product_web_folder = $tmp_product_web_folder . $link_parent . "/";
+                    }
+                    if (u_utils::exists($tmp_link)) {// 到解压目录下去找该文件，并将文件拷贝到网站的产品图片目录下
+                        if (!u_utils::exists($tmp_product_web_folder, false)) {//目录不存在则创建
+                            u_utils::mkdirs($tmp_product_web_folder);// 创建目录
+                        }
+                        if (!u_utils::exists($tmp_product_web_folder . basename($tmp_link))) {
+                            // 如果网站目录下没有同名文件，则拷贝过去，这里可能会有一个问题，就是文件名相同，但内容不同。
+                            $isCopy = copy($tmp_link, $tmp_product_web_folder . basename($tmp_link));
+                        }
+                        $product_info['image'][] = $ws_links_dir . $link;
+                    } else {// 如果解压目录里没有找到，则到对应的网站产品图片目录下去找
+                        if (u_utils::exists($tmp_product_web_folder . basename($tmp_link))) {
+                            $product_info['image'][] = $ws_links_dir . $link;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    /**
      * 处理资源情况
      * @param $product_info
      */
@@ -404,9 +451,7 @@
         $TMP_FOLDER = UNZIP_DIR;// 最后的解压目录
         $WEB_SITE_FOLDER = FS_DIR_HTTP_ROOT.WS_DIR_IMAGES."products/";
         $WEB_SITE_COMMON_FOLDER = $WEB_SITE_FOLDER."common/";
-
         // 检查解压目录下是否还有别的文件，如果有，默认认为是T-shirts 数据
-
         $product_code = $product_info['code'];
         $ws_links_dir = "products/".$product_code."/";
         $product_web_folder = $WEB_SITE_FOLDER.$product_code."/";
@@ -418,11 +463,17 @@
         $product_info["option_groups_array"] = $option_group_array;
         foreach ($option_group_array as $option_group_name => $values) {
             foreach($values as $value=>$link) {
+                //TODO: 这里还应该判断是不是http开头，如果是则
+                if(u_utils::startWith("http")) {
+                    $link = str_replace("@",":");//把@符号替换成 冒号
+                    $product_info["option_groups_array"][$option_group_name][$value] = $link;
+                    continue;
+                }
                 if(!empty($link)) { //1. 判断是否有links
 //                  是否是common开头
                     $isCommon = u_utils::startWith("common",$link);
                     if($isCommon) {
-                        echo $link."是common文件";
+//                        echo $link."是common文件";
                         $tmp_link = UNZIP_DIR.$link;
                         if(u_utils::exists($tmp_link)) {// 检查解压目录里是否有该文件
                             // 存在，复制到网站common目录
@@ -448,13 +499,14 @@
                             }
                         }
                     } else {// 非common资源
-                        echo $link."是非common资源</br>";
+//                        echo $link."是非common资源</br>";
 //                        $unzip_folder = $product_folder;
                         $tmp_link = UNZIP_DIR.$link;
 //                        $web_site_product = $WEB_SITE_FOLDER.$product_code."/";
                         $link_parent = dirname($link,1);// 构建目录层级结构
+                        $tmp_product_web_folder = $product_web_folder;
                         if($link_parent !== "\\" && $link_parent !== "." && $link_parent !== ".." ) {
-                            $tmp_product_web_folder = $product_web_folder.$link_parent."/";
+                            $tmp_product_web_folder = $tmp_product_web_folder.$link_parent."/";
                         }
 
                         // 到解压目录下去找该文件
@@ -629,10 +681,11 @@
             $sql = u_utils::builderSQL($sql, $parameter_values);
             $result = database::query($sql);
         } else {// 做更新操作，主要是更新links
-//            $sql = "update " . DB_TABLE_PRODUCTS_OPTIONS . " set links='%s',date_updated='%s' where id = %d";
-//            $parameter_values = array($link_value,$date, $id);
-//            $sql = u_utils::builderSQL($sql, $parameter_values);
-//            $result = database::query($sql);
+            $sql = "update " . DB_TABLE_PRODUCTS_OPTIONS . " set links='%s',date_updated='%s' 
+                    where product_id=%d and group_id=%d and value_id=%d";
+            $parameter_values = array($link_value,$date,$product_id, $group_id, $value_id);
+            $sql = u_utils::builderSQL($sql,$parameter_values);
+            $result = database::query($sql);
 
         }
         // ---------------------------- 处理库存  这里有数据问题 ------------------------------------------------
@@ -679,7 +732,6 @@
             //1. product_id group_id value_id parent_id parent_group_value_id links.
 //            $product_id,$value_id,$group_id,$link_value. 怎么获取到parent_id.
             // 根据product_id,$value_id,$group_id和$parentName得到 父亲的id。如果parentName和当前传入的grop_name 一样，则id为0
-            // 还要根据
             if($group_name !== $parentName && !empty($parentName)) {
                 //1. 根据product_id,$value_id,$group_id和$parentName得到 父亲的id。如果parentName和当前传入的grop_name 一样，则id为0
                 $sql = "select group_id from " . DB_TABLE_OPTION_GROUPS_INFO . " where name = '" . $parentName . "' limit 1";
@@ -694,18 +746,31 @@
                 $parentValueId = $result['id'];
             } else {
                 $parentId = 0;
+                $parentValueId = 0;
             }
             $date = u_utils::getYMDHISDate();
-            // update
-            $sql = "select count(1) as ";
-            // Insert 插入之前还是应该判断一下是否存在相同的id数据，如果存在则更新，否则会有很多重复数据
-            $sql = "insert into ".DB_TABLE_PRODUCT_OPTION_TREES . "(`product_id`,`group_id`,`value_id`,
+            // update 更新逻辑有问题，导致数据混乱，哪里出问题了？
+            $sql = "select count(1) as total from ".DB_TABLE_PRODUCT_OPTION_TREES.
+                " where product_id=%d and group_id=%d and value_id=%d and parent_group_id=%d and parent_value_id=%d";
+            $parameter_values = array($product_id,$group_id,$value_id,$parentId, $parentValueId);
+            $sql = u_utils::builderSQL($sql,$parameter_values);
+            $result = database::fetch(database::query($sql));
+            if($result['total'] > 0){
+                $date = u_utils::getYMDHISDate();
+                $sql = "update ".DB_TABLE_PRODUCT_OPTION_TREES." set links='%s', date_update='%s'
+                    where product_id=%d and group_id=%d and value_id=%d and parent_group_id=%d and parent_value_id=%d";
+                $parameter_values = array($link_value,$date,$product_id,$group_id,$value_id,$parentId,$parentValueId);
+                $sql = u_utils::builderSQL($sql,$parameter_values);
+                $result = database::query($sql);
+            } else {
+                // Insert 插入之前还是应该判断一下是否存在相同的id数据，如果存在则更新，否则会有很多重复数据
+                $sql = "insert into " . DB_TABLE_PRODUCT_OPTION_TREES . "(`product_id`,`group_id`,`value_id`,
                 `parent_group_id`, `parent_value_id`,`links`, `date_update`, `date_created` ) VALUES (
                 %d,%d,%d,%d,%d,'%s','%s','%s');";
-            $parameter_values = array($product_id,$group_id,$value_id,$parentId,$parentValueId,$link_value,$date,$date);
-            $sql = u_utils::builderSQL($sql,$parameter_values);
-            $result = database::query($sql);
-
+                $parameter_values = array($product_id,$group_id,$value_id,$parentId,$parentValueId,$link_value,$date, $date);
+                $sql = u_utils::builderSQL($sql, $parameter_values);
+                $result = database::query($sql);
+            }
         }
     }
     /**

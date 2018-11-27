@@ -65,6 +65,11 @@
     return $categories_query;
   }
 
+    /**
+     * 查询商品集合
+     * @param array $filter
+     * @return mixed
+     */
   function catalog_products_query($filter=array()) {
 
     if (!is_array($filter)) {

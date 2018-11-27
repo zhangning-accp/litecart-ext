@@ -1,4 +1,7 @@
 <?php
+    /**
+     * 分类产品列表查数据的部分
+     */
   if (empty($_GET['page']) || !is_numeric($_GET['page'])) $_GET['page'] = 1;
   if (empty($_GET['sort'])) $_GET['sort'] = 'price';
   if (empty($_GET['category_id'])) {
@@ -86,8 +89,9 @@
     );
 
     if (database::num_rows($products_query)) {
-      if ($_GET['page'] > 1) database::seek($products_query, $items_per_page * ($_GET['page'] - 1));
-
+      if ($_GET['page'] > 1) {
+          database::seek($products_query, $items_per_page * ($_GET['page'] - 1));
+      }
       $page_items = 0;
       while ($listing_product = database::fetch($products_query)) {
         switch($category->list_style) {
