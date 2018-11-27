@@ -1013,14 +1013,13 @@
           }
 
         case 'gd':
-
-          if (is_resource($this->_image)) $this->load();
-
+          if (is_resource($this->_image)) {
+              $this->load();
+          }
           if (!is_resource($this->_image)) {
             trigger_error('Not a valid image resource', E_USER_WARNING);
             return false;
           }
-
           return $this->_type;
       }
     }

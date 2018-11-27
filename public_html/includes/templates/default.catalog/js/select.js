@@ -15,7 +15,7 @@ var BuilderTemplate = {
     commonTemplate:" <label style='text-transform: uppercase;font-weight: bold;float:left'>{groupName}</label>" +
     "<input class='form-control' type='text' name='options[{groupName}]' value='' style='border:0px;width:auto;height:20px;float:right;color:#b2906a;font-weight:bold;float:left;' required='required'>" +
     "<div class='product_sizes_content' style='display: block;'><span data-info='product_color' class='product_sizes'>",
-    nodeColorA:"<a href='javascript:return;' class='product_color' style='border-radius:25px;width:50px;height:50px;border:3px solid #86797d;background-color:{colorValue};'" +
+    nodeColorA:"<a href='javascript:return;' class='product_color' style='background-color:{colorValue};'" +
     "pic_link='{link}' name='{groupName}' onclick='clickLinksOption(this,\"color_img\",\"options[{groupName}]\");'></a>",
     nodeOtherA:"<a href='javascript:return;' name='{groupName}' onclick='clickOption(this,\"options[{groupName}]\");" + "'>{optionValue}</a>",
     builderColorTemplate:function(groupName,link,colorValue) {
@@ -33,13 +33,16 @@ var BuilderTemplate = {
     endStr:" </span></div>"
 };
 
+/**
+ */
 function clickOption(obj,hidden_name) {
-    obj.style.background="#b2906a";
+    obj.style.background="#000000";
     obj.style.color = "#ffffff";
-    obj.style.border = "1px solid #b2906a";
+    obj.style.border = "1px solid #000000";
     obj.style.transition = "all .2s ease-in";
     obj.style.mozTransition = "all .2s ease-in";
     obj.style.webkitTransition = " all .2s ease-in";
+    obj.style.boxShadow = "0px 0px 2px #000000";
     var optionValue = obj.innerHTML;
     var hidden = $('input[name="'+ hidden_name +'"]');
     hidden.val(optionValue);
@@ -51,6 +54,7 @@ function clickOption(obj,hidden_name) {
             element.style.background="#FFFFFF";
             element.style.color = "#000000";
             element.style.border = "1px solid #AFAFAF";
+            element.style.boxShadow = "0 0 0px";
             element.style.transition = "all .2s ease-in";
             element.style.mozTransition = "all .2s ease-in";
             element.style.webkitTransition = "all .2s ease-in";
@@ -64,11 +68,10 @@ function clickOption(obj,hidden_name) {
  * @param hidden_name
  */
 function clickLinksOption(obj,viewImgId,hidden_name) {
-    var optionValue = obj.style.backgroundColor;
-    obj.style.border="3px solid #000000";
-
+    var optionValue = colorRGBtoHex(obj.style.backgroundColor);
+    obj.className = "product_color_click";
     var hidden = $('input[name="'+ hidden_name +'"]');
-    hidden.val(colorRGBtoHex(optionValue));
+    hidden.val(optionValue);
     var picLink = $(obj).attr("pic_link");
     if(picLink.length > 0) {
         $("#"+viewImgId).attr("src",picLink);
@@ -77,7 +80,7 @@ function clickLinksOption(obj,viewImgId,hidden_name) {
     var childer = parent.children('a');
     childer.each(function(index, element){
         if(element!= obj) {
-            element.style.border = "3px solid #86797d";
+            element.className="product_color";
         }
     });
 }
@@ -93,10 +96,17 @@ function clickStyle(obj,hidden_name) {
     child.each(function(index, element){
         if(element!= obj) {
             element.style.border="0px";
+            element.style.backgroundColor="";
+            element.style.boxShadow = "0 0 0px";
             // element.style.borderRadius="5px";
         }else {
-            element.style.border="2px solid #000000";
-            element.style.borderRadius="5px";
+            // element.style.border="1px solid #15b4c1";
+            var color = "#11285a";
+            element.style.backgroundColor=color;
+            element.style.boxShadow = "0px 0px 4px " + color;
+            element.style.transition = "all .2s ease-in";
+            element.style.mozTransition = "all .2s ease-in";
+            element.style.webkitTransition = "all .2s ease-in";
         }
     });
     //显示选中的值

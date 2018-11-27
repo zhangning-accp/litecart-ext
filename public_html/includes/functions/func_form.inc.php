@@ -487,9 +487,12 @@
             $link = str_replace(" ","%20",WS_DIR_IMAGES.$option[2]);
 //            "<div style='background-image: ".$option[2].";width: 50px;height: 60px;'> </div>";
 //            $html .= '<a href="javascript:return;" name="'.$name.'" onclick="clickOption(this,\''.$name.'\');">'.$option[0].'</a>'.PHP_EOL;
-            $html .=  "<div id_info='".$idInfo."' group_name='".$groupName."' title='".$option[1]."'";
-            $html .="style='backgroun-color:#ededed;background-image: url(".$link.");width: 50px;height: 60px;float: left;margin: 1px 3px 0px 0px;'";
-            $html.=' onclick="clickStyle(this,\''.$name.'\');"></div>'.PHP_EOL;
+            $html .="<div id_info='".$idInfo."' group_name='".$groupName."' title='".$option[1]."' ";
+            $html .="style='backgroun-color:#ededed;padding:1px;float: left;margin: 1px 1px 0px 0px;'";
+            $html.=' onclick="clickStyle(this,\''.$name.'\');">';
+            $html .=  "<img src='".$link."'/>";
+//            $html .="style='backgroun-color:#ededed;background-image: url(".$link.");width: 50px;height: 60px;float: left;margin: 1px 3px 0px 0px;'";
+            $html.='</div>'.PHP_EOL;
         }
 
         $html .= '  </span>';

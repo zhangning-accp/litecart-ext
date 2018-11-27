@@ -23,7 +23,9 @@
       //TODO: 订单页面 当前订单商品列表
       $thumbnail = $item['image'];
       if(!u_utils::startWith("http",$thumbnail)) {
-          $thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $thumbnail, 320, 320, 'FIT_USE_WHITESPACING');
+          $main_original = WS_DIR_IMAGES."products/".$item['code']."/" . $thumbnail;
+          $thumbnail = FS_DIR_HTTP_ROOT . $main_original;
+          $thumbnail = functions::image_thumbnail($thumbnail, 320, 320, 'FIT_USE_WHITESPACING');
       }
     $box_checkout_cart->snippets['items'][$key] = array(
       'product_id' => $item['product_id'],
@@ -47,5 +49,4 @@
       }
     }
   }
-
   echo $box_checkout_cart->stitch('views/box_checkout_cart');
