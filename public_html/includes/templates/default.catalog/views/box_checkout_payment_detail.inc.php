@@ -6,7 +6,7 @@
      * Time: 21:51
      * 订单支付卡号页面
      */
-    $pc_url = WS_DIR_TEMPLATES.'images/payment/pc/';
+    $pc_url = WS_DIR_TEMPLATES_DEFAULT_CATALOG_IMAGES.'payment/pc/';
     ?>
 <head>
     <style type="text/css">

@@ -27,8 +27,8 @@
         display: inline-block;
         margin: 0 3px 3px 0;
         padding: 0 5px 0 5px;
-        /*min-width: 50px;*/
-        width: auto;
+        min-width: 40px;
+        /*width: auto;*/
         height: 40px;
         background: #FFFFFF;
         color: #000000;

@@ -16,6 +16,8 @@
         $mail = new PHPMailer();
         //Tell PHPMailer to use SMTP
         $mail->isSMTP();
+
+        $mail->SMTPSecure = "ssl";
     //Enable SMTP debugging
     // 0 = off (for production use)
     // 1 = client messages
