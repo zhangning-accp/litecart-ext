@@ -741,53 +741,91 @@
             if (!empty($this->data['order_status_id'])) {
                 $order_status = reference::order_status($this->data['order_status_id'], $language_code);
             }
+/** 原框架内容*/
+//            $aliases = array(
+//                '%order_id' => $this->data['id'],
+//                '%firstname' => $this->data['customer']['firstname'],
+//                '%lastname' => $this->data['customer']['lastname'],
+//                '%billing_address' => nl2br(functions::format_address($this->data['customer'])),
+//                '%payment_transaction_id' => !empty($this->data['payment_transaction_id']) ? $this->data['payment_transaction_id'] : '-',
+//                '%shipping_address' => nl2br(functions::format_address($this->data['customer']['shipping_address'])),
+//                '%shipping_tracking_id' => !empty($this->data['shipping_tracking_id']) ? $this->data['shipping_tracking_id'] : '-',
+//                '%order_items' => null,
+//                '%payment_due' => currency::format($this->data['payment_due'], true, $this->data['currency_code'], $this->data['currency_value']),
+//                '%order_copy_url' => document::ilink('printable_order_copy', array('order_id' => $this->data['id'], 'checksum' => functions::general_order_public_checksum($this->data['id']), 'media' => 'print'), false, array(), $language_code),
+//                '%order_status' => !empty($order_status) ? $order_status->name : null,
+//                '%store_name' => settings::get('store_name'),
+//                '%store_url' => document::ilink('', array(), false, array(), $language_code),
+//            );
 
-            $aliases = array(
-                '%order_id' => $this->data['id'],
-                '%firstname' => $this->data['customer']['firstname'],
-                '%lastname' => $this->data['customer']['lastname'],
-                '%billing_address' => nl2br(functions::format_address($this->data['customer'])),
-                '%payment_transaction_id' => !empty($this->data['payment_transaction_id']) ? $this->data['payment_transaction_id'] : '-',
-                '%shipping_address' => nl2br(functions::format_address($this->data['customer']['shipping_address'])),
-                '%shipping_tracking_id' => !empty($this->data['shipping_tracking_id']) ? $this->data['shipping_tracking_id'] : '-',
-                '%order_items' => null,
-                '%payment_due' => currency::format($this->data['payment_due'], true, $this->data['currency_code'], $this->data['currency_value']),
-                '%order_copy_url' => document::ilink('printable_order_copy', array('order_id' => $this->data['id'], 'checksum' => functions::general_order_public_checksum($this->data['id']), 'media' => 'print'), false, array(), $language_code),
-                '%order_status' => !empty($order_status) ? $order_status->name : null,
-                '%store_name' => settings::get('store_name'),
-                '%store_url' => document::ilink('', array(), false, array(), $language_code),
-            );
+//            foreach ($this->data['items'] as $item) {
+//                $product = reference::product($item['product_id'], $language_code);
+//
+//                $options = array();
+//                if (!empty($item['options'])) {
+//                    foreach ($item['options'] as $k => $v) {
+//                        $options[] = $k . ': ' . $v;
+//                    }
+//                }
+//
+//                $aliases['%order_items'] .= (float)$item['quantity'] . ' x ' . $product->name . (!empty($options) ? ' (' . implode(', ', $options) . ')' : '') . "\r\n";
+//            }
 
-            foreach ($this->data['items'] as $item) {
-                $product = reference::product($item['product_id'], $language_code);
+//            $aliases['%order_items'] = trim($aliases['%order_items']);
 
-                $options = array();
-                if (!empty($item['options'])) {
-                    foreach ($item['options'] as $k => $v) {
-                        $options[] = $k . ': ' . $v;
+//            $subject = '[' . language::translate('title_order', 'Order', $language_code) . ' #' . $this->data['id'] . '] ' . language::translate('title_order_confirmation', 'Order Confirmation', $language_code);
+//
+//            $message = "Thank you for your purchase!\r\n\r\n"
+//                . "Your order #%order_id has successfully been created with a total of %payment_due for the following ordered items:\r\n\r\n"
+//                . "%order_items\r\n\r\n"
+//                . "A printable order copy is available here:\r\n"
+//                . "%order_copy_url\r\n\r\n"
+//                . "Regards,\r\n"
+//                . "%store_name\r\n"
+//                . "%store_url\r\n";
+/* 原框架内容结束*/
+//            $message = strtr(language::translate('email_order_confirmation', $message, $language_code), $aliases);
+            // 这里吧items里增加product img url。
+
+            $orderId = $this->data['id'];
+            $paymentDUE = currency::format($this->data['payment_due'], true, $this->data['currency_code'], $this->data['currency_value']);
+            $items = $this->data['items'];
+            foreach ( $items as $item=>$val) {
+                $productId = $val['product_id'];
+                $sql = "select image,code from ".DB_TABLE_PRODUCTS." where id = ".$productId." limit 1;";
+                $result = database::fetch(database::query($sql));
+                if(!empty($result)) {
+                    $image = $result['image'];
+                    $code = $result['code'];
+                    if(empty($image)) {
+                        $items[$item]['image']="";
+                    }else if(u_utils::startWith("http",$image)) {
+                        $items[$item]['image'] = $image;
+                    } else {
+//                        list($width, $height) = functions::image_scale_by_width(60, settings::get('product_image_ratio'));
+//
+//                        $main_original = WS_DIR_IMAGES."products/".$item['code']."/" . $thumbnail;
+//                        $thumbnail = FS_DIR_HTTP_ROOT . $main_original;
+//                        $thumbnail = functions::image_thumbnail($thumbnail, $width, $height, 'FIT_USE_WHITESPACING');
+                        list($width, $height) = functions::image_scale_by_width(60, settings::get('product_image_ratio'));
+                        $image =  FS_DIR_HTTP_ROOT.WS_DIR_IMAGES."products/".$code."/" . $image;
+                        $image = functions::image_thumbnail($image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+                        $serverUrl = $_SERVER['REQUEST_SCHEME']."://".$_SERVER['SERVER_NAME'];
+                        $items[$item]['image'] =  $serverUrl.$image;
+                        //$image = $store_url."" $image = $store_url.$image
+                        ///litecart/public_html/cache/2263c52a84a02a835c2d31850910725d23583377_60x60_fwb.png
                     }
                 }
-
-                $aliases['%order_items'] .= (float)$item['quantity'] . ' x ' . $product->name . (!empty($options) ? ' (' . implode(', ', $options) . ')' : '') . "\r\n";
             }
 
-            $aliases['%order_items'] = trim($aliases['%order_items']);
 
-            $subject = '[' . language::translate('title_order', 'Order', $language_code) . ' #' . $this->data['id'] . '] ' . language::translate('title_order_confirmation', 'Order Confirmation', $language_code);
+            $order_copy_url = document::ilink('printable_order_copy', array('order_id' => $this->data['id'], 'checksum' => functions::general_order_public_checksum($this->data['id']), 'media' => 'print'), false, array(), $language_code);
+            $store_name = settings::get('store_name');
+            $store_url = document::ilink('', array(), false, array(), $language_code);
 
-            $message = "Thank you for your purchase!\r\n\r\n"
-                . "Your order #%order_id has successfully been created with a total of %payment_due for the following ordered items:\r\n\r\n"
-                . "%order_items\r\n\r\n"
-                . "A printable order copy is available here:\r\n"
-                . "%order_copy_url\r\n\r\n"
-                . "Regards,\r\n"
-                . "%store_name\r\n"
-                . "%store_url\r\n";
-
-            $message = strtr(language::translate('email_order_confirmation', $message, $language_code), $aliases);
-
+            $message = u_utils::getEmailHTML($orderId,$paymentDUE,$items,$order_copy_url,$store_name,$store_url);
             $email = new email();
-            $email->sendEmail($recipient,$subject,$message);
+            $email->sendEmail($recipient,$store_name.": Order Confirmation",$message);
 //            $email->add_recipient($recipient)   // 收件人
 //                ->set_subject($subject)         // 主题
 //                ->add_body($message)            // 邮件内容

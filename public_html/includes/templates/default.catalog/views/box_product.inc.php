@@ -262,9 +262,11 @@
                 <?php if ($options) { ?>
                     <?php foreach ($options as $option) { ?>
                         <div class="form-group" id="<?php echo $option['name']; ?>">
-                            <label style="text-transform: uppercase;font-weight: bold;float:left"><?php echo $option['name']; ?>:</label>
-                            <?php echo functions::form_draw_input('options['.$option['name'].']',"","text","style='border:0px;width:auto;height:20px;float:right;color:#b2906a;font-weight:bold;float:left;' required='required'");?>
-                            <div class="product_sizes_content" style="display: block;">
+                            <div style="max-height: 20px;">
+                            <label style="text-transform: uppercase;font-weight: bold;"><?php echo $option['name']; ?>:</label>
+                            <?php echo functions::form_draw_input('options['.$option['name'].']',"","text","style='border:0px;max-width:180px;max-height:20px;color:#000000;font-weight:bold;display:inline;padding:0px;' required='required'");?>
+                            </div>
+                                <div class="product_sizes_content" style="display: block;">
                                 <?php echo $option['description'] ? '<div>' . $option['description'] . '</div>' : ''; ?>
                                         <?php echo $option['values']; ?>
                         </div>

@@ -25,7 +25,7 @@
         margin-left: -23px;
         border-radius: 23px;
         cursor: pointer;
-        background: url('{snippet:home_path}images/footer/title-arrows-grey-40x26.png') center no-repeat;
+        background: url('{snippet:template_path}images/footer/title-arrows-grey-40x26.png') center no-repeat;
         background-size: 50% auto;
         background-color: #e0e0e0;
     }
@@ -204,7 +204,7 @@
 
         /*img*/
         .Band-image, .Bands-item img, .Bands-item picture {
-            width: 100%;
+            width: 80%;
         }
 
         /*band header*/
@@ -310,7 +310,7 @@
             }
 </style>
 <div id="grid-title" class="heading-spacer">
-    <div class="scroll-down-circle"></div>
+<!--    <div class="scroll-down-circle"></div>-->
     <h1 style="font-weight: 800">Best Sellers</h1>
 </div>
 <!-- tab -->

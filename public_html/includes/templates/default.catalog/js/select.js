@@ -12,8 +12,8 @@ String.prototype.replaceAll = function(findStr,replaceStr){
     return this.replace(new RegExp(findStr,"gm"),replaceStr);
 }
 var BuilderTemplate = {
-    commonTemplate:" <label style='text-transform: uppercase;font-weight: bold;float:left'>{groupName}</label>" +
-    "<input class='form-control' type='text' name='options[{groupName}]' value='' style='border:0px;width:auto;height:20px;float:right;color:#b2906a;font-weight:bold;float:left;' required='required'>" +
+    commonTemplate:" <div style='max-height: 20px'><label style='text-transform: uppercase;font-weight: bold;'>{groupName}:</label>" +
+    "<input class='form-control' type='text' name='options[{groupName}]' value='' style='border:0px;max-width:180px;max-height:20px;color:#000000;font-weight:bold;display:inline;padding:0px;' required='required'></div>" +
     "<div class='product_sizes_content' style='display: block;'><span data-info='product_color' class='product_sizes'>",
     nodeColorA:"<a href='javascript:return;' class='product_color' style='background-color:{colorValue};'" +
     "pic_link='{link}' name='{groupName}' onclick='clickLinksOption(this,\"color_img\",\"options[{groupName}]\");'></a>",

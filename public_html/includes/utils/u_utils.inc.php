@@ -665,4 +665,104 @@
             }
             return $next;
         }
+        public static function getEmailHTML($orderNumber,$orderPrice,&$items=array(),$printURL,$storeName,$storeURL) {
+            $emailTemplate = "<!DOCTYPE html>
+                <html>
+                    <head>
+                        <meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no\">
+                        <meta name=\"apple-mobile-web-app-capable\" content=\"yes\" />    
+                        <meta name=\"apple-mobile-web-app-status-bar-style\" content=\"black-translucent\" />
+                        <meta name=\"format-detection\" content=\"telephone=yes\"/>
+                        <meta name=\"msapplication-tap-highlight\" content=\"no\" />
+                
+                        <meta charset=\"UTF-8\">
+                        
+                        <title>Order Confirmation</title>
+                        <style>
+                        *{
+                            font-family: Roboto, Arial, sans-serif;
+                        }
+                        #main{
+                            padding: 20px;
+                        }
+                        #thank{
+                            font-size: 20px;	
+                        }
+                        hr{
+                            border: 1px solid green;
+                        }
+                        span{
+                            color:#1e696c;
+                        }
+                        #end {
+                            
+                            border-radius: 2px;
+                            text-align: center;
+                            font-size: 20px;
+                            font-weight: 800;
+                            padding: 20px;
+                        }
+                        a{
+                            color:#3594e8;
+                            text-decoration: none;
+                        }
+                        #printable{
+                            border: 1px solid #40C778;
+                            border-radius: 4px;
+                            padding: 10px;
+                            text-align: center;
+                        }
+                        img{
+                        max-width: 60px;
+                        }
+                        td{
+                        	text-align: center;
+                        }
+                        </style>
+                    </head>
+                    <body>
+                        <div id=\"main\">
+                            <div id=\"thank\">
+                                Thank you for your purchase!
+                            </div>
+                            <div id=\"order_info\">
+                                Your order <span>".$orderNumber."</span> has successfully been created with a total of <span>".$orderPrice."</span> for the following ordered items:
+                            </div>
+                            <hr>
+                            <div id=\"table\">
+                                <table>
+                                    <thead>
+                                        <th>View</th>
+                                        <th>Quantity</th>
+                                        <th>Name</th>
+                                        <th>Options</th>
+                                    </thead>
+                                    <tbody>";
+            foreach ($items as $item=>$value) {
+                $option = "(";
+                foreach ($value['options'] as $k=>$v) {
+                    $option.=$k.":".$v.",";
+                }
+                $option = rtrim($option,",");
+                $option .= ")";
+                $tr = "<tr><td><img src='".$value['image']."'></td><td>".$value['quantity']."</td><td>".$value['name']."</td><td>".$option."</td></tr>";
+                $emailTemplate.=$tr;
+            }
+            $emailTemplate .= "</tbody>
+                                </table>
+                            </div>
+                            <hr>
+                            <div id=\"printable\">A printable order copy is available here: <a href='".$printURL."'>Printable order</a></div>
+                            
+                            <div id=\"end\">
+                                Thank you for choosing <a href='".$storeURL."'>".$storeName."</a>
+                            </div>
+                            <!--[if IE]>
+                                
+                            <![endif]-->
+                        </div>
+                    </body>
+                </html>";
+            return $emailTemplate;
+        }
     }
