@@ -803,17 +803,12 @@
                         $items[$item]['image'] = $image;
                     } else {
 //                        list($width, $height) = functions::image_scale_by_width(60, settings::get('product_image_ratio'));
-//
-//                        $main_original = WS_DIR_IMAGES."products/".$item['code']."/" . $thumbnail;
-//                        $thumbnail = FS_DIR_HTTP_ROOT . $main_original;
-//                        $thumbnail = functions::image_thumbnail($thumbnail, $width, $height, 'FIT_USE_WHITESPACING');
-                        list($width, $height) = functions::image_scale_by_width(60, settings::get('product_image_ratio'));
-                        $image =  FS_DIR_HTTP_ROOT.WS_DIR_IMAGES."products/".$code."/" . $image;
-                        $image = functions::image_thumbnail($image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
-                        $serverUrl = $_SERVER['REQUEST_SCHEME']."://".$_SERVER['SERVER_NAME'];
-                        $items[$item]['image'] =  $serverUrl.$image;
-                        //$image = $store_url."" $image = $store_url.$image
-                        ///litecart/public_html/cache/2263c52a84a02a835c2d31850910725d23583377_60x60_fwb.png
+//                        $image =  FS_DIR_HTTP_ROOT.WS_DIR_IMAGES."products/".$code."/" . $image;
+//                        $image = functions::image_thumbnail($image, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+//                        $serverUrl = $_SERVER['REQUEST_SCHEME']."://".$_SERVER['SERVER_NAME'];
+//                        $items[$item]['image'] =  $serverUrl.$image;
+                        $image = u_utils::image_thumbnail($image,$code,60,true);
+                        $items[$item]['image'] = $image;
                     }
                 }
             }

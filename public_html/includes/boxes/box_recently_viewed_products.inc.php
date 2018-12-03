@@ -34,11 +34,9 @@
   foreach($recently_viewed_products as $product) {
       //TODO: 前端首页左边 最近浏览的商品信息
       $thumbnail = $product['image'];
-      if(!u_utils::startWith("http",$thumbnail)) {
-//          $original = WS_DIR_IMAGES . $image;
-          $thumbnail = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $thumbnail, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
-//          $thumbnail_2x = functions::image_thumbnail(FS_DIR_HTTP_ROOT . WS_DIR_IMAGES . $image, $width*2, $height*2, settings::get('product_image_clipping'), settings::get('product_image_trim'));
-      }
+//      if(!u_utils::startWith("http",$thumbnail)) {
+          $thumbnail = u_utils::image_thumbnail($thumbnail,$product['code'],$width);
+//     }
     $box_recently_viewed_products->snippets['products'][] = array(
       'id' => $product['id'],
       'name' => $product['name'],

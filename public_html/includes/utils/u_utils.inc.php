@@ -765,4 +765,27 @@
                 </html>";
             return $emailTemplate;
         }
+
+        /**
+         * 获得站内image的图片路径。该方法会根据传入的路径决定是否生成完整的访问路径。如果传入的imagePath带有http或https则返回原路径，
+         * 否则视为本地图片会根据参数不同返回缓存文件的完整的web路径。
+         * @param $imagePath。 imagePath相对路径(数据库存放的数据)
+         * @param $productCode 商品的code。
+         * @param bool $isHttpURL 是否要添加http路径.如果为true，则生成的路径是http://xxxxx.否则就是/xx/xxxx
+         * @return string 返回系统内路径或系统外访问路径
+         */
+        public static function image_thumbnail($imagePath,$productCode,$imageWidth=60,$isHttpURL = false) {
+
+            if(!self::startWith("http",$imagePath)) {
+                list($width, $height) = functions::image_scale_by_width($imageWidth, settings::get('product_image_ratio'));
+                $imagePath = FS_DIR_HTTP_ROOT.WS_DIR_IMAGES."products/".$productCode."/" . $imagePath;
+                $imagePath = functions::image_thumbnail($imagePath, $width, $height, settings::get('product_image_clipping'), settings::get('product_image_trim'));
+                if($isHttpURL === true) {
+                    $serverUrl = $_SERVER['REQUEST_SCHEME']."://".$_SERVER['SERVER_NAME'];
+                    $imagePath = $serverUrl.$imagePath;
+                }
+            }
+            return $imagePath;
+
+        }
     }

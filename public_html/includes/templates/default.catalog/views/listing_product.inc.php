@@ -1,7 +1,7 @@
 <?php
     /** ------------------------------------------------
      *   前端网站首页商品列表的view，该php是某个产品的显示。如果有100个产品，此页面会被执行100次，
-     *   该页面的数据来自
+     *   该页面的数据来自 public_html/pages/category.inc.php
      */
 ?>
     <script type="text/javascript">
