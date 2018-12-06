@@ -31,13 +31,13 @@
          */
         public function options($items, $subtotal, $tax, $currency_code, $customer) {
             return array(
-                'title' => 'My Payment module',
+                'title' => 'Pay with Credit Card',
                 'options' => array(
                     array(
                         'id' => 'method1',
-                        'icon' => 'images/payment/mymodule-method1.png',
-                        'name' => 'Method 1',
-                        'description' => 'Select this option for method 1.',
+                        'icon' => 'images/payment/paymentus_logo-gold.jpg',
+                        'name' => 'Method',
+                        'description' => 'Select this option for method',
                         'fields' => '',
                         'cost' => 0,
                         'tax_class_id' => 0,

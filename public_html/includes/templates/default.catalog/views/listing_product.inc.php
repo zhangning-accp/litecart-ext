@@ -18,7 +18,10 @@
         <div class="product column" data-id="<?php echo $product_id; ?>"
              data-name="<?php echo htmlspecialchars($name); ?>"
              data-price="<?php echo currency::format_raw($campaign_price ? $campaign_price : $regular_price); ?>" onmouseenter="productMouseEnter(this,true)" onmouseleave="productMouseEnter(this,false)">
-            <a class="link"<?php echo !empty(document::$settings['product_modal_window']) ? ' data-toggle="lightbox" data-require-window-width="768"' : ''; ?>
+            <a class="link"<?php
+                // 加上 data-toggle="lightbox" 点击是会弹出一个商品详情对话框，不加则直接进入到商品页面。
+                echo !empty(document::$settings['product_modal_window']) ? ' data-require-window-width="768"' : '';
+                ?>
                href="<?php echo htmlspecialchars($link) ?>">
                 <div class="image-wrapper">
                     <img class="image img-responsive" src="<?php echo htmlspecialchars($image['thumbnail']); ?>"

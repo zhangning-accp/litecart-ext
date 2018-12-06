@@ -1,3 +1,8 @@
+<?php
+    /**
+     * System categories menu. 数据来自public_html/includes/boxes/box_site_menu.inc.php
+     */
+?>
 <style>
     #headers .top_header_container{
         position: relative;
@@ -62,7 +67,7 @@
         display: block;
         content: "";
         width: 100%;
-        height: 24px;
+        /*height: 24px;*/
         background: #000;
         position: absolute;
         bottom: -21px;
@@ -139,7 +144,9 @@
         float: left;
         width: auto;
         padding: 34px 30px 28px 5px;
-        font-size: 14px;
+        /*font-size: 14px;*/
+        font: 16px/1.5 Roboto,Arial,sans-serif;
+        font-weight:900;
         text-transform: uppercase;
         box-sizing: border-box;
         background: #fff;
@@ -252,9 +259,10 @@
         display: inline-block;
         float: none;
         color: #666;
-        font-size: 18px;
-        font-weight: 700;
-        text-transform: uppercase;
+        /*font-size: 16px;*/
+        font: 16px/1.5 Roboto, Arial, sans-serif;
+        /*font-weight: 700;*/
+        /*text-transform: uppercase;*/
         padding: 30px 0;
         margin: 0 20px;
         width: auto;
@@ -335,8 +343,9 @@
         list-style-position:inside
     }
     #ex_nav_2 .merch-links ul h2 {
-        text-transform:uppercase;
-        font-size:14px;
+        /*text-transform:uppercase;*/
+        /*font-size:14px;*/
+        font: 14px/1.5 Roboto, Arial, sans-serif;
         margin-bottom:5px
     }
     #ex_nav_2 .merch-links ul li a {
@@ -490,10 +499,10 @@
         float: right;
         margin-top: 4px;
     }
-    .float-left{
-        float: left!important;
-        margin-right: 10px;
-    }
+    /*.float-left{*/
+        /*float: left!important;*/
+        /*margin-right: 10px;*/
+    /*}*/
     #app-categories{
         display: none;
     }
@@ -762,7 +771,7 @@
                 <a class="screenreader open_menu" href="javascript:void(0);" title="Open View Product Categories Menu">Open View Product Categories Menu</a>
             </div>
             <div class="header_nav_item header_nav_item__link" style="padding-right: 0px">
-                <a href="#footer_big_links" manual_cm_sp="TopNav2-_-Stores-_-findastore" title="Find a Champs Store">HELP</a>
+                <a href="#footer_big_links" manual_cm_sp="TopNav2-_-Stores-_-findastore" title="Find a Champs Store">Help</a>
             </div>
             <div id="header_login" class="header_nav_item header_login guest" title="Log In or Register">
                 <a href="#" rel="nofollow" title="Log In or Register"></a>

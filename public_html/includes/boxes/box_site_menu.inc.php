@@ -1,5 +1,7 @@
 <?php
-
+    /**
+     * public_html/includes/templates/default.catalog/views/box_site_menu.inc.php 的数据来源
+     */
   $box_site_menu_cache_id = cache::cache_id('box_site_menu', array(
     'language',
   ));

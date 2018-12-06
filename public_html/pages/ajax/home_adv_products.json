@@ -1,0 +1,157 @@
+{
+  "sliders":[
+    {
+      "pc_image":"",
+      "mobile_image":"",
+      "product_link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+      "descriptions":["adidas Ultra Boost","Shop adidas"]
+    }],
+  "items":[
+    {
+      "head":"Give your game an extra push.",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T120218_Hero_adidasUltraboostCollege.jpg",
+        "mobile_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T120218_mobile_Hero_adidasUltraboostCollege_V1.gif",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":["adidas Ultra Boost","Shop adidas"]
+      }],
+      "contents":["adidas Ultra Boost","Shop adidas"]
+    },
+    {
+      "head":"Get the look now. Get the kicks later.",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T120118_1up_ConcordApparel_v1.jpg",
+        "mobile_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T120118_mobile_1up_ConcordApparel.jpg",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":["adidas Ultra Boost","Shop adidas"]
+      }],
+      "contents":["Prep for the Jordan XI 'Concord' drop with new gear.","Shop Jordan Apparel"]
+    },
+    {
+      "head":"Timberland x Champion",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T113018_1up_TimberlandxChampion.jpg",
+        "mobile_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T113018_mobile_1up_TimberlandxChampion.jpg",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":[""]
+      }],
+      "contents":["Shop Timberland x Championl"]
+    },
+    {
+      "head":"Do work.",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/2up/CH_T120118_2up_NikeVapormaxUltra.jpg",
+        "mobile_image":"",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":[""]
+      }],
+      "contents":["Nike LeBron 16 | Nike Kyrie 4 Low","Shop Nike"]
+    },
+    {
+      "head":"Fresh air that lets you breathe.",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/2up/CH_T120118_2up_NikeVapormaxUltra (1).jpg",
+        "mobile_image":"",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":[""]
+      }],
+      "contents":["Women's Nike VaporMax Flyknit ","Shop VaporMax"]
+    },
+    {
+      "head":"Limited Edition House Of Highlights X CSG Capsule",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T120118_1up_HouseofHighlights_V1_greenhoodiev2.jpg",
+        "mobile_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T120118_mobile_1up_HouseofHighlightsv2.jpg",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":[""]
+      }],
+      "contents":["SHOP COLLECTION"]
+    },
+    {
+      "head":"Refresh Your Game",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T112118_Hero_RYGv2.jpg",
+        "mobile_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T112118_mobile_Hero_RYG.jpg",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":[""]
+      }],
+      "contents":["Shop Collection"]
+    },
+    {
+      "head":"New Shoe Releases",
+      "images":[{
+        "pc_image":"https://images.footlocker.com/is/image/EBFL2/20657005?wid=298&hei=298&fmt=png-alpha",
+        "mobile_image":"",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":["Under Armour","Curry 5"]
+      },
+        {
+          "pc_image":"https://images.footlocker.com/is/image/EBFL2/30690601?wid=298&hei=298&fmt=png-alpha",
+          "mobile_image":"",
+          "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+          "descriptions":["Jordan","Retro 12"]
+        },
+        {
+          "pc_image":"https://images.footlocker.com/is/image/EBFL2/2918901?wid=298&hei=298&fmt=png-alpha",
+          "mobile_image":"",
+          "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+          "descriptions":["Nike","Kyrie 5"]
+        },
+        {
+          "pc_image":"https://images.footlocker.com/is/image/EBFL2/36799601?wid=298&hei=298&fmt=png-alpha",
+          "mobile_image":"",
+          "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+          "descriptions":["PUMA","Thunder Electric"]
+        },
+        {
+          "pc_image":"https://images.footlocker.com/is/image/EBFL2/42843601?wid=298&hei=298&fmt=png-alpha",
+          "mobile_image":"",
+          "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+          "descriptions":["Nike","Air VaporMax Flyknit 2"]
+        },
+        {
+          "pc_image":"https://images.footlocker.com/is/image/EBFL2/BB4077?wid=298&hei=298&fmt=png-alpha",
+          "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+          "descriptions":["adidas","Ultra Boost"]
+        }],
+      "contents":[""]
+    },
+    {
+      "head":"Trending on the Gram",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/4up/CH_T112718_4up_ChampionSlides.jpg",
+        "mobile_image":"",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":["Shop Champion Slides"]
+      },
+        {
+          "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/4up/CH_T112718_4up_Fila.jpg",
+          "mobile_image":"",
+          "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+          "descriptions":["Shop Fila Disruptor II"]
+        },
+        {
+          "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/4up/CH_T112718_4up_TimberlandChampion.jpg",
+          "mobile_image":"",
+          "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+          "descriptions":["Shop Timberland x Champion"]
+        },
+        {
+          "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/4up/CH_T112718_4up_Vapormax.jpg",
+          "mobile_image":"",
+          "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+          "descriptions":["Shop Nike Air Vapormax Plus"]
+        }],
+      "contents":[""]
+    },
+    {
+      "head":"Ill-ustrated: Featuring Champion x Timberland 'Sport Pack'",
+      "images":[{
+        "pc_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T112918_Hero_Illustrated.jpg",
+        "mobile_image":"https://www.champssports.com/content/dam/flincfoundation/champssports/homepage-images/hero/CH_T112918_mobile_Hero_Illustrated.jpg",
+        "link":"http://45.76.15.157/litecart/public_html/en/arizona-cardinals-c-5507/",
+        "descriptions":[""]
+      }],
+      "contents":["SHOP THE KICKS"]
+    }]
+}

@@ -77,7 +77,8 @@
 <!-- Footer -->
 {snippet:foot_tags}
 <script src="{snippet:template_path}js/app.js"></script>
-\<script src="{snippet:template_path}js/select.js"></script>
+<script src="{snippet:template_path}js/select.js"></script>
+<script src="{snippet:template_path}js/art-template-web.js"></script>
 {snippet:javascript}
 
 <style type="text/css">

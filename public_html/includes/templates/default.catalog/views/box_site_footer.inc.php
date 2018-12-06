@@ -1,3 +1,8 @@
+<?php
+    /**
+     * 系统底部信息
+     */
+?>
 <style type="text/css">
     #footer_wrapper {
         display: inline-block;
