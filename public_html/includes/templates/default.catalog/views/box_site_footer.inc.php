@@ -86,7 +86,7 @@
         height: 100%;
         width: 110px;
         float: left;
-        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
+        background: url('{snippet:template_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -47px -43px;
     }
 
@@ -95,7 +95,7 @@
         height: 100%;
         width: 110px;
         float: left;
-        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
+        background: url('{snippet:template_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -94px -43px;
     }
 
@@ -104,7 +104,7 @@
         height: 100%;
         width: 110px;
         float: left;
-        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
+        background: url('{snippet:template_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -1px -43px;
     }
 
@@ -113,7 +113,7 @@
         height: 100%;
         width: 110px;
         float: left;
-        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
+        background: url('{snippet:template_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -1px -90px;
     }
 
@@ -122,7 +122,7 @@
         height: 100%;
         width: 50px;
         float: left;
-        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
+        background: url('{snippet:template_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -47px -90px;
     }
 
@@ -131,7 +131,7 @@
         height: 100%;
         width: 110px;
         float: left;
-        background: url('{snippet:home_path}images/footer/cs-master-sprite.png') no-repeat;
+        background: url('{snippet:template_path}images/footer/cs-master-sprite.png') no-repeat;
         background-position: -94px -90px;
     }
 
@@ -215,58 +215,9 @@
         </div>
     </div>
 
-    <div id="footer_big_links">
-        <ul>
-            <li>
-                <h3>Email Exclusives</h3>
-                <p>Sign up now to receive special offers &amp; exclusives!</p>
-                <a href="mailto:store@email.com" target="_blank" title="Sign Up For Email Exclusives"><img
-                            src="https://www.champssports.com/ns/common/champssports/images/email-icon.png" alt="">store@email.com</a>
-            </li>
-            <li>
-                <h3>Champs Sports<br>Gift Cards</h3>
-                <p>Never Expires/No Fees. Even if the card says otherwise.</p>
-                <a href="mailto:store@email.com"
-                   manual_cm_sp="Footer2-_-Stayconnected-_-Champssportsgiftcards" title="Champs Sports Gift Cards">
-                    <img src="https://www.champssports.com/ns/common/champssports/images/giftcard-icon.png" alt="">store@email.com</a>
-            </li>
-            <li>
-                <h3>Contact Us</h3>
-                <p>Available 24 hours a day,<br>7 days a week.</p>
-                <a href="mailto:store@email.com"
-                   manual_cm_sp="Footer2-_-Stayconnected-_-Contactus" title="Contact Us 1.800.991.6813"><span
-                            class="phone-number">store@email.com</span></a>
-                <p></p>
-            </li>
-<!--            <li>-->
-<!--                <h3>Live Chat</h3>-->
-<!--                <a title="Live Chat" href="#"-->
-<!--                   onclick="cmCreateConversionEventTag('Live Chat',1,'Chat',0); cmCreateConversionEventTag('Live Chat',2,'Chat',0); startChatAndCobrowse(gIChannel, gServer, gAttachedData, prefillValues, agentOnlyValues, bEnterOnQueuePage); return false;">Chat-->
-<!--                    Now</a>-->
-<!--            </li>-->
-        </ul>
-    </div>
+    <div id="footer_big_links"></div>
 </hr>
-    <div id="footer_links">
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Orderinghelp" title="Ordering Help">Ordering
-            Help</a>
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Shippinginfo" title="Shipping Info">Shipping
-            Info</a>
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Sizinghelp" title="Sizing Help">Sizing Help</a>
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Returnsandexchanges"
-           title="Returns &amp; Exchanges">Returns &amp; Exchanges</a>
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Affiliates" title="Affiliates">Affiliates</a>
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Storelocator"
-           title="Champs Sports Store Locator">Store Locator</a>
-        <a href="javascript:return;" title="Contact Information">Contact Us</a>
-        <a href="javascript:return;" title="Job Opportunities" target="_blank">Job Opportunities</a>
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Privacystatement" title="Privacy Statement">Privacy
-            Statement</a>
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Termsofuse" title="Terms of Use"> Terms of
-            Use</a>
-        <a href="javascript:return;" target="_blank" title="About Us">About Us</a>
-        <a href="javascript:return;" manual_cm_sp="Footer2-_-Textlinks-_-Sitemap" title="Sitemap">Sitemap</a>
-    </div>
+    <div id="footer_links"></div>
 
     <p style="color: #FFFFFF;font-weight: bold;text-align: center">© 2018 Footlocker.com, Inc. All rights reserved.
         Prices subject to change without notice. Products shown may not be available in our stores. (<a
@@ -276,6 +227,43 @@
         <img src="<?php document::ilink(WS_DIR_IMAGES . 'logotype.png') ?>" alt="">
     </div>
 </div>
+
+<script id="footer_script_big_links" type="text/html">
+    <ul>
+        {{each items item index}}
+            {{if index < 3}}
+                <li>
+                <h3>{{item.head}}</h3>
+                <p>{{item.contents[0]}}</p>
+                <a href="{{item.images[0].link}}" target="_blank" title="{{item.contents[2]}}"><img
+                        src="{{item.images[0].pc_image}}" alt="">{{item.contents[1]}}</a>
+                </li>
+            {{/if}}
+        {{/each}}
+    </ul>
+</script>
+<script id="footer_script_links" type="text/html">
+        {{each items item index}}
+            {{if index > 2}}
+                <a href="{{item.images[0].link}}" manual_cm_sp="Footer2-_-Textlinks-_-Orderinghelp" title="{{item.head}}">{{item.head}}</a>
+            {{/if}}
+        {{/each}}
+</script>
+<script type="text/javascript">
+    var url = window.config.platform.url;
+    url = url.replace("en/","");
+    url += "pages/ajax/site_footer.json";
+    //发送ajax请求
+    $.post(url,function(data) {
+//        data = JSON.parse(data);
+        var  footerBigLinks= template('footer_script_big_links', data);
+        $("#footer_big_links").html(footerBigLinks);
+        var  footerLinks= template('footer_script_links', data);
+        $("#footer_links").html(footerLinks);
+    });
+</script>
+
+
 
 <!--<footer id="footer">-->
 <!---->

@@ -73,7 +73,9 @@
             bottom:0;
             height: 50px;
             width: 100%;
-            background-color: #b2906a;
+            background-color: #000000;
+            box-shadow: 0px 0px 2px #000000;
+            opacity: 0.9;
             color: #FFFFFF;
             font-family: Roboto, Arial, sans-serif;
             text-align: center;

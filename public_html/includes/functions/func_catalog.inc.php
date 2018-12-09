@@ -49,7 +49,14 @@
     return $subcategories;
   }
 
-  function catalog_categories_query($parent_id=0, $dock=null,$limit = 0) {
+    /**
+     * 查询分类
+     * @param int $parent_id 父类id
+     * @param null $dock 停靠选项，系统提供menu(以菜单形式)和tree(左边树)。默认是查tree(也就是)
+     * @param int $limit 如果limit < 0 则查出所有符合的数据，否则只查制定区间数据。 数据排序是按照priority asc和 name asc
+     * @return mixe
+     */
+  function catalog_categories_query($parent_id=0, $dock='tree',$limit = 0) {
 
           $sql = "select c.id, c.parent_id, c.image, ci.name, ci.short_description, c.priority, c.date_updated from " . DB_TABLE_CATEGORIES . " c
       left join " . DB_TABLE_CATEGORIES_INFO . " ci on (ci.category_id = c.id and ci.language_code = '" . database::input(language::$selected['code']) . "')
@@ -216,8 +223,8 @@
         ". (!empty($sql_where_prices) ? $sql_where_prices : null) ."
       )
       order by ". implode(",", $sql_outer_sort) ."
-      ". (!empty($filter['limit']) && (!empty($filter['sql_where']) || !empty($filter['product_name']) || !empty($filter['campaign']) || !empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : null) .";
-    ";
+      ". (!empty($filter['limit']) && (!empty($filter['sql_where']) || !empty($filter['product_name']) || !empty($filter['campaign']) || !empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : null) .
+        " limit 9135;";// 这里limit 9135 是后来加上的，为了避免某个分类下商品过多(比如18w条)导致内存溢出。作为一个不太好的解决方法，可能会引发其它有limit情况下的问题。目前还没有遇到 2018-12-7 22:22
     $products_query = database::query($query);
 
     return $products_query;

@@ -1,6 +1,6 @@
 <?php
     /**
-     * System categories menu. 数据来自public_html/includes/boxes/box_site_menu.inc.php
+     * System categories menu. data from public_html/includes/boxes/box_category_tree.inc.php
      */
 ?>
 <style>
@@ -390,6 +390,17 @@
         color: #86080b;
         text-decoration: none;
     }
+    #ex_nav_2 .merch-links .second-ul>a>h2{
+        color:#000000;
+    }
+    .merch-links {
+        border: 1px solid #F5F5DC;
+        box-shadow: 0 0 5px #F5F5DC,0 0 5px #F5F5DC;
+        /*background-color: #F5F5DC;*/
+    }
+    #ex_nav_2 .merch-links .second-ul>a>h2:hover{
+        color: #64048e;
+    }
     /*以下是手机端样式*/
     #app{
         overflow: scroll;
@@ -704,10 +715,10 @@
        * @param $item
        * @return string
        */
-      function create_li($item) {
-          $output = '<li><a id="'.$item['id'].'_li" href="'. htmlspecialchars($item['link']) .'">'.$item['title'].'</a></li>';
-          return $output;
-      }
+//      function create_li($item) {
+//          $output = '<li><a id="'.$item['id'].'_li" href="'. htmlspecialchars($item['link']) .'">'.$item['title'].'</a></li>';
+//          return $output;
+//      }
   }
   if (!function_exists("create_second_menu")) {
       /**
@@ -721,12 +732,11 @@
           if (!empty($item['subitems'])) {
               $output = '<div id="'. $item['id'] .'_div"><div class="merch-links">';
               foreach ($item['subitems'] as $subitem) {// 二级分类
-//                  $output .= create_li($subitem);
                   $output .= '<ul class="second-ul">
-                    <a id="'.$item['id'].'_li" href="'. htmlspecialchars($item['link']) .'"><h2>'. $subitem['title'] .'</h2></a>';
-                  foreach ($subitem['subitems'] as $threeSubItem) {
-                      $output .= create_li($threeSubItem);
-                  }
+                    <a id="'.$item['id'].'_li" href="'. htmlspecialchars($subitem['link']) .'"><h2>'. $subitem['title'] .'</h2></a>';
+//                  foreach ($subitem['subitems'] as $threeSubItem) {//三级分类
+//                      $output .= create_li($threeSubItem);
+//                  }
                   $output .= '</ul>';
               }
               $output .="</div></div>";
@@ -737,8 +747,8 @@
           return $output;
       }
   }
-  if (!function_exists("create_app_li")) {
-      function create_app_li($item) {
+  if (!function_exists("create_app_menu_item")) {
+      function create_app_menu_item($item) {// create moblie menu.
           $output = '<li id="app_li_'.$item['id'].'" class="c-header-navigation-drawer-panel__menu-item" ' ;
           if (!empty($item['subitems'])) {
              $output .= 'onclick = "show_child(this,1)"';
@@ -795,7 +805,7 @@
         <ul id="nav_categories">
             <div>
                 <?php
-                        foreach ($categories as $item) {// 一级分类
+                        foreach ($categories as $item) {// PC一级分类
                             $html = create_fisrt_menu($item);
                             echo $html;
                         }
@@ -807,14 +817,14 @@
     <div id="ex_nav_2">
         <?php
             foreach ($categories as $item) {
-                $html = create_second_menu($item);
+                $html = create_second_menu($item);// PC二级分类
                 echo $html;
             }
         ?>
     </div>
 </div>
 <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-<div id="app">
+<div id="app"><!--mobile menu-->
     <div id="app-search" class="js-pushdown app_search removed">
 
         <form name="search_form" enctype="application/x-www-form-urlencoded" accept-charset="UTF-8" action="<?php echo document::ilink('search')?>" method="get">
@@ -841,7 +851,7 @@
                         <ul>
                             <?php
                             foreach ($categories as $item) {
-                                $html = create_app_li($item);
+                                $html = create_app_menu_item($item);
                                 echo $html;
                             }
                             ?>

@@ -1,6 +1,13 @@
 <?php
     /**
      * //TODO:　点击左边分类时　右边的页面数据
+     * 分类的页面流程：
+     * http://localhost/litecart/public_html/en/nfl-c-303/arizona-cardinals-c-311/
+     *  ->public_html/index.php->public_html/pages/category.inc.php
+     *  ->public_html/includes/templates/default.catalog/pages/category.inc.php
+     *  ->public_html/includes/templates/default.catalog/views/column_left.inc.php
+     *  ->public_html/includes/boxes/box_category_tree.inc.php
+     *  ->public_html/includes/templates/default.catalog/views/box_category_tree.inc.php
      */
 ?>
 <style type="text/css">

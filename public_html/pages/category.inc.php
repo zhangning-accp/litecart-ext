@@ -1,6 +1,7 @@
 <?php
     /**
-     * 分类产品列表查数据的部分
+     * 对应分类下的页面，包含产品列表，相关子分类等查数据的地方
+     * 举例：
      */
   if (empty($_GET['page']) || !is_numeric($_GET['page'])) $_GET['page'] = 1;
   if (empty($_GET['sort'])) $_GET['sort'] = 'price';
@@ -27,6 +28,7 @@
   document::$snippets['title'][] = $category->head_title ? $category->head_title : $category->name;
   document::$snippets['description'] = $category->meta_description ? $category->meta_description : strip_tags($category->short_description);
 
+  /*面包屑导航*/
   breadcrumbs::add(language::translate('title_categories', 'Categories'), document::ilink('categories'));
   foreach (array_slice(functions::catalog_category_trail($category->id), 0, -1, true) as $category_id => $category_name) {
     breadcrumbs::add($category_name, document::ilink('category', array('category_id' => $category_id)));

@@ -250,16 +250,27 @@
       }
     }
 
+      /**
+       * 构建内部链接地址。
+       * @param null $route
+       * @param array $new_params
+       * @param null $inherit_params
+       * @param array $skip_params
+       * @param null $language_code
+       * @return mixed|string
+       */
     public static function ilink($route=null, $new_params=array(), $inherit_params=null, $skip_params=array(), $language_code=null) {
 
       if ($route === null) {
         $route = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        if ($inherit_params === null) $inherit_params = true;
+        if ($inherit_params === null) {
+            $inherit_params = true;
+        }
       } else {
         $route = WS_DIR_HTTP_HOME . $route;
       }
-
-      return link::create_link($route, $new_params, $inherit_params, $skip_params, $language_code);
+      $link = link::create_link($route, $new_params, $inherit_params, $skip_params, $language_code);
+      return $link;
     }
 
     public static function href_ilink($route=null, $new_params=array(), $inherit_params=null, $skip_params=array(), $language_code=null) {

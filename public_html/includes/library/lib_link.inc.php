@@ -37,13 +37,16 @@
 
     public static function create_link($document=null, $new_params=array(), $inherit_params=null, $skip_params=array(), $language_code=null) {
 
-      if (empty($language_code)) $language_code = language::$selected['code'];
+      if (empty($language_code)) {
+          $language_code = language::$selected['code'];
+      }
 
     // Parse link
       if ($document === null) {
         $parsed_link = self::explode_link(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-        if ($inherit_params === null) $inherit_params = true;
-
+        if ($inherit_params === null) {
+            $inherit_params = true;
+        }
       } else if ($document == '') {
         $parsed_link = self::explode_link(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 
@@ -60,7 +63,9 @@
       if ($inherit_params === null) $inherit_params = false;
 
     // Clean any double slashes
-      while (strpos($parsed_link['path'], '//')) $parsed_link['path'] = str_replace('//', '/', $parsed_link['path']);
+      while (strpos($parsed_link['path'], '//')) {
+          $parsed_link['path'] = str_replace('//', '/', $parsed_link['path']);
+      }
 
     // Remove index file from links
       $parsed_link['path'] = preg_replace('#/(index\.php)$#', '', $parsed_link['path']);
@@ -108,12 +113,18 @@
 
     public static function fullpath($path) {
 
-      if (substr($path, 0, 1) == '/') return $path;
+      if (substr($path, 0, 1) == '/') {
+          return $path;
+      }
 
-      if (substr($path, 0, 4) == 'http') return parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH);
+      if (substr($path, 0, 4) == 'http') {
+          return parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH);
+      }
 
       $dir = str_replace('\\', '/', dirname(parse_url($_SERVER['SCRIPT_NAME'], PHP_URL_PATH)));
-      if (substr($dir, -1) != '/') $dir .= '/';
+      if (substr($dir, -1) != '/') {
+          $dir .= '/';
+      }
 
       $path = $dir . $path;
 
@@ -133,11 +144,17 @@
       }
 
     // Remove duplicate slashes
-      while(strpos($path, '//') === true) str_replace('//', '/', $path);
+      while(strpos($path, '//') === true) {
+          str_replace('//', '/', $path);
+      }
 
       return $path;
     }
 
+      /**
+       * @param string $link
+       * @return mixed
+       */
     public static function explode_link($link='') {
 
       $parts = parse_url($link);
