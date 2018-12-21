@@ -106,7 +106,7 @@
       //'itemCondition' => 'http://schema.org/UsedCondition',
       //'availability' => 'http://schema.org/InStock',
     ),
-  );
+    );
 
   list($width, $height) = functions::image_scale_by_width(320, settings::get('product_image_ratio'));
     //TODO: 主图内容

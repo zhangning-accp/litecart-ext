@@ -223,8 +223,8 @@
         ". (!empty($sql_where_prices) ? $sql_where_prices : null) ."
       )
       order by ". implode(",", $sql_outer_sort) ."
-      ". (!empty($filter['limit']) && (!empty($filter['sql_where']) || !empty($filter['product_name']) || !empty($filter['campaign']) || !empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : null) .
-        " limit 9135;";// 这里limit 9135 是后来加上的，为了避免某个分类下商品过多(比如18w条)导致内存溢出。作为一个不太好的解决方法，可能会引发其它有limit情况下的问题。目前还没有遇到 2018-12-7 22:22
+      ". (!empty($filter['limit']) && (!empty($filter['sql_where']) || !empty($filter['product_name']) || !empty($filter['campaign']) || !empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : null) .";";
+        //" limit 9135;";// 这里limit 7135 是后来加上的，为了避免某个分类下商品过多(比如18w条)导致内存溢出。可能会引发其它有limit情况下的问题。目前还没有遇到 2018-12-7
     $products_query = database::query($query);
 
     return $products_query;

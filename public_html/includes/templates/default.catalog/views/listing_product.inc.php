@@ -5,9 +5,11 @@
      */
 ?>
     <script type="text/javascript">
+        /*Mouse enter product style*/
         function productMouseEnter(obj,isEnter) {
             if(isEnter) {
-                obj.style = "border:1px solid #A9A9A9;padding:5px 5px";
+                obj.style = "border:1px solid #A9A9A9;padding:5px 5px;box-shadow:0px 0px 5px;";
+
             } else {
                 obj.style = "border:0px; padding:0px 0px";
             }

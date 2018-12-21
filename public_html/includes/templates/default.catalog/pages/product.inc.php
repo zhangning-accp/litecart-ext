@@ -12,7 +12,9 @@
 
   <?php include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_TEMPLATE . 'views/box_product.inc.php'); ?>
 <!--    --><?php //include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_TEMPLATE . 'views/box_product_info_option.inc.php'); ?>
-  <?php include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_similar_products.inc.php'); ?>
+  <?php
+      // TODO: similar 非常消耗效率。需要看看有没有优化的空间。
+      include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_similar_products.inc.php'); ?>
 <!---->
 <!--  --><?php //include vmod::check(FS_DIR_HTTP_ROOT . WS_DIR_BOXES . 'box_also_purchased_products.inc.php'); ?>
 </main>

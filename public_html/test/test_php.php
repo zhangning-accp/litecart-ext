@@ -143,39 +143,45 @@
 //        }
 //        var_dump($product_info);
 //    }
-    $option_groups_array = array(
-            "Style"=> array("Classic"=>"products/common/Classic.jpg"),
-            "Color"=>array(
-                "#FFF"=>"products/48da8abf437a492eb24d4b3d2121ea49/Classic/WhiteTshirt.png",
-                "#efce1f"=>"products/48da8abf437a492eb24d4b3d2121ea49/Classic/DaisyTshirt.png",
-                "#d5ab47"=>"products/48da8abf437a492eb24d4b3d2121ea49/Classic/GoldTshirt.png",
-                "#50af72"=>"products/48da8abf437a492eb24d4b3d2121ea49/Classic/IrishGreenTshirt.png"
-            ),
-            "Size"=>array(
-                "X SM (Youth)"=>"",
-                "SM (Youth)"=>"",
-                "MED (Youth)"=>"",
-                "SM"=>"",
-                "MED"=>"",
-                "LG"=>"",
-                "XL"=>"",
-                "2XL"=>"",
-                "3XL"=>"",
-                "4XL"=>"",
-                "5XL"=>"",
-                "6XL"=>"")
-        );
+//    $option_groups_array = array(
+//            "Style"=> array("Classic"=>"products/common/Classic.jpg"),
+//            "Color"=>array(
+//                "#FFF"=>"products/48da8abf437a492eb24d4b3d2121ea49/Classic/WhiteTshirt.png",
+//                "#efce1f"=>"products/48da8abf437a492eb24d4b3d2121ea49/Classic/DaisyTshirt.png",
+//                "#d5ab47"=>"products/48da8abf437a492eb24d4b3d2121ea49/Classic/GoldTshirt.png",
+//                "#50af72"=>"products/48da8abf437a492eb24d4b3d2121ea49/Classic/IrishGreenTshirt.png"
+//            ),
+//            "Size"=>array(
+//                "X SM (Youth)"=>"",
+//                "SM (Youth)"=>"",
+//                "MED (Youth)"=>"",
+//                "SM"=>"",
+//                "MED"=>"",
+//                "LG"=>"",
+//                "XL"=>"",
+//                "2XL"=>"",
+//                "3XL"=>"",
+//                "4XL"=>"",
+//                "5XL"=>"",
+//                "6XL"=>"")
+//        );
+//
+//    if(!empty($option_groups_array)) {
+//        reset($option_groups_array);
+//        $rootOptionName = key($option_groups_array);// 拿到 Style
+//        $rootOptionValue = key($option_groups_array[$rootOptionName]); // 拿到Style
+//        echo $rootOptionValue;
+////        foreach ($array as $option_name=>$option_values) {
+////            $option_values = $array[$option_name];
+//////            $prev = u_utils::findArrayPrev($option_name,$array);
+////            echo "option_name:".$option_name.",prev:".$prev."</br>";
+////        }
+//    }
 
-    if(!empty($option_groups_array)) {
-        reset($option_groups_array);
-        $rootOptionName = key($option_groups_array);// 拿到 Style
-        $rootOptionValue = key($option_groups_array[$rootOptionName]); // 拿到Style
-        echo $rootOptionValue;
-//        foreach ($array as $option_name=>$option_values) {
-//            $option_values = $array[$option_name];
-////            $prev = u_utils::findArrayPrev($option_name,$array);
-//            echo "option_name:".$option_name.",prev:".$prev."</br>";
-//        }
-    }
+    $date = u_utils::getYMDHISDate();
+    echo "start...".$date;
 
+    echo passthru("mysql -uroot litecart_no_data <d:/sql-test/test.sql");
+    $date = u_utils::getYMDHISDate();
+    echo "end...".$date;
 ?>
