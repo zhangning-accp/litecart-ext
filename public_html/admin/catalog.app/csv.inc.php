@@ -749,7 +749,7 @@
                 $parentValueId = 0;
             }
             $date = u_utils::getYMDHISDate();
-            // update 更新逻辑有问题，导致数据混乱，哪里出问题了？
+            // update
             $sql = "select count(1) as total from ".DB_TABLE_PRODUCT_OPTION_TREES.
                 " where product_id=%d and group_id=%d and value_id=%d and parent_group_id=%d and parent_value_id=%d";
             $parameter_values = array($product_id,$group_id,$value_id,$parentId, $parentValueId);
