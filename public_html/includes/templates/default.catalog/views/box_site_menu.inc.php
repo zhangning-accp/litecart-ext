@@ -681,9 +681,9 @@
 
         foreach ($item['subitems'] as $subitem) {//遍历二级分类
           $output .= custom_draw_site_menu_item($subitem, $indent+1);
-          foreach($subitem['subitems'] as $threeSubItem) {// 遍历三级分类
-              $output .= custom_draw_site_menu_item($threeSubItem, $indent+2);
-          }
+//          foreach($subitem['subitems'] as $threeSubItem) {// 遍历三级分类
+//              $output .= custom_draw_site_menu_item($threeSubItem, $indent+2);
+//          }
         }
 
         $output .= '  </ul>' . PHP_EOL

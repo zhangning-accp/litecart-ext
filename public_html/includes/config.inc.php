@@ -19,7 +19,6 @@
   define('WS_DIR_INCLUDES',    WS_DIR_HTTP_HOME . 'includes/');
   define('WS_DIR_LOGS',        WS_DIR_HTTP_HOME . 'logs/');
   define('WS_DIR_PAGES',       WS_DIR_HTTP_HOME . 'pages/');
-  define('WS_DIR_TEST',   WS_DIR_HTTP_HOME  . 'test/');
 
   define('WS_DIR_BOXES',       WS_DIR_INCLUDES  . 'boxes/');
   define('WS_DIR_CLASSES',     WS_DIR_INCLUDES  . 'classes/');
@@ -30,10 +29,6 @@
   define('WS_DIR_REFERENCES',  WS_DIR_INCLUDES  . 'references/');
   define('WS_DIR_ROUTES',      WS_DIR_INCLUDES  . 'routes/');
   define('WS_DIR_TEMPLATES',   WS_DIR_INCLUDES  . 'templates/');
-
-  define('WS_DIR_TEMPLATES_DEFAULT_CATALOG',   WS_DIR_TEMPLATES  . 'default.catalog/');
-  define('WS_DIR_TEMPLATES_DEFAULT_CATALOG_IMAGES',   WS_DIR_TEMPLATES_DEFAULT_CATALOG  . 'images/');
-
 
 ######################################################################
 ## Database ##########################################################
@@ -82,7 +77,7 @@
   define('DB_TABLE_PRODUCTS',                          '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'products`');
   define('DB_TABLE_PRODUCTS_CAMPAIGNS',                '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'products_campaigns`');
   define('DB_TABLE_PRODUCTS_OPTIONS',                  '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'products_options`');
-  define('DB_TABLE_PRODUCT_OPTION_TREES',             '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'product_option_trees`');
+  define('DB_TABLE_PRODUCT_OPTION_TREES',              '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'product_option_trees`');
   define('DB_TABLE_PRODUCTS_OPTIONS_STOCK',            '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'products_options_stock`');
   define('DB_TABLE_PRODUCTS_IMAGES',                   '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'products_images`');
   define('DB_TABLE_PRODUCTS_INFO',                     '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'products_info`');
@@ -104,6 +99,7 @@
   define('DB_TABLE_USERS',                             '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'users`');
   define('DB_TABLE_ZONES',                             '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'zones`');
   define('DB_TABLE_ZONES_TO_GEO_ZONES',                '`'. DB_DATABASE .'`.`'. DB_TABLE_PREFIX . 'zones_to_geo_zones`');
+
 // Database tables (Add-ons)
   /* Your added tables here ... */
 
@@ -123,10 +119,6 @@
     ini_set('display_startup_errors', 'On');
     ini_set('display_errors', 'On');
   }
-// Files upload set
-//    ini_set('upload_max_filesize','50M');
-//    ini_set('post_max_size','100M');
-//    ini_set('memory_limit','200M');
-//    ini_set('upload_tmp_dir',FS_DIR_HTTP_ROOT . 'tmp');
+
 // Password Encryption Salt
-  define('PASSWORD_SALT', 'Srb11n33pI8ytijoZnCCo2iGDpt0jijSTwkDCNYVVymv6vUnx17MsI3telV92aoRiPkJOpc8Vz72eMQ3cLcoqXgevSzutubWXjTZCWLgEALvC9J0X1jLk98b9fpHerk0');
+  define('PASSWORD_SALT', 'RVuw36LQbfliQEpjoatLFHHqxfsyzEu5YEbgUKzp8AHX7rPEKSlApMkBUaWoS2WwprNeD1wXXdvOhEYYCWAvbsqisyITyd9SHTOwZcG1dTi5lGfa0X3avcCjdm01nDrZ');

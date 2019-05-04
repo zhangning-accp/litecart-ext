@@ -73,12 +73,12 @@
   }
 
     /**
-     * 查询商品集合
+     * 查询商品集合，测试sql优化的方法
      * @param array $filter
      * @return mixed
      */
   function catalog_products_query($filter=array()) {
-
+    $start = u_utils::getYMDHISDate();
     if (!is_array($filter)) {
         trigger_error('Invalid array filter for products query', E_USER_ERROR);
     }
@@ -112,7 +112,9 @@
     $filter['manufacturers'] = array_filter($filter['manufacturers']);
     $filter['product_groups'] = array_filter($filter['product_groups']);
 
-    if (empty($filter['sort'])) $filter['sort'] = 'popularity';
+    if (empty($filter['sort'])) {
+        $filter['sort'] = 'popularity';
+    }
 
     $sql_inner_sort = array();
     $sql_outer_sort = array();
@@ -180,7 +182,10 @@
       }
       $sql_where_prices = "$sql_andor (". ltrim($sql_where_prices, " or ") .")";
     }
-    //TODO:这条语句查询了商品相关的信息，已经将状态修改为 status=1.首页以及各个列表都只显示状态为1的商品。此处不负责搜索结果。
+    //TODO:这条语句需要优化。有两个问题：
+      //1. 当点击一个商品查找类似商品整整花了20s查询。需要优化执行时间按太长
+      //2. 某个分类下的商品列表如果过多还会导致内存不够(所有后面有limit，但是在某些情况下会导致有两个limit)，
+   //这条语句查询了商品相关的信息，已经将状态修改为 status=1.首页以及各个列表都只显示状态为1的商品。此处不负责搜索结果。
     $query = "
       select p.*, pi.name, pi.short_description, m.id as manufacturer_id, m.name as manufacturer_name, pp.price, pc.campaign_price, if(pc.campaign_price, pc.campaign_price, pp.price) as final_price". (($filter['sort'] == 'occurrences') ? ", " . $sql_select_occurrences : false) ."
       from (
@@ -224,12 +229,182 @@
       )
       order by ". implode(",", $sql_outer_sort) ."
       ". (!empty($filter['limit']) && (!empty($filter['sql_where']) || !empty($filter['product_name']) || !empty($filter['campaign']) || !empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : null) .";";
-        //" limit 9135;";// 这里limit 7135 是后来加上的，为了避免某个分类下商品过多(比如18w条)导致内存溢出。可能会引发其它有limit情况下的问题。目前还没有遇到 2018-12-7
-    $products_query = database::query($query);
+
+    //" limit 9135;";// 这里limit 7135 是后来加上的，为了避免某个分类下商品过多(比如18w条)导致内存溢出。可能会引发其它有limit情况下的问题。目前还没有遇到 2018-12-7
+    $query = rtrim($query,";");
+    if(strpos($query,"limit") === false) {
+        $query.=" limit 9135";
+    }
+      $query.=";";
+      $products_query = database::query($query);
+    $end = u_utils::getYMDHISDate();
 
     return $products_query;
   }
 
+    /**
+     * 查询商品集合,litecart 最初的方法。catalog_products_query
+     * @param array $filter
+     * @return mixed
+     */
+    function catalog_products_query_original($filter=array()) {
+        $start = u_utils::getYMDHISDate();
+        if (!is_array($filter)) {
+            trigger_error('Invalid array filter for products query', E_USER_ERROR);
+        }
+        if (empty($filter['categories'])) {
+            $filter['categories'] = array();
+        }
+        if (empty($filter['manufacturers'])) {
+            $filter['manufacturers'] = array();
+        }
+        if (empty($filter['products'])) {
+            $filter['products'] = array();
+        }
+        if (empty($filter['product_groups'])) {
+            $filter['product_groups'] = array();
+        }
+
+        if (!empty($filter['category_id'])) {
+            $filter['categories'][] = $filter['category_id'];
+        }
+        if (!empty($filter['manufacturer_id'])) {
+            $filter['manufacturers'][] = $filter['manufacturer_id'];
+        }
+        if (!empty($filter['product_group_id'])) {
+            $filter['product_groups'][] = $filter['product_group_id'];
+        }
+        if (!empty($filter['product_id'])) {
+            $filter['products'][] = $filter['product_id'];
+        }
+
+        $filter['categories'] = array_filter($filter['categories']);
+        $filter['manufacturers'] = array_filter($filter['manufacturers']);
+        $filter['product_groups'] = array_filter($filter['product_groups']);
+
+        if (empty($filter['sort'])) {
+            $filter['sort'] = 'popularity';
+        }
+
+        $sql_inner_sort = array();
+        $sql_outer_sort = array();
+
+        if (!empty($filter['campaigns_first'])) {
+            $sql_outer_sort[] = "if(pc.campaign_price, 0, 1)";
+        }
+
+        switch ($filter['sort']) {
+            case 'name':
+                $sql_outer_sort[] = "name asc";
+                break;
+            case 'price':
+                $sql_outer_sort[] = "final_price asc";
+                break;
+            case 'date':
+                $sql_inner_sort[] = "p.date_created desc";
+                $sql_outer_sort[] = "p.date_created desc";
+                break;
+            case 'occurrences':
+                $sql_outer_sort[] = "occurrences desc";
+                break;
+            case 'rand':
+                $sql_outer_sort[] = "rand()";
+                break;
+            case 'popularity':
+            default:
+                $sql_inner_sort[] = "(p.purchases / (datediff(now(), p.date_created)/7)) desc, (p.views / (datediff(now(), p.date_created)/7)) desc";
+                $sql_outer_sort[] = "(p.purchases / (datediff(now(), p.date_created)/7)) desc, (p.views / (datediff(now(), p.date_created)/7)) desc";
+                break;
+        }
+        if (!empty($filter['exclude_products']) && !is_array($filter['exclude_products'])) {
+            $filter['exclude_products'] = array($filter['exclude_products']);
+        }
+        $sql_andor = "and";
+        // Define match points
+        if ($filter['sort'] == 'occurrences') {
+            $sql_select_occurrences = "(0
+        ". (!empty($filter['product_name']) ? "+ if(pi.name like '%". database::input($filter['product_name']) ."%', 1, 0)" : false) ."
+        ". (!empty($filter['sql_where']) ? "+ if(". $filter['sql_where'] .", 1, 0)" : false) ."
+        ". (!empty($filter['categories']) ? "+ if(find_in_set('". implode("', categories), 1, 0) + if(find_in_set('", database::input($filter['categories'])) ."', categories), 1, 0)" : false) ."
+        ". (!empty($filter['keywords']) ? "+ if(find_in_set('". implode("', p.keywords), 1, 0) + if(find_in_set('", database::input($filter['keywords'])) ."', p.keywords), 1, 0)" : false) ."
+        ". (!empty($filter['manufacturers']) ? "+ if(p.manufacturer_id and p.manufacturer_id in ('". implode("', '", database::input($filter['manufacturers'])) ."'), 1, 0)" : false) ."
+        ". (!empty($filter['product_groups']) ? "+ if(find_in_set('". implode("', p.product_groups), 1, 0) + if(find_in_set('", database::input($filter['product_groups'])) ."', p.product_groups), 1, 0)" : false) ."
+        ". (!empty($filter['products']) ? "+ if(p.id in ('". implode("', '", database::input($filter['products'])) ."'), 1, 0)" : false) ."
+      ) as occurrences";
+            $sql_andor = "or";
+        }
+        $sql_where_product_groups = "";
+        if (!empty($filter['product_groups'])) {
+            $product_groups = array();
+            foreach ($filter['product_groups'] as $group_value) {
+                list($group,) = explode('-', $group_value);
+                $product_groups[$group][] = $group_value;
+            }
+            foreach ($product_groups as $group_value) {
+                $sql_where_product_groups .= "$sql_andor (find_in_set('". implode("', product_groups) or find_in_set('", $group_value) ."', product_groups))";
+            }
+        }
+        $sql_where_prices = "";
+        if (!empty($filter['price_ranges'])) {
+            foreach ($filter['price_ranges'] as $price_range) {
+                list($min,$max) = explode('-', $price_range);
+                $sql_where_prices .= " or (if(pc.campaign_price, pc.campaign_price, pp.price) >= ". (float)$min ." and if(pc.campaign_price, pc.campaign_price, pp.price) <= ". (float)$max .")";
+            }
+            $sql_where_prices = "$sql_andor (". ltrim($sql_where_prices, " or ") .")";
+        }
+        //TODO:这条语句需要优化。有两个问题：
+        //1. 当点击一个商品查找类似商品整整花了20s查询。需要优化执行时间按太长
+        //2. 某个分类下的商品列表如果过多还会导致内存不够(所有后面有limit，但是在某些情况下会导致有两个limit)，
+        //这条语句查询了商品相关的信息，已经将状态修改为 status=1.首页以及各个列表都只显示状态为1的商品。此处不负责搜索结果。
+        $query = "
+      select p.*, pi.name, pi.short_description, m.id as manufacturer_id, m.name as manufacturer_name, pp.price, pc.campaign_price, if(pc.campaign_price, pc.campaign_price, pp.price) as final_price". (($filter['sort'] == 'occurrences') ? ", " . $sql_select_occurrences : false) ."
+      from (
+        select p.id, p.code, p.sku, p.manufacturer_id, group_concat(ptc.category_id separator ',') as categories, p.keywords, p.product_groups, p.image, p.tax_class_id, p.quantity, p.views, p.purchases, p.date_created
+        from ". DB_TABLE_PRODUCTS ." p
+        left join ". DB_TABLE_PRODUCTS_TO_CATEGORIES ." ptc on (p.id = ptc.product_id)
+        where p.status = 1 
+          and (id
+          ". (!empty($filter['products']) ? "$sql_andor p.id in ('". implode("', '", database::input($filter['products'])) ."')" : null) ."
+          ". (!empty($filter['categories']) ? "$sql_andor ptc.category_id in (". implode(",", database::input($filter['categories'])) .")" : null) ."
+          ". (!empty($filter['manufacturers']) ? "$sql_andor manufacturer_id in ('". implode("', '", database::input($filter['manufacturers'])) ."')" : null) ."
+          ". (!empty($filter['keywords']) ? "$sql_andor (find_in_set('". implode("', p.keywords) or find_in_set('", database::input($filter['keywords'])) ."', p.keywords))" : null) ."
+          ". (!empty($sql_where_product_groups) ? $sql_where_product_groups : null) ."
+          ". (!empty($filter['purchased']) ? "$sql_andor p.purchases" : null) ."
+        )
+        and (p.date_valid_from <= '". date('Y-m-d H:i:s') ."')
+        and (year(p.date_valid_to) < '1971' or p.date_valid_to >= '". date('Y-m-d H:i:s') ."')
+        ". (!empty($filter['exclude_products']) ? "and p.id not in ('". implode("', '", $filter['exclude_products']) ."')" : null) ."
+        group by ptc.product_id
+        ". ((!empty($sql_inner_sort) && !empty($filter['limit'])) ? "order by " . implode(",", $sql_inner_sort) : null) ."
+        ". ((!empty($filter['limit']) && empty($filter['sql_where']) && empty($filter['product_name']) && empty($filter['product_name']) && empty($filter['campaign']) && empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : "") ."
+      ) p
+      left join ". DB_TABLE_PRODUCTS_INFO ." pi on (pi.product_id = p.id and pi.language_code = '". language::$selected['code'] ."')
+      left join ". DB_TABLE_MANUFACTURERS ." m on (m.id = p.manufacturer_id)
+      left join (
+        select product_id, if(`". database::input(currency::$selected['code']) ."`, `". database::input(currency::$selected['code']) ."` / ". (float)currency::$selected['value'] .", `". database::input(settings::get('store_currency_code')) ."`) as price
+        from ". DB_TABLE_PRODUCTS_PRICES ."
+      ) pp on (pp.product_id = p.id)
+      left join (
+        select product_id, if(`". database::input(currency::$selected['code']) ."`, `". database::input(currency::$selected['code']) ."` / ". (float)currency::$selected['value'] .", `". database::input(settings::get('store_currency_code')) ."`) as campaign_price
+        from ". DB_TABLE_PRODUCTS_CAMPAIGNS ."
+        where (start_date <= '". date('Y-m-d H:i:s') ."')
+        and (year(end_date) < '1971' or end_date >= '". date('Y-m-d H:i:s') ."')
+        order by end_date asc
+      ) pc on (pc.product_id = p.id)
+      where (p.id
+        ". (!empty($filter['sql_where']) ? "$sql_andor (". $filter['sql_where'] .")" : null) ."
+        ". (!empty($filter['product_name']) ? "$sql_andor pi.name like '%". database::input($filter['product_name']) ."%'" : null) ."
+        ". (!empty($filter['campaign']) ? "$sql_andor campaign_price > 0" : null) ."
+        ". (!empty($sql_where_prices) ? $sql_where_prices : null) ."
+      )
+      order by ". implode(",", $sql_outer_sort) ."
+      ". (!empty($filter['limit']) && (!empty($filter['sql_where']) || !empty($filter['product_name']) || !empty($filter['campaign']) || !empty($sql_where_prices)) ? "limit ". (!empty($filter['offset']) ? (int)$filter['offset'] . ", " : null) ."". (int)$filter['limit'] : null) .";";
+        //" limit 9135;";// 这里limit 7135 是后来加上的，为了避免某个分类下商品过多(比如18w条)导致内存溢出。可能会引发其它有limit情况下的问题。目前还没有遇到 2018-12-7
+        $products_query = database::query($query);
+        $end = u_utils::getYMDHISDate();
+
+        return $products_query;
+    }
   function catalog_stock_adjust($product_id, $option_stock_combination, $quantity) {
 
     if (empty($product_id)) return;

@@ -156,12 +156,11 @@
         return;
       }
 
-      $user_query = database::query(
-        "select * from ". DB_TABLE_USERS ."
+      $sql = "select * from ". DB_TABLE_USERS ."
         where username = '". database::input($username) ."'
         and password = '". functions::password_checksum($user['id'], $password) ."'
-        limit 1;"
-      );
+        limit 1;";
+      $user_query = database::query($sql);
 
       if (!database::num_rows($user_query)) {
         $user['login_attempts']++;
